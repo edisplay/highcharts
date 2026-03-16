@@ -28,17 +28,17 @@ import type SVGRenderer from '../Core/Renderer/SVG/SVGRenderer';
 
 declare module '../Core/Renderer/SVG/SymbolType' {
     interface SymbolTypeRegistry {
-        /** @requires Extensions/ArrowSymbols */
+        /** @requires modules/arrow-symbols */
         arrow: typeof arrow;
-        /** @requires Extensions/ArrowSymbols */
+        /** @requires modules/arrow-symbols */
         'arrow-filled': typeof triangleLeft;
-        /** @requires Extensions/ArrowSymbols */
+        /** @requires modules/arrow-symbols */
         'arrow-filled-half': typeof triangleLeftHalf;
-        /** @requires Extensions/ArrowSymbols */
+        /** @requires modules/arrow-symbols */
         'arrow-half': typeof arrowHalf;
-        /** @requires Extensions/ArrowSymbols */
+        /** @requires modules/arrow-symbols */
         'triangle-left': typeof triangleLeft;
-        /** @requires Extensions/ArrowSymbols */
+        /** @requires modules/arrow-symbols */
         'triangle-left-half': typeof triangleLeftHalf;
     }
 }
@@ -61,7 +61,6 @@ declare module '../Core/Renderer/SVG/SymbolType' {
  *                   o
  * ```
  *
- * @internal
  * @function
  *
  * @param {number} x
@@ -103,7 +102,6 @@ function arrow(
  *       o
  * ```
  *
- * @internal
  * @function
  *
  * @param {number} x
@@ -138,7 +136,7 @@ function arrowHalf(
  * @param SVGRendererClass
  * The SVGRenderer class to extend.
  */
-function compose(
+export function compose(
     SVGRendererClass: typeof SVGRenderer
 ): void {
     const symbols = SVGRendererClass.prototype.symbols;
@@ -161,7 +159,6 @@ function compose(
  *             o
  * ```
  *
- * @internal
  * @function
  *
  * @param {number} x
@@ -203,7 +200,6 @@ function triangleLeft(
  *       o
  * ```
  *
- * @internal
  * @function
  *
  * @param {number} x
@@ -236,8 +232,10 @@ function triangleLeftHalf(
  *
  * */
 
+/** @internal */
 const ArrowSymbols = {
     compose
 };
 
+/** @internal */
 export default ArrowSymbols;
