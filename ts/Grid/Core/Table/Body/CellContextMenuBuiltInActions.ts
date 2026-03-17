@@ -46,7 +46,7 @@ export const defaultBuiltInCellContextMenuActions: CellContextMenuActionId[] = [
 
 export interface ResolvedCellContextMenuActionItemOptions {
     label: string;
-    icon?: GridIconName;
+    icon?: string;
     disabled?: boolean;
     onClick?: (
         this: TableCell,
@@ -173,7 +173,14 @@ function getCurrentRowId(cell: TableCell): (string|number|undefined) {
  * True when row pinning option is enabled.
  */
 function isPinningOptionEnabled(cell: TableCell): boolean {
-    return cell.row.viewport.grid.rowPinning?.isOptionEnabled() !== false;
+    const grid = cell.row.viewport.grid;
+    const pinningOptions = grid.userOptions?.rendering?.rows?.pinning;
+
+    if (pinningOptions) {
+        return pinningOptions.enabled !== false;
+    }
+
+    return !!grid.rowPinning?.isEnabled();
 }
 
 /**

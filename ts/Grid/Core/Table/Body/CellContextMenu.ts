@@ -28,18 +28,7 @@ import {
     openFocusedSubMenu,
     renderResolvedCellContextMenuItems
 } from './CellContextSubMenu.js';
-import U from '../../../../Core/Utilities.js';
-
-const {
-    addEvent
-} = U;
-
-/* *
- *
- *  Class
- *
- * */
-
+import { addEvent } from '../../../../Shared/Utilities.js';
 class CellContextMenu extends ContextMenu {
 
     public cell?: TableCell;

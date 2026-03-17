@@ -110,23 +110,22 @@ class PaginationController {
     }
 
     /**
-     * Clamps the current page to the total number of pages.
+     * Clamps the current page to the valid range [1, totalPages].
      */
     public clampPage(): void {
         if (this.totalItemsCount === void 0) {
             return;
         }
 
-        const totalPages = Math.max(1, this.totalPages);
-        const currentPage = Math.max(
+        const target = Math.max(
             1,
-            Math.min(this.currentPage, totalPages)
+            Math.min(this.currentPage, this.totalPages || 1)
         );
-        if (currentPage === this.currentPage) {
+        if (this.currentPage === target) {
             return;
         }
 
-        this.currentPage = currentPage;
+        this.currentPage = target;
         this.querying.shouldBeUpdated = true;
     }
 

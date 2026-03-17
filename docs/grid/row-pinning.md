@@ -20,12 +20,12 @@ Grid.grid('container', {
                 id: ['row-001', 'row-002', 'row-999'],
                 price: [1, 2, 999]
             }
-        }
+        },
+        idColumn: 'id'
     },
     rendering: {
         rows: {
             pinning: {
-                idColumn: 'id',
                 topIds: ['row-001'],
                 bottomIds: ['row-999']
             }
@@ -52,8 +52,7 @@ When disabled, Grid ignores row pinning config (`topIds`, `bottomIds`,
 `resolve`, etc.), runtime pinning methods are no-op, and pinned row sections
 are not rendered.
 
-Use `pinning.idColumn` to define stable row identity for persistence and
-restore.
+Use `data.idColumn` to define stable row identity for persistence and restore.
 If it is not set, Grid uses a default row id.
 
 ## Resolve pinning from row data
@@ -68,10 +67,12 @@ The callback receives a row object and should return:
 
 ```js
 Grid.grid('container', {
+    data: {
+        idColumn: 'id'
+    },
     rendering: {
         rows: {
             pinning: {
-                idColumn: 'id',
                 resolve: function (row) {
                     if (row.priority === 'critical') {
                         return 'top';

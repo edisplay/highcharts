@@ -32,15 +32,14 @@ import { defaultOptions as gridDefaultOptions } from '../../Core/Defaults.js';
 import Globals from '../../Core/Globals.js';
 import GridUtils from '../../Core/GridUtils.js';
 import RowPinningController from './RowPinningController.js';
-import U from '../../../Core/Utilities.js';
-
-const { formatText } = GridUtils;
-const {
+import {
     addEvent,
     fireEvent,
     merge,
     pushUnique
-} = U;
+} from '../../../Shared/Utilities.js';
+
+const { formatText } = GridUtils;
 
 /**
  * Default options for row pinning.
@@ -275,6 +274,10 @@ async function runRuntimePinningChange(
     callRowPinningEventCallback(this, 'beforeRowPin', eventPayload);
 
     await applyChange();
+
+    if (this.viewport && this.querying.pagination.enabled) {
+        await this.viewport.rowsVirtualizer.refreshRows();
+    }
 
     const renderResult = this.viewport ?
         await this.viewport.renderPinnedRows(true) :

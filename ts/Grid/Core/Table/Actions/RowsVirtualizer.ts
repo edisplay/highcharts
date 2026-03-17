@@ -27,11 +27,7 @@ import type { RowsSettings } from '../../Options';
 import Table from '../Table.js';
 import TableRow from '../Body/TableRow.js';
 import Globals from '../../Globals.js';
-import U from '../../../../Core/Utilities.js';
-
-const {
-    defined
-} = U;
+import { defined } from '../../../../Shared/Utilities.js';
 
 /* *
  *
@@ -308,6 +304,56 @@ class RowsVirtualizer {
     }
 
     /**
+     * Refreshes the rendered rows without a full teardown.
+     * It updates the row range and reuses existing rows when possible.
+     */
+    public async refreshRows(): Promise<void> {
+        await this.updateGridMetrics();
+
+        const tbody = this.viewport.tbodyElement;
+        const oldScrollLeft = tbody.scrollLeft;
+        const oldScrollTop = this.viewport.virtualRows ?
+            tbody.scrollTop :
+            void 0;
+
+        const maxRowCursor = Math.max(0, this.rowCount - 1);
+        if (this.rowCursor > maxRowCursor) {
+            this.rowCursor = maxRowCursor;
+        }
+
+        // Render missing rows, drop out-of-range ones, and ensure last row.
+        await this.renderRows(this.rowCursor);
+
+        const rows = this.viewport.rows;
+
+        // For non-virtualized rows, re-order rows to match data order.
+        if (!this.viewport.virtualRows) {
+            let node = tbody.firstElementChild;
+            for (let i = 0, iEnd = rows.length; i < iEnd; ++i) {
+                if (node === rows[i].htmlElement) {
+                    node = node.nextElementSibling;
+                    continue;
+                }
+
+                // Mismatch found, so append the rest in the correct order.
+                for (let j = i; j < iEnd; ++j) {
+                    tbody.appendChild(rows[j].htmlElement);
+                }
+                break;
+            }
+        }
+
+        for (let i = 0, iEnd = rows.length; i < iEnd; ++i) {
+            await rows[i].update();
+        }
+
+        if (this.viewport.virtualRows && defined(oldScrollTop)) {
+            tbody.scrollTop = oldScrollTop;
+        }
+        tbody.scrollLeft = oldScrollLeft;
+    }
+
+    /**
      * Method called on the viewport scroll event, only when the virtualization
      * is enabled.
      */
@@ -515,7 +561,11 @@ class RowsVirtualizer {
                 }
             }
 
-            const alwaysLastRow = rows.length > 0 ? rows.pop() : void 0;
+            let alwaysLastRow = rows.length > 0 ? rows.pop() : void 0;
+            if (alwaysLastRow && alwaysLastRow.index !== rowEnd) {
+                this.poolRow(alwaysLastRow);
+                alwaysLastRow = void 0;
+            }
             const from = Math.max(0, Math.min(
                 rowCursor - buffer,
                 rowEnd - rowsPerPage + 1
@@ -616,7 +666,32 @@ class RowsVirtualizer {
                 }
             }
 
+            if (!alwaysLastRow && rowCount > 0) {
+                alwaysLastRow = await this.getOrCreateRow(rowEnd);
+            }
+
             if (alwaysLastRow) {
+                if (!alwaysLastRow.rendered) {
+                    if (
+                        !alwaysLastRow.htmlElement
+                            .hasAttribute('data-row-index')
+                    ) {
+                        await alwaysLastRow.init();
+                    }
+                    vp.tbodyElement.appendChild(alwaysLastRow.htmlElement);
+                    await alwaysLastRow.render();
+                    if (isVirtualization) {
+                        const topOffset = Math.min(
+                            alwaysLastRow.getDefaultTopOffset(),
+                            this.maxElementHeight -
+                            alwaysLastRow.htmlElement.offsetHeight
+                        );
+                        alwaysLastRow.setTranslateY(topOffset);
+                    }
+                } else if (!alwaysLastRow.htmlElement.isConnected) {
+                    vp.tbodyElement.appendChild(alwaysLastRow.htmlElement);
+                }
+
                 rows.push(alwaysLastRow);
             }
 
@@ -913,9 +988,27 @@ class RowsVirtualizer {
      * overflow-aware scrolling.
      */
     private async updateGridMetrics(): Promise<void> {
-        const providerRowCount = await this.viewport.grid.dataProvider
-            ?.getRowCount();
+        const dataProvider = this.viewport.grid.dataProvider;
+        const providerRowCount = await dataProvider?.getRowCount();
         this.rowCount = defined(providerRowCount) ? providerRowCount : 0;
+
+        if (this.viewport.grid.querying.pagination.enabled) {
+            const pinnedRows = this.viewport.grid.rowPinning?.getPinnedRows();
+            const pinnedSet = new Set([
+                ...(pinnedRows?.topIds || []),
+                ...(pinnedRows?.bottomIds || [])
+            ]);
+            let pinnedCount = 0;
+
+            for (let i = 0; i < this.rowCount; ++i) {
+                const rowId = await dataProvider?.getRowId(i);
+                if (defined(rowId) && pinnedSet.has(rowId)) {
+                    ++pinnedCount;
+                }
+            }
+
+            this.rowCount = Math.max(this.rowCount - pinnedCount, 0);
+        }
 
         this.totalGridHeight = this.rowCount * this.defaultRowHeight;
         this.gridHeightOverflow = Math.max(

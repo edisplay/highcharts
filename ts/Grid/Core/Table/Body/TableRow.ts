@@ -31,11 +31,7 @@ import Row from '../Row.js';
 import Table from '../Table.js';
 import TableCell from './TableCell.js';
 import Globals from '../../Globals.js';
-import U from '../../../../Core/Utilities.js';
-
-const {
-    fireEvent
-} = U;
+import { fireEvent } from '../../../../Shared/Utilities.js';
 
 
 /* *
@@ -66,7 +62,7 @@ class TableRow extends Row {
     public index: number;
 
     /**
-     * The index of the row in the original data table (ID).
+     * The unique ID of the row.
      */
     public id?: RowId;
 

@@ -24,7 +24,10 @@ function test_grid() {
     });
 
     const grid = Grid.grid('container', {
-        dataTable,
+        data: {
+            dataTable,
+            idColumn: 'x'
+        },
         header: [{
             format: 'grouped header',
             columns: [{

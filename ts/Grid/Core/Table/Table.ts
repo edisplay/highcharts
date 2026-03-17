@@ -28,7 +28,6 @@ import type { CellType as DataTableCellType } from '../../../Data/DataTable';
 import type { RowId } from '../Data/DataProvider';
 
 import GridUtils from '../GridUtils.js';
-import Utils from '../../../Core/Utilities.js';
 import ColumnResizing from './ColumnResizing/ColumnResizing.js';
 import ColumnResizingMode from './ColumnResizing/ResizingMode.js';
 import Column from './Column.js';
@@ -40,15 +39,11 @@ import Globals from '../Globals.js';
 import type TableCell from './Body/TableCell';
 
 import Cell from './Cell.js';
+import { defined, fireEvent, getStyle } from '../../../Shared/Utilities.js';
 import CellContextMenu from './Body/CellContextMenu.js';
 import CellContextMenuBuiltInActions from './Body/CellContextMenuBuiltInActions.js';
 
 const { makeHTMLElement } = GridUtils;
-const {
-    fireEvent,
-    getStyle,
-    defined
-} = Utils;
 
 /* *
  *
@@ -266,7 +261,7 @@ class Table {
     public get dataTable(): DataTable | undefined {
         const dp = this.grid.dataProvider;
         if (dp && 'getDataTable' in dp) {
-            return dp.getDataTable();
+            return dp.getDataTable(true);
         }
     }
 
@@ -475,9 +470,12 @@ class Table {
             }
 
             const newRowCount = await dp.getRowCount();
-            if (shouldRerender || oldRowsCount !== newRowCount) {
+            if (shouldRerender) {
                 // Rerender all rows
                 await vp.rowsVirtualizer.rerender();
+            } else if (oldRowsCount !== newRowCount) {
+                // Refresh rows without full teardown
+                await vp.rowsVirtualizer.refreshRows();
             } else {
                 // Update existing rows - create a snapshot to avoid issues
                 // if array changes during iteration
@@ -670,25 +668,27 @@ class Table {
             return;
         }
 
-        const isContextMenuKey = (
-            e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)
-        );
+        // Disabled until meaningful functionality is ready.
 
-        if (isContextMenuKey && 'column' in cell && 'row' in cell) {
-            const tableCell = cell as TableCell;
-            const rect = tableCell.htmlElement.getBoundingClientRect();
-            const opened = this.openCellContextMenu(
-                tableCell,
-                rect.left + 4,
-                rect.bottom - 2
-            );
 
-            if (opened) {
-                e.preventDefault();
-                e.stopPropagation();
-                return;
-            }
-        }
+        // const isContextMenuKey = (
+        //     e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)
+        // );
+
+        // if (isContextMenuKey && 'column' in cell && 'row' in cell) {
+        //     const tableCell = cell as TableCell;
+        //     const rect = tableCell.htmlElement.getBoundingClientRect();
+        //     const opened = this.openCellContextMenu(
+        //         tableCell,
+        //         rect.left + 4,
+        //         rect.bottom - 2
+        //     );
+        //     if (opened) {
+        //         e.preventDefault();
+        //         e.stopPropagation();
+        //         return;
+        //     }
+        // }
 
         (cell as { onKeyDown(e: KeyboardEvent): void }).onKeyDown(e);
     };

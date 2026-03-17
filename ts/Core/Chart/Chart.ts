@@ -83,11 +83,10 @@ const { seriesTypes } = SeriesRegistry;
 import SVGElement from '../Renderer/SVG/SVGElement';
 import SVGRenderer from '../Renderer/SVG/SVGRenderer.js';
 import Time from '../Time.js';
-import U from '../Utilities.js';
 import AST from '../Renderer/HTML/AST.js';
 import { AxisCollectionKey } from '../Axis/AxisOptions';
 import Tick from '../Axis/Tick.js';
-const {
+import {
     addEvent,
     attr,
     createElement,
@@ -96,12 +95,12 @@ const {
     diffObjects,
     discardElement,
     erase,
-    error,
     extend,
     find,
     fireEvent,
     getAlignFactor,
     getStyle,
+    internalClearTimeout,
     isArray,
     isNumber,
     isObject,
@@ -113,9 +112,10 @@ const {
     relativeLength,
     removeEvent,
     splat,
-    syncTimeout,
-    uniqueKey
-} = U;
+    syncTimeout
+} from '../../Shared/Utilities.js';
+import { error, uniqueKey } from '../Utilities.js';
+
 
 /* *
  *
@@ -2284,7 +2284,7 @@ class Chart {
                 containerBox.width !== oldBox.width ||
                 containerBox.height !== oldBox.height
             ) {
-                U.clearTimeout(chart.reflowTimeout);
+                internalClearTimeout(chart.reflowTimeout);
                 // When called from window.resize, e is set, else it's called
                 // directly (#2224)
                 chart.reflowTimeout = syncTimeout(function (): void {
@@ -2292,6 +2292,12 @@ class Chart {
                     // (#1257)
                     if (chart.container) {
                         chart.setSize(void 0, void 0, false);
+                        // #23712: sync containerBox with reflowed height to
+                        // break infinite loop
+                        const box = chart.containerBox;
+                        if (box) {
+                            box.height = chart.chartHeight;
+                        }
                     }
                 }, e ? 100 : 0);
             }
@@ -3238,7 +3244,7 @@ class Chart {
         chart.pointer?.getChartPosition(); // #14973
 
         // Fire the load event if there are no external images
-        if (!chart.renderer.imgCount && !chart.hasLoaded) {
+        if (!chart.renderer.asyncCounter && !chart.hasLoaded) {
             chart.onload();
         }
 
@@ -3532,13 +3538,14 @@ class Chart {
         const chart = this,
             options = chart.options,
             loadingOptions = options.loading,
+            loadingStyle = loadingOptions?.style ?? {},
             setLoadingSize = function (): void {
                 if (loadingDiv) {
                     css(loadingDiv, {
-                        left: chart.plotLeft + 'px',
-                        top: chart.plotTop + 'px',
-                        width: chart.plotWidth + 'px',
-                        height: chart.plotHeight + 'px'
+                        left: loadingStyle.left ?? chart.plotLeft + 'px',
+                        top: loadingStyle.top ?? chart.plotTop + 'px',
+                        width: loadingStyle.width ?? chart.plotWidth + 'px',
+                        height: loadingStyle.height ?? chart.plotHeight + 'px'
                     });
                 }
             };
@@ -3573,10 +3580,8 @@ class Chart {
 
         if (!chart.styledMode) {
             // Update visuals
-            css(loadingDiv, extend((loadingOptions as any).style, {
-                zIndex: 10
-            }));
-            css(loadingSpan, (loadingOptions as any).labelStyle);
+            css(loadingDiv, extend(loadingStyle, { zIndex: 10 }));
+            css(loadingSpan, loadingOptions?.labelStyle ?? {});
 
             // Show it
             if (!chart.loadingShown) {
@@ -3585,9 +3590,9 @@ class Chart {
                     display: ''
                 });
                 animate(loadingDiv, {
-                    opacity: (loadingOptions as any).style.opacity || 0.5
+                    opacity: loadingStyle.opacity ?? 0.5
                 }, {
-                    duration: (loadingOptions as any).showDuration || 0
+                    duration: loadingOptions?.showDuration ?? 0
                 });
             }
         }
@@ -3620,7 +3625,7 @@ class Chart {
                 animate(loadingDiv, {
                     opacity: 0
                 }, {
-                    duration: (options.loading as any).hideDuration || 100,
+                    duration: options.loading?.hideDuration ?? 100,
                     complete: function (): void {
                         css(loadingDiv as any, { display: 'none' });
                     }
@@ -5167,6 +5172,10 @@ export default Chart;
  * @param {string} [thousandsSep]
  *        The thousands separator, defaults to the one given in the lang
  *        options, or a space character.
+ *
+ * @param {Highcharts.Chart} [ctx]
+ *        Since v12.5.0, the chart context passed as an extra argument for
+ *        arrow functions.
  *
  * @return {string} The formatted number.
  */

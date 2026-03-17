@@ -878,7 +878,7 @@ test.describe('Grid Lite row pinning', () => {
         });
 
         expect(state.topCount).toBe(2);
-        expect(state.scrollableCount).toBe(10);
+        expect(state.scrollableCount).toBe(8);
         expect(state.bottomCount).toBe(1);
     });
 
@@ -933,10 +933,10 @@ test.describe('Grid Lite row pinning', () => {
         });
 
         expect(state.page1.pinnedTop).toEqual(['ROW-001', 'ROW-002', 'ROW-003']);
-        expect(state.page1.scrollableCount).toBe(2);
-        expect(state.page1.firstScrollableId).toBe('ROW-001');
+        expect(state.page1.scrollableCount).toBe(0);
+        expect(state.page1.firstScrollableId).toBe('');
 
-        expect(state.page2.scrollableCount).toBe(2);
+        expect(state.page2.scrollableCount).toBe(1);
         expect(state.page2.firstScrollableId).toBe('ROW-003');
     });
 
