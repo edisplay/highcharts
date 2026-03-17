@@ -18,19 +18,12 @@
  *
  * */
 
-import type {
-    AlignValue,
-    VerticalAlignValue
-} from '../Core/Renderer/AlignObject';
 import type ColorString from '../Core/Color/ColorString';
-import type CSSObject from '../Core/Renderer/CSSObject';
-import type DashStyleValue from '../Core/Renderer/DashStyleValue';
 import type { PlotBandLabelOptions } from '../Core/Axis/PlotLineOrBand/PlotBandOptions';
 import type {
     PlotLineLabelOptions,
     PlotLineOptions
 } from '../Core/Axis/PlotLineOrBand/PlotLineOptions';
-import type Templating from '../Core/Templating';
 import type Time from '../Core/Time';
 
 import Axis from '../Core/Axis/Axis.js';
@@ -142,8 +135,8 @@ const defaultOptions: CurrentDateIndicatorOptions = {
          *
          * @type      {string|Intl.DateTimeFormatOptions}
          * @product   gantt
-         * @apioption xAxis.currentDateIndicator.label.format
          * @default   %[abdYHM]
+         * @apioption xAxis.currentDateIndicator.label.format
          */
         format: '%[abdYHM]',
         formatter: function (
