@@ -53,9 +53,10 @@ describe('Column Header Toolbar', () => {
 
     it('Can navigate menu with keyboard to filtering.', () => {
         cy.viewport(800, 600);
-        cy.get('.hcg-popup').type('{downarrow}{downarrow}{downarrow}{enter}');
+        cy.get('.hcg-popup').type('{downarrow}{downarrow}{enter}');
         cy.get('.hcg-popup-content input').should('exist')
             .type('es{esc}{esc}{esc}{downArrow}{downArrow}');
-        cy.focused().should('have.attr', 'data-column-id', 'product');
+        cy.focused().should('have.attr', 'data-column-id', 'product')
+            .parent().should('have.attr', 'data-row-id', '0');
     });
 });
