@@ -38,6 +38,9 @@ Use the articles below to choose the right setup:
 - [Server-side data handling](https://www.highcharts.com/docs/grid/data-handling/serverside)
 - [Connectors](https://www.highcharts.com/docs/grid/data-handling/connectors)
 
+You can also register a custom data provider when neither the built-in local nor
+remote model fits your data source.
+
 ## API reference
 
 - [`data`](https://api.highcharts.com/grid/data)
