@@ -217,7 +217,7 @@ function wrapPlotLineOrBandGetLabelText(
     defaultLabelOptions: (PlotBandLabelOptions|PlotLineLabelOptions)
 ): string {
     if (
-        this.options.className && // has a className
+        this.options.className &&
         this.options.className.indexOf(
             'highcharts-current-date-indicator'
         ) !== -1 &&
