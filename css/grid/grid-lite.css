@@ -257,6 +257,11 @@
         text-overflow: ellipsis;
     }
 
+    tbody.hcg-tbody-scrollable tr.hcg-row-pinned-top td,
+    tbody.hcg-tbody-scrollable tr.hcg-row-pinned-bottom td {
+        font-weight: 600;
+    }
+
     .hcg-last-header-cell-in-row,
     td:last-of-type {
         border-right: none;

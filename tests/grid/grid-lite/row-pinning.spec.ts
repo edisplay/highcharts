@@ -461,6 +461,69 @@ test.describe('Grid Lite row pinning', () => {
         );
     });
 
+    test('Scrollable copy of pinned rows is visually emphasized', async ({
+        page
+    }) => {
+        const state = await page.evaluate(async () => {
+            const grid = (window as any).grid;
+
+            await grid.pinRow('ROW-010', 'top');
+            await grid.pinRow('ROW-020', 'bottom');
+
+            const topRow = grid.viewport.getRenderedRows().find((
+                row: { id: string; pinnedSection?: string }
+            ) => (
+                row.id === 'ROW-010' && !row.pinnedSection
+            ));
+            const bottomRow = grid.viewport.getRenderedRows().find((
+                row: { id: string; pinnedSection?: string }
+            ) => (
+                row.id === 'ROW-020' && !row.pinnedSection
+            ));
+            const getWeight = (row?: { htmlElement?: HTMLElement }): string => {
+                const cell = row?.htmlElement?.querySelector('td');
+                return cell ? window.getComputedStyle(cell).fontWeight : '';
+            };
+
+            const getAnyUnpinnedWeight = (): string => {
+                const cell = document.querySelector(
+                    'tbody.hcg-tbody-scrollable tr:not(.hcg-row-pinned-top):not(.hcg-row-pinned-bottom) td'
+                );
+
+                return cell instanceof HTMLElement ?
+                    window.getComputedStyle(cell).fontWeight :
+                    '';
+            };
+
+            return {
+                topWeight: getWeight(topRow),
+                bottomWeight: getWeight(bottomRow),
+                normalWeight: getAnyUnpinnedWeight()
+            };
+        });
+
+        const toNumericWeight = (value: string): number => {
+            if (!value) {
+                return 400;
+            }
+            if (value === 'normal') {
+                return 400;
+            }
+            if (value === 'bold') {
+                return 700;
+            }
+
+            return Number.parseInt(value, 10);
+        };
+
+        expect(toNumericWeight(state.topWeight)).toBeGreaterThan(
+            toNumericWeight(state.normalWeight)
+        );
+        expect(toNumericWeight(state.bottomWeight)).toBeGreaterThan(
+            toNumericWeight(state.normalWeight)
+        );
+    });
+
     test('aria-rowcount stays coherent with pinned rendered row indexes', async ({ page }) => {
         const state = await page.evaluate(async () => {
             const grid = (window as any).grid;
