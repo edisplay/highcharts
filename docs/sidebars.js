@@ -138,7 +138,7 @@ module.exports = {
                 'Rows': [
                     'grid/rows/index',
                     'grid/rows/data',
-                    'grid/row-pinning',
+                    'grid/rows/pinning',
                     'grid/rows/pagination',
                     'grid/rows/virtualization',
                     'grid/rows/performance'

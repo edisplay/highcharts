@@ -38,26 +38,6 @@ Use the articles below to choose the right setup:
 - [Server-side data handling](https://www.highcharts.com/docs/grid/data-handling/serverside)
 - [Connectors](https://www.highcharts.com/docs/grid/data-handling/connectors)
 
-You can also register a custom data provider when neither the built-in local nor
-remote model fits your data source.
-
-## Custom data providers
-
-You can implement your own provider by extending the `DataProvider` base class
-and registering it in the provider registry.
-
-```ts
-class MyProvider extends DataProvider {
-    // Implement the abstract methods defined by DataProvider.
-}
-
-DataProviderRegistry.registerDataProvider('myProvider', MyProvider);
-```
-
-If your provider should support row pinning efficiently, you can also implement
-the optional methods `getOriginalRowObjectByRowId(rowId)`,
-`primePinnedRows(rowIds)`, and `clearPinnedRowCache(rowId)`.
-
 ## API reference
 
 - [`data`](https://api.highcharts.com/grid/data)

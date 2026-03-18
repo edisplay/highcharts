@@ -44,33 +44,15 @@ Row pinning live announcements are enabled by default and can be toggled with
 }
 ```
 
-## Localization
+## Row pinning localization
 
-To customize the default language or wording for ARIA attributes and announcers, use the root `lang.accessibility` options:
+To customize row pinning announcements and ARIA descriptions, use
+`lang.accessibility.rowPinning`:
 
 ```js
 {
     lang: {
         accessibility: {
-            cellEditing: {
-                editable: "Editable",
-                announcements: {
-                    started: "Entered cell editing mode",
-                    ...
-                }
-            },
-            sorting: {
-                announcements: {
-                    ascending: "Sorted ascending",
-                    ...
-                }
-            },
-            filtering: {
-                announcements: {
-                    filterApplied: "Filter applied for {columnId}, {condition} {value}. {rowsCount} results found.",
-                    ...
-                }
-            },
             rowPinning: {
                 announcements: {
                     pinned: "Row {rowId} pinned to {position}.",
@@ -99,19 +81,6 @@ Row pinning descriptions can be customized with:
 - `lang.accessibility.rowPinning.descriptions.pinnedBottom`
 - `lang.accessibility.rowPinning.descriptions.alsoPinnedTop`
 - `lang.accessibility.rowPinning.descriptions.alsoPinnedBottom`
-
-To translate built-in accessibility text such as sorting, filtering, or row
-pinning announcements, see the
-[Internationalization article](https://www.highcharts.com/docs/grid/internationalization).
-
-For a complete list of available options, check out the
-[API reference](https://api.highcharts.com/dashboards/#interfaces/Grid_Options.LangOptions).
-
-When configuring localization, it typically want it to apply to all grids on
-the same page. In such cases, we recommend using `setOptions()` to apply these
-changes globally. Read
-[Understanding Highcharts Grid](https://www.highcharts.com/docs/grid/understanding-grid#setOptions)
-for the details.
 
 ## High contrast mode
 
