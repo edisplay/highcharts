@@ -29,6 +29,13 @@ import {
     renderResolvedCellContextMenuItems
 } from './CellContextSubMenu.js';
 import { addEvent } from '../../../../Shared/Utilities.js';
+
+/* *
+ *
+ *  Class
+ *
+ * */
+
 class CellContextMenu extends ContextMenu {
 
     public cell?: TableCell;

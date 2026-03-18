@@ -136,6 +136,9 @@ export class LocalDataProvider extends DataProvider {
      *
      * */
 
+    /**
+     * Initializes the local data provider and its backing table.
+     */
     public override async init(): Promise<void> {
         if (this.dataTable) {
             return;
@@ -277,10 +280,30 @@ export class LocalDataProvider extends DataProvider {
         }
     }
 
+    /**
+     * Returns the IDs of the columns in the current presentation table.
+     *
+     * @return
+     * Column IDs in presentation order.
+     */
     public override getColumnIds(): Promise<string[]> {
         return Promise.resolve(this.presentationTable?.getColumnIds() ?? []);
     }
 
+    /**
+     * Returns the row ID for a given local row index. If not found, returns
+     * `undefined`.
+     *
+     * If a configured ID column is available, the row ID is the value from
+     * that column in the current row. Otherwise, the row ID is the original
+     * row index.
+     *
+     * @param rowIndex
+     * The local (presentation table) row index to get the row ID for.
+     *
+     * @return
+     * The row ID for the requested row.
+     */
     public override async getRowId(
         rowIndex: number
     ): Promise<RowId | undefined> {
@@ -306,6 +329,19 @@ export class LocalDataProvider extends DataProvider {
         }
     }
 
+    /**
+     * Returns the local (presentation table) row index for a given row ID. If
+     * not found, returns `undefined`.
+     *
+     * The lookup is resolved against the current materialized presentation
+     * rows, with fallback to original row index mapping when needed.
+     *
+     * @param rowId
+     * The row ID to get the row index for.
+     *
+     * @return
+     * The local row index for the requested row.
+     */
     public override async getRowIndex(
         rowId: RowId
     ): Promise<number | undefined> {
@@ -326,6 +362,15 @@ export class LocalDataProvider extends DataProvider {
         return this.getLocalRowIndexFromOriginal(originalRowIndex);
     }
 
+    /**
+     * Returns the original row index for a given local row index.
+     *
+     * @param localRowIndex
+     * The local row index to get the original row index for.
+     *
+     * @return
+     * The original row index.
+     */
     public getOriginalRowIndexFromLocal(
         localRowIndex: number
     ): Promise<number | undefined> {
@@ -334,6 +379,15 @@ export class LocalDataProvider extends DataProvider {
         );
     }
 
+    /**
+     * Returns the local row index for a given original row index.
+     *
+     * @param originalRowIndex
+     * The original row index to get the local row index for.
+     *
+     * @return
+     * The local row index.
+     */
     public getLocalRowIndexFromOriginal(
         originalRowIndex: number
     ): Promise<number | undefined> {
@@ -342,12 +396,30 @@ export class LocalDataProvider extends DataProvider {
         );
     }
 
+    /**
+     * Returns the row object for a given local row index.
+     *
+     * @param rowIndex
+     * The local row index to get the row object for.
+     *
+     * @return
+     * The row object in presentation scope.
+     */
     public override getRowObject(
         rowIndex: number
     ): Promise<RowObjectType | undefined> {
         return Promise.resolve(this.materializedRows.rowObjects[rowIndex]);
     }
 
+    /**
+     * Returns the original row object for a given row ID.
+     *
+     * @param rowId
+     * The row ID to get the original row object for.
+     *
+     * @return
+     * The original row object in raw data scope.
+     */
     public override getOriginalRowObjectByRowId(
         rowId: RowId
     ): Promise<RowObjectType | undefined> {
@@ -360,14 +432,38 @@ export class LocalDataProvider extends DataProvider {
         return Promise.resolve(this.dataTable?.getRowObject(originalIndex));
     }
 
+    /**
+     * Returns the number of rows before pagination is applied.
+     *
+     * @return
+     * The row count before pagination.
+     */
     public override getPrePaginationRowCount(): Promise<number> {
         return Promise.resolve(this.prePaginationRowCount ?? 0);
     }
 
+    /**
+     * Returns the number of rows in the current presentation table.
+     *
+     * @return
+     * The presentation row count.
+     */
     public override getRowCount(): Promise<number> {
         return Promise.resolve(this.materializedRows.rowIds.length);
     }
 
+    /**
+     * Returns the value of a cell in the current presentation table.
+     *
+     * @param columnId
+     * The column ID.
+     *
+     * @param rowIndex
+     * The local row index.
+     *
+     * @return
+     * The cell value.
+     */
     public override getValue(
         columnId: string,
         rowIndex: number
@@ -378,6 +474,21 @@ export class LocalDataProvider extends DataProvider {
         );
     }
 
+    /**
+     * Sets the value of a cell identified by row ID and column ID.
+     *
+     * After updating the raw data table, the current query pipeline is
+     * reapplied so the presentation snapshot stays in sync.
+     *
+     * @param value
+     * The new cell value.
+     *
+     * @param columnId
+     * The column ID.
+     *
+     * @param rowId
+     * The row ID.
+     */
     public override async setValue(
         value: DataTableCellType,
         columnId: string,
@@ -538,6 +649,9 @@ export class LocalDataProvider extends DataProvider {
         return rowIndex;
     }
 
+    /**
+     * Destroys the data provider and clears its cached state.
+     */
     public override destroy(): void {
         this.clearDataTableEvents();
         this.clearConnector();
@@ -550,6 +664,15 @@ export class LocalDataProvider extends DataProvider {
         this.originalRowIndexesMap = void 0;
     }
 
+    /**
+     * Returns the inferred data type for a given column.
+     *
+     * @param columnId
+     * The column ID to inspect.
+     *
+     * @return
+     * The inferred column data type.
+     */
     public override getColumnDataType(
         columnId: string
     ): Promise<ColumnDataType> {

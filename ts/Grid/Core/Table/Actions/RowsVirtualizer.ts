@@ -489,6 +489,8 @@ class RowsVirtualizer {
      * The index of the first visible row.
      */
     private async renderRows(rowCursor: number): Promise<void> {
+        // Prevent concurrent render operations. Queue the latest cursor and
+        // render it once the current pass completes.
         if (this.isRendering) {
             this.pendingRowCursor = rowCursor;
             return;
@@ -561,6 +563,7 @@ class RowsVirtualizer {
                 }
             }
 
+            // The last row is always kept rendered for bottom alignment.
             let alwaysLastRow = rows.length > 0 ? rows.pop() : void 0;
             if (alwaysLastRow && alwaysLastRow.index !== rowEnd) {
                 this.poolRow(alwaysLastRow);
@@ -570,6 +573,7 @@ class RowsVirtualizer {
                 rowCursor - buffer,
                 rowEnd - rowsPerPage + 1
             ));
+            // `to` should not include the alwaysLastRow index (`rowEnd`).
             const to = Math.min(
                 rowCursor + rowsPerPage + buffer,
                 rowEnd - 1
@@ -586,6 +590,7 @@ class RowsVirtualizer {
             );
 
             if (!hasOverlap) {
+                // Remove rows that are out of the range except the last row.
                 for (let i = 0, iEnd = rows.length; i < iEnd; ++i) {
                     const row = rows[i];
                     const rowIndex = row.index;
@@ -604,6 +609,8 @@ class RowsVirtualizer {
                     const firstRowIndex =
                         rows.length > 0 ? rows[0].index : from;
                     const row = rows[i - firstRowIndex];
+                    // Recreate the row when it is missing from the target
+                    // range.
                     if (!row) {
                         rows.push(await this.getOrCreateRow(i));
                     }
@@ -611,10 +618,12 @@ class RowsVirtualizer {
 
                 rows.sort((a, b): number => a.index - b.index);
             } else {
+                // Remove rows outside the range from the start.
                 while (rows.length && rows[0].index < from) {
                     this.poolRow(rows.shift() as TableRow);
                 }
 
+                // Remove rows outside the range from the end.
                 while (rows.length && rows[rows.length - 1].index > to) {
                     this.poolRow(rows.pop() as TableRow);
                 }
@@ -624,10 +633,12 @@ class RowsVirtualizer {
                         rows.push(await this.getOrCreateRow(i));
                     }
                 } else {
+                    // Add rows before the current range.
                     for (let i = rows[0].index - 1; i >= from; --i) {
                         rows.unshift(await this.getOrCreateRow(i));
                     }
 
+                    // Add rows after the current range.
                     const lastRowIndex = rows[rows.length - 1].index + 1;
                     for (let i = lastRowIndex; i <= to; ++i) {
                         rows.push(await this.getOrCreateRow(i));
@@ -640,6 +651,7 @@ class RowsVirtualizer {
             for (let i = 0, iEnd = rows.length; i < iEnd; ++i) {
                 const row = rows[i];
                 if (!row.rendered) {
+                    // Ensure the row is initialized before rendering.
                     if (!row.htmlElement.hasAttribute('data-row-index')) {
                         await row.init();
                     }
@@ -695,6 +707,7 @@ class RowsVirtualizer {
                 rows.push(alwaysLastRow);
             }
 
+            // Focus the cell if the focus cursor is set.
             if (vp.focusCursor) {
                 const focusCursor = vp.focusCursor;
                 if (focusCursor.section === 'scroll') {
@@ -710,6 +723,7 @@ class RowsVirtualizer {
                 }
             }
 
+            // Set the focus anchor cell.
             if (
                 (!vp.focusCursor || !vp.focusAnchorCell?.row.rendered) &&
                 rows.length > 0
@@ -725,6 +739,7 @@ class RowsVirtualizer {
         } finally {
             this.isRendering = false;
 
+            // If there is a pending render request, process it now.
             if (this.pendingRowCursor !== null) {
                 const pendingCursor = this.pendingRowCursor;
                 this.pendingRowCursor = null;
