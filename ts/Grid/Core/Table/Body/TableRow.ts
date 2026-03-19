@@ -294,6 +294,7 @@ class TableRow extends Row {
         }
 
         el.classList.remove(
+            Globals.getClassName('rowPinned'),
             Globals.getClassName('rowPinnedTop'),
             Globals.getClassName('rowPinnedBottom')
         );
@@ -304,6 +305,7 @@ class TableRow extends Row {
         }
 
         if (this.pinnedSection === 'top') {
+            el.classList.add(Globals.getClassName('rowPinned'));
             el.setAttribute(
                 'aria-roledescription',
                 rowPinningDescriptions?.pinnedTop ||
@@ -313,6 +315,7 @@ class TableRow extends Row {
         }
 
         if (this.pinnedSection === 'bottom') {
+            el.classList.add(Globals.getClassName('rowPinned'));
             el.setAttribute(
                 'aria-roledescription',
                 rowPinningDescriptions?.pinnedBottom ||
@@ -328,6 +331,7 @@ class TableRow extends Row {
 
         const pinnedRows = vp.grid.getPinnedRows?.();
         if (pinnedRows?.topIds.includes(this.id)) {
+            el.classList.add(Globals.getClassName('rowPinned'));
             el.classList.add(Globals.getClassName('rowPinnedTop'));
             el.setAttribute(
                 'aria-roledescription',
@@ -338,6 +342,7 @@ class TableRow extends Row {
         }
 
         if (pinnedRows?.bottomIds.includes(this.id)) {
+            el.classList.add(Globals.getClassName('rowPinned'));
             el.classList.add(Globals.getClassName('rowPinnedBottom'));
             el.setAttribute(
                 'aria-roledescription',

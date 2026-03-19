@@ -276,7 +276,9 @@ Grid.grid('container', {
     },
     rendering: {
         rows: {
-            pinning: {}
+            pinning: {
+                enabled: true
+            }
         }
     },
     columnDefaults: {

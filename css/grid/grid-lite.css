@@ -257,8 +257,7 @@
         text-overflow: ellipsis;
     }
 
-    tbody.hcg-tbody-scrollable tr.hcg-row-pinned-top td,
-    tbody.hcg-tbody-scrollable tr.hcg-row-pinned-bottom td {
+    tbody.hcg-tbody-scrollable tr.hcg-row-pinned td {
         font-weight: 600;
     }
 

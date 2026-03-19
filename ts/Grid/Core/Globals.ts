@@ -49,6 +49,7 @@ export const rawClassNames = {
     pinnedBottomTbodyElement: 'tbody-pinned-bottom',
     pinnedTbodyElementActive: 'tbody-pinned-active',
     rowElement: 'row',
+    rowPinned: 'row-pinned',
     rowPinnedTop: 'row-pinned-top',
     rowPinnedBottom: 'row-pinned-bottom',
     rowEven: 'row-even',

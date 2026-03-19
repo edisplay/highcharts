@@ -2,7 +2,103 @@ import { test, expect } from '~/fixtures.ts';
 
 test.describe('Grid Lite row pinning', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('grid-lite/demo/row-pinning');
+        await page.goto('grid-lite/demo/minimal-grid');
+
+        await page.evaluate(() => {
+            const rowCount = 60;
+            const rows = Array.from({ length: rowCount }, (_, i) => {
+                const id = 'ROW-' + String(i + 1).padStart(3, '0');
+
+                return {
+                    id,
+                    product: 'Product ' + (i + 1),
+                    group: ['A', 'B', 'C'][i % 3],
+                    stock: 10 + (i % 40)
+                };
+            });
+
+            document.body.innerHTML = `
+                <div id="container" style="height: 520px;"></div>
+                <input
+                    id="pinnedTop"
+                    type="text"
+                    aria-label="top pinned"
+                    readonly
+                />
+                <input
+                    id="pinnedBottom"
+                    type="text"
+                    aria-label="bottom pinned"
+                    readonly
+                />
+            `;
+
+            const topInput = document.getElementById(
+                'pinnedTop'
+            ) as HTMLInputElement | null;
+            const bottomInput = document.getElementById(
+                'pinnedBottom'
+            ) as HTMLInputElement | null;
+
+            function updatePinnedInputs(grid: any): void {
+                const pinned = grid.getPinnedRows();
+
+                if (topInput) {
+                    topInput.value = pinned.topIds.join(',');
+                }
+
+                if (bottomInput) {
+                    bottomInput.value = pinned.bottomIds.join(',');
+                }
+            }
+
+            const grid = (window as any).Grid.grid('container', {
+                dataTable: {
+                    columns: {
+                        id: rows.map((row) => row.id),
+                        product: rows.map((row) => row.product),
+                        group: rows.map((row) => row.group),
+                        stock: rows.map((row) => row.stock)
+                    }
+                },
+                rendering: {
+                    rows: {
+                        virtualizationThreshold: 20,
+                        pinning: {
+                            idColumn: 'id',
+                            topIds: ['ROW-001'],
+                            bottomIds: ['ROW-060']
+                        }
+                    }
+                },
+                columnDefaults: {
+                    cells: {
+                        contextMenu: {
+                            enabled: true
+                        }
+                    }
+                }
+            });
+
+            function wrapPinnedMethod(methodName: string): void {
+                const method = grid[methodName].bind(grid);
+                grid[methodName] = function (
+                    ...args: Array<any>
+                ): Promise<any> {
+                    return Promise.resolve(method(...args)).then((result) => {
+                        updatePinnedInputs(grid);
+                        return result;
+                    });
+                };
+            }
+
+            wrapPinnedMethod('pinRow');
+            wrapPinnedMethod('toggleRow');
+            wrapPinnedMethod('unpinRow');
+
+            (window as any).grid = grid;
+            updatePinnedInputs(grid);
+        });
 
         await page.waitForFunction(() => {
             return typeof (window as any).grid !== 'undefined';
