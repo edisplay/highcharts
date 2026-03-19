@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LicenseRef-Highcharts
 /**
  * (c) 2009-2026 Highsoft AS
- * Author: Sebastian Bochann
+ * Author: Sebastian Bochan
  *
  * Price indicator for Highcharts
  *
@@ -33,27 +33,18 @@ import { addEvent, merge, pushUnique } from '../Shared/Utilities.js';
  *
  * */
 
+/** @internal */
 declare module '../Core/Series/SeriesBase' {
     interface SeriesBase {
-
-        /** @internal */
         lastPrice?: SVGElement;
-
-        /** @internal */
         lastPriceLabel?: SVGElement;
-
-        /** @internal */
         lastVisiblePrice?: SVGElement;
-
-        /** @internal */
         lastVisiblePriceLabel?: SVGElement;
-
     }
 }
 
 declare module '../Core/Series/SeriesOptions' {
     interface SeriesOptions {
-
         /**
          * @see {@link plotOptions.series.lastPrice}
          *
@@ -67,7 +58,6 @@ declare module '../Core/Series/SeriesOptions' {
          * @internal
          */
         lastVisiblePrice?: LastVisiblePriceOptions;
-
     }
 }
 
@@ -126,17 +116,14 @@ export interface LastVisiblePriceLabelOptions {
  * */
 
 /** @internal */
-function compose(
+export function composePriceIndication(
     SeriesClass: typeof Series
 ): void {
-
     if (pushUnique(composed, 'PriceIndication')) {
         addEvent(SeriesClass, 'afterRender', onSeriesAfterRender);
         addEvent(SeriesClass, 'hide', onSeriesHide);
     }
-
 }
-
 
 /**
  * Hides price indication when parent series is hidden. Showing the indicator is
@@ -277,7 +264,7 @@ function onSeriesAfterRender(
  * */
 
 const PriceIndication = {
-    compose
+    composePriceIndication
 };
 
 export default PriceIndication;
