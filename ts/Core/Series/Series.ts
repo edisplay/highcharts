@@ -770,7 +770,6 @@ class Series {
      *
      * */
 
-    /* eslint-disable valid-jsdoc */
     /** @internal */
     public init(
         chart: Chart,

@@ -550,18 +550,6 @@ class MockPoint {
      * Translate the point.
      *
      * @internal
-     *
-     * @param {number|undefined} cx
-     * Origin x transformation.
-     *
-     * @param {number|undefined} cy
-     * Origin y transformation.
-     *
-     * @param {number} dx
-     * Translation for x coordinate.
-     *
-     * @param {number} dy
-     * Translation for y coordinate.
      **/
     public translate(
         _cx: (number|undefined),

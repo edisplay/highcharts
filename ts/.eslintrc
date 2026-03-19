@@ -92,7 +92,7 @@
         "@typescript-eslint/no-empty-interface": 0,
         "@typescript-eslint/no-empty-object-type": 0,
         "@typescript-eslint/no-explicit-any": 0,
-        "@typescript-eslint/no-floating-promises": 1, // @todo
+        "@typescript-eslint/no-floating-promises": 2, // @todo
         "@typescript-eslint/no-inferrable-types": 0, // @todo ?
         "@typescript-eslint/no-namespace": 0,
         "@typescript-eslint/no-object-literal-type-assertion": 0,
@@ -132,10 +132,10 @@
         "@highcharts/highcharts/no-highcharts-object": 2,
         "@highcharts/highcharts/no-mixin": 1, // @todo
         "@highcharts/highcharts/no-private-constructor-doclet": 0,
-        "@highcharts/highcharts/no-wrap": 1, // @todo
+        "@highcharts/highcharts/no-wrap": 0, // @todo
         "@highcharts/highcharts/quote-members": 2,
         "jsdoc/check-alignment": 0,
-        "jsdoc/check-param-names": 1,
+        "jsdoc/check-param-names": 2,
         "jsdoc/check-tag-names": [
             "error",
             {
@@ -157,11 +157,11 @@
             }
         ],
         "jsdoc/check-types": 0,
-        "jsdoc/require-description": 1,
-        "jsdoc/require-jsdoc": 1, // @todo
+        "jsdoc/require-description": 0,
+        "jsdoc/require-jsdoc": 0, // @todo
         "jsdoc/require-param": 0, // @todo
-        "jsdoc/require-param-description": 1, // @todo
-        "jsdoc/require-param-type": 1, // @todo
+        "jsdoc/require-param-description": 0, // @todo
+        "jsdoc/require-param-type": 2, // @todo
         "node/no-missing-import": 0, // @todo
         "node/no-unsupported-features/es-builtins": 0, // @todo
         "node/no-unsupported-features/es-syntax": 0 // @todo

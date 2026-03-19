@@ -88,9 +88,6 @@ function getAssignedAxis(
  *
  * @internal
  *
- * @param {'boolean'|'number'|'string'} value
- * Atomic type (one of: string, number, boolean)
- *
  * @return {'checkbox'|'color'|'number'|'text'}
  * Field type (one of: text, number, checkbox, color)
  */
