@@ -1824,7 +1824,26 @@ function buildDemo() {
         buttonString +=  `<a href="${product.url}" 
         target="_blank" class="hc-button hc-button--white hc-button--size-100">
         ${product.name}`;
-        if (product.icon.indexOf('highcharts.com') !== -1) {
+        let isHighchartsIcon = false;
+        try {
+            const iconUrl = new URL(
+                product.icon,
+                (typeof window !== 'undefined' && window.location && window.location.origin) ?
+                    window.location.origin :
+                    'https://highcharts.com'
+            );
+            const allowedHosts = [
+                'highcharts.com',
+                'www.highcharts.com',
+                'code.highcharts.com'
+            ];
+            if (allowedHosts.indexOf(iconUrl.hostname) !== -1) {
+                isHighchartsIcon = true;
+            }
+        } catch (e) {
+            isHighchartsIcon = false;
+        }
+        if (isHighchartsIcon) {
             // eslint-disable-next-line max-len
             buttonString += `<img src="${product.icon}" height="12" width="12"></a>`;
         } else {
