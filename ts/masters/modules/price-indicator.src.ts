@@ -5,10 +5,10 @@
  * @requires highcharts
  * @requires highcharts/modules/stock
  *
- * (c) 2009-2026 Highsoft AS
+ * (c) 2018-2026 Highsoft AS
  * Author: Sebastian Bochan
  *
- * Price indicator for Highcharts
+ * Price indicator for Highcharts Stock
  *
  * A commercial license may be required depending on use.
  * See www.highcharts.com/license
