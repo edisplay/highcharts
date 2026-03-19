@@ -227,6 +227,7 @@ export default class ContourSeries extends ScatterSeries {
         if (this.renderFrame) {
             this.renderFrame();
         } else {
+            /* eslint-disable @typescript-eslint/no-floating-promises */
             this.run();
         }
     }
