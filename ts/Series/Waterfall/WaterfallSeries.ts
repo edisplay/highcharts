@@ -618,7 +618,6 @@ addEvent(WaterfallSeries, 'afterColumnTranslate', function (): void {
         previousY = threshold,
         y,
         total,
-        yPos,
         hPos;
 
     for (let i = 0; i < points.length; i++) {
@@ -701,18 +700,16 @@ addEvent(WaterfallSeries, 'afterColumnTranslate', function (): void {
                         actualStackX.threshold + actualStackX.stackTotal;
                 }
 
+                hPos = y - Math.abs(pointY);
+
                 if (yAxis.reversed) {
-                    yPos = (pointY >= 0) ? (y - pointY) : (y + pointY);
-                    hPos = y;
-                } else {
-                    yPos = y;
-                    hPos = (pointY >= 0) ? (y - pointY) : (y + pointY);
+                    [y, hPos] = [hPos, y];
                 }
 
-                point.below = yPos <= threshold;
+                point.below = y <= threshold;
 
                 box.y = yAxis.translate(
-                    yPos,
+                    y,
                     false,
                     true,
                     false,
@@ -771,22 +768,19 @@ addEvent(WaterfallSeries, 'afterColumnTranslate', function (): void {
                 point.below = range[1] <= threshold;
             } else if (point.isIntermediateSum) {
                 if (pointY >= 0) {
-                    yPos = range[1] + previousIntermediate;
+                    y = range[1] + previousIntermediate;
                     hPos = previousIntermediate;
                 } else {
-                    yPos = previousIntermediate;
+                    y = previousIntermediate;
                     hPos = range[1] + previousIntermediate;
                 }
 
                 if (yAxis.reversed) {
-                    // Swapping values
-                    yPos ^= hPos;
-                    hPos ^= yPos;
-                    yPos ^= hPos;
+                    [y, hPos] = [hPos, y];
                 }
 
                 box.y = yAxis.translate(
-                    yPos,
+                    y,
                     false,
                     true,
                     false,
@@ -807,7 +801,7 @@ addEvent(WaterfallSeries, 'afterColumnTranslate', function (): void {
                 );
 
                 previousIntermediate += range[1];
-                point.below = yPos <= threshold;
+                point.below = y <= threshold;
 
             // If it's not the sum point, update previous stack end position
             // and get shape height (#3886)

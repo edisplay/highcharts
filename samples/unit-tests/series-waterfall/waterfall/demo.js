@@ -150,8 +150,9 @@ QUnit.test('General waterfall tests', function (assert) {
     });
 
     assert.close(
+        chart.series[0].points[0].graphic.attr('height') +
         chart.series[1].points[0].graphic.attr('height'),
-        chart.yAxis[0].toPixels(-4, true),
+        chart.yAxis[0].toPixels(-16, true),
         1,
         'First point of the second stack should have correct height, #22330.'
     );
