@@ -79,6 +79,14 @@ export function getGridRowPinningOptions(
  *
  * */
 
+/**
+ * Stores row pinning state from two sources:
+ * - explicit pinned ids from config/runtime API
+ * - resolved pinned ids produced by `pinning.resolve`
+ *
+ * The effective pinned state is the normalized combination of both, minus
+ * rows explicitly unpinned at runtime.
+ */
 class RowPinningController {
 
     public readonly grid: Grid;
