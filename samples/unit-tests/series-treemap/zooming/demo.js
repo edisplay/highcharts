@@ -68,10 +68,9 @@ QUnit.test(
             'xAxis.max is correct according to zoom'
         );
 
-        assert.strictEqual(
-            points[1].dataLabel.visibility &&
-            points[1].dataLabel.getStyle('visibility'),
-            'hidden',
+        assert.ok(
+            points[1].dataLabel.visibility === 'hidden' &&
+            points[1].dataLabel.getStyle('visibility') === 'hidden',
             'Data label outside of zoomed range should not be visible, #24220.'
         );
 
