@@ -202,7 +202,7 @@ export class ScrollablePlotArea {
         SeriesClass: typeof Series
     ): void {
 
-        if (pushUnique(composed, this.compose)) {
+        if (pushUnique(composed, 'ScrollablePlotArea')) {
             addEvent(AxisClass, 'afterInit', markDirty);
 
             addEvent(

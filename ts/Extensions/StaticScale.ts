@@ -21,7 +21,14 @@ import type Axis from '../Core/Axis/Axis';
 import type Chart from '../Core/Chart/Chart';
 import type Series from '../Core/Series/Series';
 
-import { addEvent, defined, isNumber } from '../Shared/Utilities.js';
+import {
+    addEvent,
+    defined,
+    isNumber,
+    pushUnique
+} from '../Shared/Utilities.js';
+import H from '../Core/Globals.js';
+const { composed } = H;
 
 /* *
  *
@@ -81,9 +88,9 @@ export function composeStaticScale(
     AxisClass: typeof Axis,
     ChartClass: typeof Chart
 ): void {
-    const chartProto = ChartClass.prototype;
+    if (pushUnique(composed, 'StaticScale')) {
+        const chartProto = ChartClass.prototype;
 
-    if (!chartProto.adjustHeight) {
         addEvent(AxisClass, 'afterSetOptions', onAxisAfterSetOptions);
 
         chartProto.adjustHeight = chartAdjustHeight;

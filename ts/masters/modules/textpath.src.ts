@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LicenseRef-Highcharts
 /**
  * @license Highcharts JS v@product.version@ (@product.date@)
- * @module highcharts/modules/textpath-support
+ * @module highcharts/modules/textpath
  * @requires highcharts
  *
  * (c) 2009-2026 Highsoft AS

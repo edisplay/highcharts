@@ -26,9 +26,15 @@ import SVGAttributes from '../Core/Renderer/SVG/SVGAttributes';
 import H from '../Core/Globals.js';
 import Point from '../Core/Series/Point';
 import BBoxObject from '../Core/Renderer/BBoxObject';
-import { addEvent, defined, extend, merge } from '../Shared/Utilities.js';
+import {
+    addEvent,
+    defined,
+    extend,
+    merge,
+    pushUnique
+} from '../Shared/Utilities.js';
 import { uniqueKey } from '../Core/Utilities.js';
-const { deg2rad } = H;
+const { composed, deg2rad } = H;
 
 /* *
  *
@@ -70,6 +76,7 @@ declare module '../Core/Renderer/SVG/SVGElementBase' {
          *
          * @sample highcharts/members/renderer-textpath/ Text path demonstrated
          *
+         * @internal
          * @function Highcharts.SVGElement#setTextPath
          *
          * @param {Highcharts.SVGElement|undefined} path
@@ -109,6 +116,7 @@ declare module '../Core/Renderer/SVG/SVGElementBase' {
  *
  * @sample highcharts/members/renderer-textpath/ Text path demonstrated
  *
+ * @internal
  * @function Highcharts.SVGElement#setTextPath
  *
  * @param {Highcharts.SVGElement|undefined} path
@@ -220,6 +228,7 @@ function setTextPath(
 /**
  * Attach a polygon to a bounding box if the element contains a textPath.
  *
+ * @internal
  * @function Highcharts.SVGElement#setPolygon
  *
  * @param {any} event
@@ -347,7 +356,8 @@ function setPolygon(this: SVGElement, event: any): BBoxObject {
 /**
  * Draw text along a textPath for a dataLabel.
  *
- * @function Highcharts.SVGElement#setTextPath
+ * @internal
+ * @function Highcharts.SVGElement#drawTextPath
  *
  * @param {any} event
  *        An event containing label options
@@ -385,12 +395,11 @@ function drawTextPath(
 
 /** @internal */
 export function composeTextPath(SVGElementClass: typeof SVGElement): void {
-    addEvent(SVGElementClass, 'afterGetBBox', setPolygon);
-    addEvent(SVGElementClass, 'beforeAddingDataLabel', drawTextPath);
+    if (pushUnique(composed, 'TextPath')) {
+        addEvent(SVGElementClass, 'afterGetBBox', setPolygon);
+        addEvent(SVGElementClass, 'beforeAddingDataLabel', drawTextPath);
 
-    const svgElementProto = SVGElementClass.prototype;
-
-    if (!svgElementProto.setTextPath) {
-        svgElementProto.setTextPath = setTextPath;
+        SVGElementClass.prototype.setTextPath =
+            SVGElementClass.prototype.setTextPath ?? setTextPath;
     }
 }
