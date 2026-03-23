@@ -350,6 +350,31 @@ class RowsVirtualizer {
         tbody.scrollLeft = oldScrollLeft;
     }
 
+    private async syncRemotePinnedRowsFromCache(): Promise<void> {
+        const { grid } = this.viewport;
+
+        if (
+            grid.options?.data?.providerType !== 'remote' ||
+            !grid.rowPinning?.isEnabled()
+        ) {
+            return;
+        }
+
+        const pinnedRows = grid.rowPinning.getPinnedRows();
+        const pinnedIds = [
+            ...pinnedRows.topIds,
+            ...pinnedRows.bottomIds
+        ];
+
+        if (!pinnedIds.length) {
+            return;
+        }
+
+        await grid.dataProvider?.primePinnedRows(pinnedIds);
+        const renderResult = await this.viewport.renderPinnedRows(true);
+        await grid.rowPinning.handlePinnedRenderResult(renderResult, 'query');
+    }
+
     /**
      * Method called on the viewport scroll event, only when the virtualization
      * is enabled.
@@ -729,6 +754,7 @@ class RowsVirtualizer {
             }
 
             await vp.syncAriaRowIndexes();
+            await this.syncRemotePinnedRowsFromCache();
         } finally {
             this.isRendering = false;
 

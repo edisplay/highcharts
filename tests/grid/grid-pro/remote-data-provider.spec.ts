@@ -89,6 +89,14 @@ async function runRemoteScenario(
     }, { options, mode });
 }
 
+async function openRemoteProviderFixture(page: Page): Promise<void> {
+    await page.goto('/grid-pro/e2e/remote-data-provider');
+    await page.waitForFunction(() => {
+        const api = (window as any).remoteDataProviderTest;
+        return !!(api && api.createGrid && api.getGrid);
+    });
+}
+
 test.describe('RemoteDataProvider', () => {
     test('caches chunks and reuses them for reads', async ({ page }) => {
         const result = await runRemoteScenario(
@@ -175,161 +183,309 @@ test.describe('RemoteDataProvider', () => {
         expect(result.rowId1).toBe('row-3');
     });
 
-    test('supports pinned rows with remote provider and virtualization', async ({
+    test('pins unfetched remote rows once their chunks are scrolled into cache', async ({
         page
     }) => {
-        await page.goto('/grid-pro/e2e/remote-data-provider');
-        await page.waitForFunction(() => {
-            const api = (window as any).remoteDataProviderTest;
-            return !!(api && api.createGrid && api.getGrid);
-        });
+        await openRemoteProviderFixture(page);
 
-        await page.evaluate(() => {
-            const api = (window as any).remoteDataProviderTest;
-            api.createGrid({
-                totalRowCount: 80,
-                data: {
-                    chunkSize: 200,
-                    idColumn: 'id'
-                },
-                rendering: {
-                    rows: {
-                        virtualization: true,
-                        virtualizationThreshold: 20,
-                        pinning: {
-                            topIds: [5, 20, 70]
-                        }
-                    }
-                }
-            });
-        });
-
-        await page.waitForFunction(() => {
-            const grid = (window as any).remoteDataProviderTest.getGrid();
-            return !!grid?.viewport?.rowsVirtualizer;
-        });
-
-        const result = await page.evaluate(async () => {
-            const api = (window as any).remoteDataProviderTest;
-            const grid = api.getGrid();
-            const vp = grid.viewport;
-            const rowCount = await grid.dataProvider.getRowCount();
-
-            await new Promise((resolve) => window.setTimeout(resolve, 0));
-
-            const rowHeight = vp.rowsVirtualizer.defaultRowHeight ||
-                vp.rows[0]?.htmlElement.offsetHeight ||
-                1;
-            vp.tbodyElement.scrollTop = rowHeight * 60;
-            vp.tbodyElement.dispatchEvent(new Event('scroll'));
-
-            await new Promise((resolve) => window.setTimeout(resolve, 0));
-
-            const visibleFrom = Math.max(
-                0,
-                Math.floor(vp.tbodyElement.scrollTop / rowHeight)
-            );
-            const pinnedRows = grid.getPinnedRows ? grid.getPinnedRows() : {
-                topIds: [],
-                bottomIds: []
-            };
-            const excluded = new Set(
-                [...pinnedRows.topIds, ...pinnedRows.bottomIds].map(
-                    (id: string | number) => String(id)
-                )
-            );
-
-            let target: { index: number; id: number } = { index: -1, id: -1 };
-            for (const row of vp.rows) {
-                if (
-                    row.index < visibleFrom &&
-                    row.index > 0 &&
-                    row.index < rowCount - 1 &&
-                    !excluded.has(String(row.data.id))
-                ) {
-                    target = {
-                        index: row.index,
-                        id: Number(row.data.id)
-                    };
-                    break;
-                }
-            }
-
-            if (target.index === -1) {
-                return {
-                    target,
-                    pinnedRows: grid.getPinnedRows ? grid.getPinnedRows() : {
-                        topIds: [],
-                        bottomIds: []
-                    }
-                };
-            }
-
-            await grid.pinRow(target.id);
-
-            return {
-                target,
-                pinnedRows: grid.getPinnedRows ? grid.getPinnedRows() : {
-                    topIds: [],
-                    bottomIds: []
-                }
-            };
-        });
-
-        expect(result.target.index).toBeGreaterThan(-1);
-        expect(result.pinnedRows.topIds).toContain(result.target.id);
-    });
-
-    test('supports pinRow/unpinRow for remote data', async ({
-        page
-    }) => {
-        await page.goto('/grid-pro/e2e/remote-data-provider');
-        await page.waitForFunction(() => {
-            const api = (window as any).remoteDataProviderTest;
-            return !!(api && api.createGrid && api.getGrid);
-        });
-
-        const result = await page.evaluate(async () => {
+        const state = await page.evaluate(async () => {
             const api = (window as any).remoteDataProviderTest;
             await api.createGrid({
-                totalRowCount: 40,
+                totalRowCount: 100,
                 data: {
-                    chunkSize: 80,
+                    chunkSize: 10,
                     idColumn: 'id'
-                },
-                rendering: {
-                    rows: {
-                        pinning: {
-                            topIds: [5]
-                        }
-                    }
                 }
             });
 
             const grid = api.getGrid();
-            if (
-                typeof grid.pinRow !== 'function' ||
-                typeof grid.unpinRow !== 'function' ||
-                typeof grid.getPinnedRows !== 'function'
-            ) {
-                return {
-                    hasApi: false,
-                    pinnedRows: { topIds: [], bottomIds: [] }
-                };
-            }
+            const vp = grid.viewport;
+            const frame = (): Promise<void> => new Promise((resolve) => {
+                window.requestAnimationFrame(() => resolve());
+            });
+            const tick = (): Promise<void> => new Promise((resolve) => {
+                window.setTimeout(resolve, 0);
+            });
+            const settle = async (): Promise<void> => {
+                await frame();
+                await frame();
+                await tick();
+            };
+            const getPinnedTopIds = (): number[] => Array.from(
+                vp.pinnedTopTbodyElement.querySelectorAll('tr[data-row-id]')
+            ).map((row): number => Number(row.getAttribute('data-row-id')));
+            const scrollToRow = async (rowIndex: number): Promise<void> => {
+                vp.scrollToRow(rowIndex);
+                vp.tbodyElement.dispatchEvent(new Event('scroll'));
+                await settle();
+            };
 
-            await grid.unpinRow(5);
-            await grid.pinRow(7);
+            await settle();
+            await grid.pinRow(25);
+            await grid.pinRow(75);
+            await settle();
+
+            const initial = {
+                pinnedState: grid.getPinnedRows(),
+                pinnedTop: getPinnedTopIds()
+            };
+
+            await scrollToRow(25);
+            const afterFirstChunk = {
+                pinnedTop: getPinnedTopIds()
+            };
+
+            await scrollToRow(75);
+            const afterSecondChunk = {
+                pinnedTop: getPinnedTopIds()
+            };
 
             return {
-                hasApi: true,
-                pinnedRows: grid.getPinnedRows()
+                initial,
+                afterFirstChunk,
+                afterSecondChunk
             };
         });
 
-        expect(result.hasApi).toBe(true);
-        expect(result.pinnedRows.topIds).not.toContain(5);
-        expect(result.pinnedRows.topIds).toContain(7);
+        expect(state.initial.pinnedState.topIds).toEqual([25, 75]);
+        expect(state.initial.pinnedTop).toEqual([]);
+        expect(state.afterFirstChunk.pinnedTop).toEqual([25]);
+        expect(state.afterSecondChunk.pinnedTop).toEqual([25, 75]);
+    });
+
+    test('pins a fetched remote row immediately and keeps it pinned while scrolling until unpinned', async ({
+        page
+    }) => {
+        await openRemoteProviderFixture(page);
+
+        const state = await page.evaluate(async () => {
+            const api = (window as any).remoteDataProviderTest;
+            await api.createGrid({
+                totalRowCount: 100,
+                data: {
+                    chunkSize: 10,
+                    idColumn: 'id'
+                }
+            });
+
+            const grid = api.getGrid();
+            const vp = grid.viewport;
+            const frame = (): Promise<void> => new Promise((resolve) => {
+                window.requestAnimationFrame(() => resolve());
+            });
+            const tick = (): Promise<void> => new Promise((resolve) => {
+                window.setTimeout(resolve, 0);
+            });
+            const settle = async (): Promise<void> => {
+                await frame();
+                await frame();
+                await tick();
+            };
+            const getPinnedTopIds = (): number[] => Array.from(
+                vp.pinnedTopTbodyElement.querySelectorAll('tr[data-row-id]')
+            ).map((row): number => Number(row.getAttribute('data-row-id')));
+            const scrollToRow = async (rowIndex: number): Promise<void> => {
+                vp.scrollToRow(rowIndex);
+                vp.tbodyElement.dispatchEvent(new Event('scroll'));
+                await settle();
+            };
+
+            await settle();
+            await grid.pinRow(5);
+            await settle();
+
+            const afterPin = {
+                pinnedState: grid.getPinnedRows(),
+                pinnedTop: getPinnedTopIds()
+            };
+
+            await scrollToRow(95);
+            const afterScroll = {
+                pinnedTop: getPinnedTopIds()
+            };
+
+            await grid.unpinRow(5);
+            await settle();
+
+            const afterUnpin = {
+                pinnedState: grid.getPinnedRows(),
+                pinnedTop: getPinnedTopIds()
+            };
+
+            return {
+                afterPin,
+                afterScroll,
+                afterUnpin
+            };
+        });
+
+        expect(state.afterPin.pinnedState.topIds).toEqual([5]);
+        expect(state.afterPin.pinnedTop).toEqual([5]);
+        expect(state.afterScroll.pinnedTop).toEqual([5]);
+        expect(state.afterUnpin.pinnedState.topIds).toEqual([]);
+        expect(state.afterUnpin.pinnedTop).toEqual([]);
+    });
+
+    test('keeps a cached pinned remote row visible across pagination pages until unpinned', async ({
+        page
+    }) => {
+        await openRemoteProviderFixture(page);
+
+        const state = await page.evaluate(async () => {
+            const api = (window as any).remoteDataProviderTest;
+            await api.createGrid({
+                totalRowCount: 100,
+                data: {
+                    chunkSize: 10,
+                    idColumn: 'id'
+                },
+                pagination: {
+                    enabled: true,
+                    pageSize: 10,
+                    page: 1
+                }
+            });
+
+            const grid = api.getGrid();
+            const vp = grid.viewport;
+            const frame = (): Promise<void> => new Promise((resolve) => {
+                window.requestAnimationFrame(() => resolve());
+            });
+            const tick = (): Promise<void> => new Promise((resolve) => {
+                window.setTimeout(resolve, 0);
+            });
+            const settle = async (): Promise<void> => {
+                await frame();
+                await frame();
+                await tick();
+            };
+            const getPinnedTopIds = (): number[] => Array.from(
+                vp.pinnedTopTbodyElement.querySelectorAll('tr[data-row-id]')
+            ).map((row): number => Number(row.getAttribute('data-row-id')));
+
+            await settle();
+            await grid.pinRow(5);
+            await settle();
+
+            const page1 = {
+                currentPage: grid.querying.pagination.currentPage,
+                pinnedState: grid.getPinnedRows(),
+                pinnedTop: getPinnedTopIds()
+            };
+
+            await grid.update({
+                pagination: {
+                    page: 2
+                }
+            });
+            await settle();
+
+            const page2 = {
+                currentPage: grid.querying.pagination.currentPage,
+                pinnedState: grid.getPinnedRows(),
+                pinnedTop: getPinnedTopIds()
+            };
+
+            await grid.unpinRow(5);
+            await settle();
+
+            const afterUnpin = {
+                currentPage: grid.querying.pagination.currentPage,
+                pinnedState: grid.getPinnedRows(),
+                pinnedTop: getPinnedTopIds()
+            };
+
+            return {
+                page1,
+                page2,
+                afterUnpin
+            };
+        });
+
+        expect(state.page1.currentPage).toBe(1);
+        expect(state.page1.pinnedState.topIds).toEqual([5]);
+        expect(state.page1.pinnedTop).toEqual([5]);
+
+        expect(state.page2.currentPage).toBe(2);
+        expect(state.page2.pinnedState.topIds).toEqual([5]);
+        expect(state.page2.pinnedTop).toEqual([5]);
+
+        expect(state.afterUnpin.currentPage).toBe(2);
+        expect(state.afterUnpin.pinnedState.topIds).toEqual([]);
+        expect(state.afterUnpin.pinnedTop).toEqual([]);
+    });
+
+    test('keeps cached pinned remote rows visible across sorting changes', async ({
+        page
+    }) => {
+        await openRemoteProviderFixture(page);
+
+        const state = await page.evaluate(async () => {
+            const api = (window as any).remoteDataProviderTest;
+            await api.createGrid({
+                totalRowCount: 100,
+                data: {
+                    chunkSize: 10,
+                    idColumn: 'id'
+                },
+                columns: [{
+                    id: 'name'
+                }]
+            });
+
+            const grid = api.getGrid();
+            const vp = grid.viewport;
+            const frame = (): Promise<void> => new Promise((resolve) => {
+                window.requestAnimationFrame(() => resolve());
+            });
+            const tick = (): Promise<void> => new Promise((resolve) => {
+                window.setTimeout(resolve, 0);
+            });
+            const settle = async (): Promise<void> => {
+                await frame();
+                await frame();
+                await tick();
+            };
+            const getPinnedTopIds = (): number[] => Array.from(
+                vp.pinnedTopTbodyElement.querySelectorAll('tr[data-row-id]')
+            ).map((row): number => Number(row.getAttribute('data-row-id')));
+
+            await settle();
+            await grid.pinRow(5);
+            await settle();
+
+            const beforeSort = {
+                pinnedTop: getPinnedTopIds(),
+                firstRowId: await grid.dataProvider.getRowId(0)
+            };
+
+            await grid.update({
+                columns: [{
+                    id: 'name',
+                    sorting: {
+                        order: 'desc'
+                    }
+                }]
+            });
+            await settle();
+
+            const afterSort = {
+                pinnedState: grid.getPinnedRows(),
+                pinnedTop: getPinnedTopIds(),
+                firstRowId: await grid.dataProvider.getRowId(0)
+            };
+
+            return {
+                beforeSort,
+                afterSort
+            };
+        });
+
+        expect(state.beforeSort.pinnedTop).toEqual([5]);
+        expect(state.beforeSort.firstRowId).toBe(0);
+        expect(state.afterSort.pinnedState.topIds).toEqual([5]);
+        expect(state.afterSort.pinnedTop).toEqual([5]);
+        expect(state.afterSort.firstRowId).toBe(99);
     });
 
     test('uses idColumn for row IDs when provided', async ({ page }) => {

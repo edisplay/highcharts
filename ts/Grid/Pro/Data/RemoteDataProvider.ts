@@ -603,6 +603,11 @@ export class RemoteDataProvider extends DataProvider {
                 value
             );
 
+            const pinnedRow = this.pinnedRowCache.get(rowId);
+            if (pinnedRow) {
+                pinnedRow[columnId] = value;
+            }
+
             this.lastQueryFingerprint = null;
 
             // TODO(optim): Can be optimized by checking if the value was
@@ -690,7 +695,7 @@ export class RemoteDataProvider extends DataProvider {
         this.columnIds = null;
         this.prePaginationRowCount = null;
         this.rowCount = null;
-        this.resetPinnedRowCache();
+        this.warnedPinnedCacheMisses.clear();
 
         // When pagination is enabled, update the total items count
         // for the pagination controller (used to calculate total pages).
