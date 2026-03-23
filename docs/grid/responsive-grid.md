@@ -88,6 +88,13 @@ The optional `callback` gives full control over rule matching:
 - Active rules are merged in order, so later matching rules can override earlier matching rules.
 - The responsive check is based on the Grid container size, not the browser window size.
 
+> **Note:** Responsive rules rely on the browser's
+> [ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver)
+> API, which does not observe elements with `display: inline` or
+> `display: none`. Make sure the Grid container uses a block-level
+> display value (e.g. `block`, `inline-block`, `flex`, or `grid`)
+> for responsive rules to work correctly.
+
 ## Typical use cases
 
 Typical responsive use cases in Grid include:
