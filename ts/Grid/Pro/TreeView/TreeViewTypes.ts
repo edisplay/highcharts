@@ -140,6 +140,7 @@ export interface TreeProjectionRowState {
     depth: number;
     hasChildren: boolean;
     isExpanded: boolean;
+    isAncestorOnly?: boolean;
 }
 
 /**

@@ -374,17 +374,6 @@ class Table {
 
             const newRowCount = await dp.getRowCount();
 
-            if (
-                'treeView' in vp.grid &&
-                !!vp.grid.treeView?.getOptions() &&
-                oldRowsCount !== newRowCount
-            ) {
-                // If the tree view is enabled, simple rows updating does not
-                // suffice. We should check it later when there will be a need
-                // for the optimization.
-                shouldRerender = true;
-            }
-
             if (shouldRerender) {
                 // Rerender all rows
                 await vp.rowsVirtualizer.rerender();

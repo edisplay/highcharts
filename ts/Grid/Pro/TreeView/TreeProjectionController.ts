@@ -95,6 +95,8 @@ class TreeProjectionController {
 
     private projectionStateCache?: TreeProjectionState;
 
+    private injectedAncestorIds?: Set<RowId>;
+
     private expansionStateSeedKey?: string;
 
     private cacheSource?: {
@@ -370,6 +372,7 @@ class TreeProjectionController {
     private clearCache(): void {
         this.indexCache = void 0;
         this.projectionStateCache = void 0;
+        this.injectedAncestorIds = void 0;
         this.cacheSource = void 0;
     }
 
@@ -647,6 +650,8 @@ class TreeProjectionController {
             }
         };
 
+        const injectedAncestorIds = new Set<RowId>();
+
         for (let i = 0, iEnd = visibleRowIds.length; i < iEnd; ++i) {
             let currentId: RowId | null = visibleRowIds[i];
 
@@ -672,8 +677,8 @@ class TreeProjectionController {
                     !visibleSet.has(parentId) &&
                     !parentNode.isGenerated
                 ) {
-                    addRoot(currentId);
-                    break;
+                    visibleSet.add(parentId);
+                    injectedAncestorIds.add(parentId);
                 }
 
                 addChild(parentId, currentId);
@@ -690,17 +695,30 @@ class TreeProjectionController {
             const children = childrenByParent.get(nodeId);
             const hasChildren = !!(children && children.length);
             const explicitExpanded = this.grid.rowMeta.get(nodeId)?.expanded;
+            const isAncestorOnly = injectedAncestorIds.has(nodeId);
             const isExpanded = (
                 hasChildren &&
-                explicitExpanded === true
+                (
+                    explicitExpanded === true ||
+                    (
+                        typeof explicitExpanded === 'undefined' &&
+                        isAncestorOnly
+                    )
+                )
             );
 
-            rowsById.set(nodeId, {
+            const rowState: TreeProjectionRowState = {
                 id: nodeId,
                 depth,
                 hasChildren,
                 isExpanded
-            });
+            };
+
+            if (isAncestorOnly) {
+                rowState.isAncestorOnly = true;
+            }
+
+            rowsById.set(nodeId, rowState);
 
             if (!children || !isExpanded) {
                 return;
@@ -715,6 +733,8 @@ class TreeProjectionController {
             visitNode(rootIds[i], 0);
         }
 
+        this.injectedAncestorIds = injectedAncestorIds;
+
         const projectedIndexes = new Array<number | undefined>(
             projectedRowIds.length
         );
@@ -725,11 +745,15 @@ class TreeProjectionController {
                 continue;
             }
 
-            const node = index.nodes.get(projectedRowIds[i]);
-            if (!node || !node.isGenerated) {
+            const nodeId = projectedRowIds[i];
+            const node = index.nodes.get(nodeId);
+            if (
+                !node ||
+                (!node.isGenerated && !injectedAncestorIds.has(nodeId))
+            ) {
                 throw new Error(
                     'TreeView: Could not resolve row index for id "' +
-                    String(projectedRowIds[i]) +
+                    String(nodeId) +
                     '".'
                 );
             }
@@ -789,11 +813,18 @@ class TreeProjectionController {
                     continue;
                 }
 
-                projectedColumn[j] = this.getGeneratedCellValue(
-                    columnId,
-                    rowIds[j],
-                    idColumn
-                );
+                if (this.injectedAncestorIds?.has(rowIds[j])) {
+                    projectedColumn[j] = this.getSourceTableCellValue(
+                        columnId,
+                        rowIds[j]
+                    );
+                } else {
+                    projectedColumn[j] = this.getGeneratedCellValue(
+                        columnId,
+                        rowIds[j],
+                        idColumn
+                    );
+                }
             }
 
             projectedColumns[columnId] = projectedColumn;
@@ -807,11 +838,14 @@ class TreeProjectionController {
 
         for (let i = 0, iEnd = rowIndexes.length; i < iEnd; ++i) {
             const rowIndex = rowIndexes[i];
-            originalRowIndexes[i] = (
-                typeof rowIndex === 'number' ?
-                    table.getOriginalRowIndex(rowIndex) :
-                    void 0
-            );
+            if (typeof rowIndex === 'number') {
+                originalRowIndexes[i] = table.getOriginalRowIndex(rowIndex);
+            } else if (this.injectedAncestorIds?.has(rowIds[i])) {
+                const node = this.indexCache?.nodes.get(rowIds[i]);
+                originalRowIndexes[i] = node?.rowIndex ?? void 0;
+            } else {
+                originalRowIndexes[i] = void 0;
+            }
         }
 
         projectedTable.setOriginalRowIndexes(originalRowIndexes);
@@ -864,6 +898,38 @@ class TreeProjectionController {
         }
 
         return null;
+    }
+
+    /**
+     * Resolves cell value for an injected ancestor row from the source table.
+     *
+     * @param columnId
+     * Target column ID.
+     *
+     * @param rowId
+     * Ancestor row ID.
+     *
+     * @returns
+     * Cell value from the source table, or `null` when unavailable.
+     */
+    private getSourceTableCellValue(
+        columnId: string,
+        rowId: RowId
+    ): DataTableCellType {
+        const index = this.indexCache;
+        const sourceTable = this.cacheSource?.table;
+
+        if (!index || !sourceTable) {
+            return null;
+        }
+
+        const node = index.nodes.get(rowId);
+        if (!node || node.rowIndex === null) {
+            return null;
+        }
+
+        const column = sourceTable.columns[columnId];
+        return (column?.[node.rowIndex] as DataTableCellType) ?? null;
     }
 
     /**
