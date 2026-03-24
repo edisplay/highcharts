@@ -25,7 +25,6 @@ import type ColorType from '../Color/ColorType';
 import type CSSObject from '../Renderer/CSSObject';
 import type Point from './Point';
 import type ShadowOptionsObject from '../Renderer/ShadowOptionsObject';
-import type SVGAttributes from '../Renderer/SVG/SVGAttributes';
 import type { SymbolTypeRegistry } from '../Renderer/SVG/SymbolType';
 
 /* *
