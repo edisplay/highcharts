@@ -35,7 +35,7 @@ const columns = {
 };
 
 const grid = Grid.grid('container', {
-    dataTable: { columns },
+    data: { columns },
     rendering: {
         rows: {
             pinning: {
