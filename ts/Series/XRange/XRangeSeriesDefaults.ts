@@ -56,7 +56,8 @@ const XRangeSeriesDefaults: XRangeSeriesOptions = {
     /**
      * A partial fill for each point, typically used to visualize how much
      * of a task is performed. The partial fill object can be set either on
-     * series or point level.
+     * series or point level. When set as a number, works as
+     * `{ amount: number }`.
      *
      * @sample {highcharts} highcharts/demo/x-range
      *         X-range with partial fill
@@ -72,17 +73,6 @@ const XRangeSeriesDefaults: XRangeSeriesOptions = {
      * @type      {Highcharts.ColorType}
      * @product   highcharts highstock gantt
      * @apioption plotOptions.xrange.partialFill.fill
-     */
-
-    /**
-     * A partial fill for each point, typically used to visualize how much
-     * of a task is performed. See [completed](series.gantt.data.completed).
-     *
-     * @sample gantt/demo/progress-indicator
-     *         Gantt with progress indicator
-     *
-     * @product   gantt
-     * @apioption plotOptions.gantt.partialFill
      */
 
     /**
