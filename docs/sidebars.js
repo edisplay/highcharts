@@ -138,7 +138,6 @@ module.exports = {
                 'Rows': [
                     'grid/rows/index',
                     'grid/rows/data',
-                    'grid/rows/sorting',
                     'grid/rows/pagination',
                     'grid/rows/virtualization',
                     'grid/rows/performance'
@@ -169,9 +168,17 @@ module.exports = {
                 ]
             },
             'grid/responsive-grid',
-            'grid/data-providers',
+            {
+                'Data handling': [
+                    'grid/data-handling/overview',
+                    'grid/data-handling/clientside',
+                    'grid/data-handling/serverside',
+                    'grid/data-handling/connectors'
+                ]
+            },
             'grid/events',
             'grid/accessibility',
+            'grid/internationalization',
             'grid/exporting',
             'grid/sparklines',
             {
