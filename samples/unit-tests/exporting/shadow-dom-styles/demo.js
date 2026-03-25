@@ -53,4 +53,9 @@ QUnit.test('Shadow DOM CSS styles', function (assert) {
         -1,
         'Styles were inlined during export'
     );
+
+    // Replace the #container since attachShadow is irreversible,
+    // and the shared test page reuses this element
+    const container = document.querySelector('#container');
+    container.parentNode.replaceChild(container.cloneNode(false), container);
 });
