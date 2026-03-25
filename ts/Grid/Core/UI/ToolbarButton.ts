@@ -2,11 +2,11 @@
  *
  *  Grid Toolbar Button class
  *
- *  (c) 2020-2025 Highsoft AS
+ *  (c) 2020-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Dawid Dragula
@@ -26,8 +26,8 @@ import type Toolbar from './Toolbar';
 import type Button from './Button';
 import type Popup from './Popup';
 
-import SvgIcons from './SvgIcons.js';
-import Globals from '../Globals.js';
+import { createGridIcon } from './SvgIcons.js';
+import Globals, { ClassNameKey } from '../Globals.js';
 import GridUtils from '../GridUtils.js';
 
 const { makeHTMLElement } = GridUtils;
@@ -72,7 +72,7 @@ class ToolbarButton implements Button {
     /**
      * The options for the toolbar button.
      */
-    private options: ToolbarButton.Options;
+    private options: ToolbarButtonOptions;
 
     /**
      * The default icon for the toolbar button.
@@ -96,7 +96,7 @@ class ToolbarButton implements Button {
      *
      * */
 
-    constructor(options: ToolbarButton.Options) {
+    constructor(options: ToolbarButtonOptions) {
         this.options = options;
     }
 
@@ -128,7 +128,10 @@ class ToolbarButton implements Button {
             {
                 className: (
                     Globals.getClassName('button') +
-                    (this.isActive ? ' active' : '')
+                    (this.isActive ?
+                        ' ' + Globals.getClassName('buttonSelected') :
+                        ''
+                    )
                 )
             },
             wrapper
@@ -136,16 +139,34 @@ class ToolbarButton implements Button {
         button.setAttribute('type', 'button');
         button.setAttribute('tabindex', '-1');
 
-        if (cfg.tooltip) {
-            button.title = cfg.tooltip;
-            button.setAttribute('aria-label', cfg.tooltip);
-        }
+        this.setA11yAttributes(button);
 
         this.setIcon(cfg.icon);
         this.refreshState();
         this.addEventListeners();
 
         return this;
+    }
+
+    public setA11yAttributes(button: HTMLButtonElement): void {
+        const { accessibility, tooltip } = this.options;
+        const { ariaLabel, ariaExpanded, ariaControls } = accessibility || {};
+
+        if (tooltip) {
+            button.title = tooltip;
+        }
+
+        if (ariaLabel) {
+            button.setAttribute('aria-label', ariaLabel);
+        }
+
+        if (typeof ariaExpanded === 'boolean') {
+            button.setAttribute('aria-expanded', ariaExpanded);
+        }
+
+        if (ariaControls) {
+            button.setAttribute('aria-controls', ariaControls);
+        }
     }
 
     public focus(): void {
@@ -161,22 +182,34 @@ class ToolbarButton implements Button {
      * Sets the icon for the button.
      *
      * @param icon
-     * The icon to set.
+     * The icon to set (built-in name or custom name from rendering.icons).
      */
-    public setIcon(icon: SvgIcons.GridIconName): void {
+    public setIcon(icon: string): void {
         this.icon?.remove();
-        this.icon = SvgIcons.createGridIcon(icon);
+        const grid = this.toolbar?.grid;
+        this.icon = createGridIcon(
+            icon,
+            grid?.options?.rendering?.icons
+        );
         this.buttonEl?.appendChild(this.icon);
     }
 
     public setActive(active: boolean): void {
         this.isActive = active;
-        this.buttonEl?.classList.toggle('active', active);
-        this.renderActiveIndicator(active);
+        this.buttonEl?.classList.toggle(
+            Globals.getClassName('buttonSelected'), active
+        );
     }
 
     public setHighlighted(highlighted: boolean): void {
-        this.buttonEl?.classList.toggle('highlighted', highlighted);
+        this.buttonEl?.classList.toggle(
+            Globals.getClassName('buttonHighlighted'), highlighted
+        );
+
+        const ariaExpanded = this.options.accessibility?.ariaExpanded;
+        if (typeof ariaExpanded === 'boolean') {
+            this.buttonEl?.setAttribute('aria-expanded', highlighted);
+        }
     }
 
     /**
@@ -192,9 +225,10 @@ class ToolbarButton implements Button {
     }
 
     /**
-     * Initializes the state of the button.
+     * Refreshes the state of the button.
+     * @internal
      */
-    protected refreshState(): void {
+    public refreshState(): void {
         // Do nothing, to be overridden by subclasses
     }
 
@@ -206,30 +240,6 @@ class ToolbarButton implements Button {
      */
     protected clickHandler(event: MouseEvent): void {
         this.options.onClick?.(event, this);
-    }
-
-    /**
-     * Renders the active indicator for the button.
-     *
-     * @param render
-     * Whether the active indicator should be rendered.
-     */
-    protected renderActiveIndicator(render: boolean): void {
-        const button = this.buttonEl;
-        if (!button) {
-            return;
-        }
-
-        this.activeIndicator?.remove();
-
-        if (!render) {
-            delete this.activeIndicator;
-            return;
-        }
-
-        this.activeIndicator = makeHTMLElement('div', {
-            className: Globals.getClassName('toolbarButtonActiveIndicator')
-        }, button);
     }
 
     /**
@@ -260,42 +270,60 @@ class ToolbarButton implements Button {
 
 /* *
  *
- *  Namespace
+ *  Declarations
  *
  * */
 
-namespace ToolbarButton {
+/**
+ * Options for the toolbar button.
+ */
+export interface ToolbarButtonOptions {
+    /**
+     * The icon for the button (built-in name or custom from rendering.icons).
+     */
+    icon: string;
 
     /**
-     * Options for the toolbar button.
+     * The class name key for the button.
      */
-    export interface Options {
-        /**
-         * The icon for the button.
-         */
-        icon: SvgIcons.GridIconName;
+    classNameKey?: ClassNameKey;
 
-        /**
-         * The class name key for the button.
-         */
-        classNameKey?: Globals.ClassNameKey;
+    /**
+     * The tooltip string for the button.
+     */
+    tooltip?: string;
 
-        /**
-         * The tooltip string for the button.
-         */
-        tooltip?: string;
+    /**
+     * Whether the button should be always visible.
+     */
+    alwaysVisible?: boolean;
 
-        /**
-         * Whether the button should be always visible.
-         */
-        alwaysVisible?: boolean;
+    /**
+     * The accessibility options for the button.
+     */
+    accessibility?: ToolbarButtonA11yOptions;
 
-        /**
-         * The click handler for the button.
-         */
-        onClick?: (event: MouseEvent, button: ToolbarButton) => void;
-    }
+    /**
+     * The click handler for the button.
+     */
+    onClick?: (event: MouseEvent, button: ToolbarButton) => void;
+}
 
+export interface ToolbarButtonA11yOptions {
+    /**
+     * The aria label attribute for the button.
+     */
+    ariaLabel?: string;
+
+    /**
+     * The aria expanded attribute for the button.
+     */
+    ariaExpanded?: boolean;
+
+    /**
+     * The aria controls attribute for the button.
+     */
+    ariaControls?: string;
 }
 
 

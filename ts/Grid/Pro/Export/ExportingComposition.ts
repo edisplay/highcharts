@@ -2,11 +2,11 @@
  *
  *  Grid Exporting composition
  *
- *  (c) 2020-2025 Highsoft AS
+ *  (c) 2020-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Karol Kolodziej
@@ -23,43 +23,42 @@
 
 import type Grid from '../../Core/Grid';
 
+import { defaultOptions } from '../../Core/Defaults.js';
 import Exporting from './Exporting.js';
 import Globals from '../../Core/Globals.js';
-import U from '../../../Core/Utilities.js';
-
-const { addEvent, pushUnique } = U;
+import { addEvent, pushUnique } from '../../../Shared/Utilities.js';
 
 /* *
  *
- *  Class Namespace
+ *  Composition
  *
  * */
 
-namespace ExportingComposition {
-    /**
-     * Extends the grid classes with exporting.
-     *
-     * @param GridClass
-     * The class to extend.
-     *
-     */
-    export function compose(
-        GridClass: typeof Grid
-    ): void {
-        if (!pushUnique(Globals.composed, 'Exporting')) {
-            return;
-        }
-
-        addEvent(GridClass, 'afterRenderViewport', initExporting);
+/**
+ * Extends the grid classes with exporting.
+ *
+ * @param GridClass
+ * The class to extend.
+ *
+ */
+export function compose(
+    GridClass: typeof Grid
+): void {
+    if (!pushUnique(Globals.composed, 'Exporting')) {
+        return;
     }
 
-    /**
-     * Init exporting
-     */
-    function initExporting(this: Grid): void {
-        this.exporting = new Exporting(this, this.options?.exporting);
-    }
+    defaultOptions.exporting = Exporting.defaultOptions;
+    addEvent(GridClass, 'beforeLoad', initExporting);
 }
+
+/**
+ * Init exporting
+ */
+function initExporting(this: Grid): void {
+    this.exporting = new Exporting(this);
+}
+
 
 /* *
  *
@@ -135,4 +134,6 @@ declare module '../../Core/Grid' {
  *
  * */
 
-export default ExportingComposition;
+export default {
+    compose
+} as const;

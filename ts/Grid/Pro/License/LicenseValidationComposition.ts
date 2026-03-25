@@ -33,105 +33,99 @@ const {
     pushUnique
 } = U;
 
+
 /* *
  *
- *  Namespace
+ *  Functions
  *
  * */
 
 /**
+ * Compose license validation into Grid Pro.
+ *
+ * @param GridClass
+ * The Grid class to extend with license validation.
+ *
  * @internal
  */
-namespace LicenseValidationComposition {
-
-    /* *
-     *
-     *  Functions
-     *
-     * */
-
-    /**
-     * Compose license validation into Grid Pro.
-     *
-     * @param GridClass
-     * The Grid class to extend with license validation.
-     *
-     * @internal
-     */
-    export function compose(GridClass: typeof Grid): void {
-        // Ensure composition only applied once
-        if (!pushUnique(Globals.composed, 'LicenseValidation')) {
-            return;
-        }
-
-        // Hook into Grid after viewport render (earliest event Grid fires)
-        addEvent(GridClass, 'afterRenderViewport', onGridInit);
+function compose(GridClass: typeof Grid): void {
+    // Ensure composition only applied once
+    if (!pushUnique(Globals.composed, 'LicenseValidation')) {
+        return;
     }
 
-    /**
-     * Check license on Grid initialization.
-     *
-     * @internal
-     */
-    function onGridInit(this: Grid): void {
-        // Skip validation in SSR environments
-        if (typeof window === 'undefined') {
-            return;
-        }
+    // Hook into Grid after viewport render (earliest event Grid fires)
+    addEvent(GridClass, 'afterRenderViewport', onGridInit);
+}
 
-        // Skip validation on whitelisted URLs
-        // (localhost, *.highcharts.com, *.jsfiddle.net, *.stackblitz.com,
-        // *.highcharts.com.cn)
-        if (LicenseValidation.isWhitelistedURL()) {
-            return;
-        }
+/**
+ * Check license on Grid initialization.
+ *
+ * @internal
+ */
+function onGridInit(this: Grid): void {
+    // Skip validation in SSR environments
+    if (typeof window === 'undefined') {
+        return;
+    }
 
-        const licenseState = GridGlobals.license;
+    // Skip validation on whitelisted URLs
+    // (localhost, *.highcharts.com, *.jsfiddle.net, *.stackblitz.com,
+    // *.highcharts.com.cn)
+    if (LicenseValidation.isWhitelistedURL()) {
+        return;
+    }
 
-        // Get Grid key from instance
-        let gridKey = this.options?.gridKey;
+    const licenseState = GridGlobals.license;
 
-        // Auto-promote instance key to global if different from current global
-        // (Allows later grids to override stale/invalid keys)
-        if (gridKey && gridKey !== licenseState.key) {
-            licenseState.key = gridKey;
-        }
+    // Get Grid key from instance
+    let gridKey = this.options?.gridKey;
 
-        // Use global key if instance doesn't have one
-        if (!gridKey) {
-            gridKey = licenseState.key;
-        }
+    // Auto-promote instance key to global if different from current global
+    // (Allows later grids to override stale/invalid keys)
+    if (gridKey && gridKey !== licenseState.key) {
+        licenseState.key = gridKey;
+    }
 
-        // Skip validation if we've already validated this exact key
-        const lastKey = licenseState.lastValidatedKey;
-        if (lastKey !== void 0 && gridKey === lastKey) {
-            return;
-        }
+    // Use global key if instance doesn't have one
+    if (!gridKey) {
+        gridKey = licenseState.key;
+    }
 
-        // Validate the Grid Key
-        const isValid = LicenseValidation.validate(gridKey);
+    // Skip validation if we've already validated this exact key
+    const lastKey = licenseState.lastValidatedKey;
+    if (lastKey !== void 0 && gridKey === lastKey) {
+        return;
+    }
 
-        // Track the validated key to avoid redundant validation
-        licenseState.lastValidatedKey = gridKey;
+    // Validate the Grid Key
+    const isValid = LicenseValidation.validate(gridKey);
 
-        // Show warning only once if invalid or missing
-        const hasWarned = licenseState.warningShown;
-        if (!isValid && !hasWarned) {
-            // eslint-disable-next-line no-console
-            console.warn(
-                'This is an unlicensed version of Highcharts Grid Pro. ' +
-                'Insert a Grid Key in the configuration or visit ' +
-                'https://shop.highcharts.com to get one.'
-            );
-            licenseState.warningShown = true;
-        }
+    // Track the validated key to avoid redundant validation
+    licenseState.lastValidatedKey = gridKey;
+
+    // Show warning only once if invalid or missing
+    const hasWarned = licenseState.warningShown;
+    if (!isValid && !hasWarned) {
+        // eslint-disable-next-line no-console
+        console.warn(
+            'This is an unlicensed version of Highcharts Grid Pro. ' +
+            'Insert a Grid Key in the configuration or visit ' +
+            'https://shop.highcharts.com to get one.'
+        );
+        licenseState.warningShown = true;
     }
 }
+
 
 /* *
  *
  *  Default Export
  *
  * */
+
+const LicenseValidationComposition = {
+    compose
+};
 
 export default LicenseValidationComposition;

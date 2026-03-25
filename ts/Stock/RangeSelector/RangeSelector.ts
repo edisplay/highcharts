@@ -1,10 +1,11 @@
 /* *
  *
- *  (c) 2010-2025 Torstein Honsi
+ *  (c) 2010-2026 Highsoft AS
+ *  Author: Torstein Honsi
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -41,24 +42,22 @@ import RangeSelectorComposition from './RangeSelectorComposition.js';
 import SVGElement from '../../Core/Renderer/SVG/SVGElement.js';
 import T from '../../Core/Templating.js';
 const { format } = T;
-import U from '../../Core/Utilities.js';
-const {
-    addEvent,
+import {
     createElement,
-    css,
     defined,
-    destroyObjectProperties,
-    diffObjects,
-    discardElement,
     extend,
-    fireEvent,
-    isNumber,
     isString,
+    isNumber,
     merge,
     objectEach,
     pick,
-    splat
-} = U;
+    splat,
+    discardElement,
+    destroyObjectProperties,
+    css,
+    addEvent,
+    fireEvent
+} from '../../Shared/Utilities.js';
 
 /* *
  *
@@ -397,7 +396,7 @@ class RangeSelector {
                 xAxis.options.min = baseXAxisOptions.min;
                 axisRangeUpdateEvent(); // Remove event
             });
-        } else if (isNumber(newMin) && isNumber(newMax)) {
+        } else if (isNumber(newMin) || isNumber(newMax)) {
             // Existing axis object. Set extremes after render time.
             baseAxis.setExtremes(
                 newMin,
@@ -1479,7 +1478,7 @@ class RangeSelector {
                 rangeOptions.text ?? '',
                 0,
                 0,
-                (e: (Event | AnyRecord)): void => {
+                (e): void => {
 
                     // Extract events from button object and call
                     const buttonEvents = (
@@ -1797,19 +1796,11 @@ class RangeSelector {
 
             // Update current buttons
             for (let i = btnLength - 1; i >= 0; i--) {
-                const diff = diffObjects(
-                    newButtonsOptions[i],
-                    this.buttonOptions[i]
-                );
-
-                if (Object.keys(diff).length !== 0) {
-                    const rangeOptions = newButtonsOptions[i];
-                    this.buttons[i].destroy();
-                    dropdown?.options.remove(i + 1);
-                    this.createButton(rangeOptions, i, width, states);
-                    this.computeButtonRange(rangeOptions);
-
-                }
+                const rangeOptions = newButtonsOptions[i];
+                this.buttons[i].destroy();
+                dropdown?.options.remove(i + 1);
+                this.createButton(rangeOptions, i, width, states);
+                this.computeButtonRange(rangeOptions);
             }
 
             // Create missing buttons
@@ -2032,8 +2023,6 @@ class RangeSelector {
      * Collapse the buttons and show the select element.
      *
      * @private
-     * @function Highcharts.RangeSelector#collapseButtons
-     * @param {number} xOffsetForExportButton
      */
     public collapseButtons(): void {
         const {
@@ -2201,7 +2190,7 @@ class RangeSelector {
             return this.init(chart);
         }
 
-        this.isDirty = !!options.buttons;
+        this.isDirty = !!options.buttons || !!options.buttonTheme;
 
         if (redraw) {
             this.render();

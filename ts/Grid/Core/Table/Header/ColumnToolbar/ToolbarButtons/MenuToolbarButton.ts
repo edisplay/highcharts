@@ -2,11 +2,11 @@
  *
  *  Grid Menu Toolbar Button class
  *
- *  (c) 2020-2025 Highsoft AS
+ *  (c) 2020-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Dawid Dragula
@@ -27,9 +27,7 @@ import type ColumnToolbar from '../ColumnToolbar.js';
 import ToolbarButton from '../../../../UI/ToolbarButton.js';
 import StateHelpers from '../StateHelpers.js';
 import MenuPopup from '../MenuPopup.js';
-import U from '../../../../../../Core/Utilities.js';
-
-const { addEvent } = U;
+import { addEvent } from '../../../../../../Shared/Utilities.js';
 
 
 /* *
@@ -87,7 +85,7 @@ class MenuToolbarButton extends ToolbarButton {
         this.popup.toggle(this.wrapper);
     }
 
-    protected override refreshState(): void {
+    public override refreshState(): void {
         const column = this.toolbar?.column;
         if (!column) {
             return;

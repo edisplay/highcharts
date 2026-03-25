@@ -1,28 +1,56 @@
 /* *
  *
- *  (c) 2009-2025 Øystein Moseng
+ *  (c) 2009-2026 Highsoft AS
+ *  Author: Øystein Moseng
  *
  *  Class representing a speech synthesis voice.
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
 'use strict';
 
-import U from '../../Core/Utilities.js';
-const {
-    pick
-} = U;
+import { pick } from '../../Shared/Utilities.js';
 
 namespace SonificationSpeaker {
+    /**
+     * Configuration for a SonificationSpeaker.
+     *
+     * @requires modules/sonification
+     */
     export interface SpeakerOptions {
+        /**
+         * Name of the voice synthesis to use. If not found, reverts to the
+         * default voice for the language chosen.
+         *         */
         name?: string;
+        /**
+         * The language of the voice synthesis.
+         *
+         * @default "en-US"
+         *         */
         language?: string;
+        /**
+         * The pitch modifier of the voice. Set higher for a higher
+         * voice pitch.
+         *
+         * @default 1
+         *         */
         pitch?: number;
+        /**
+         * The speech rate modifier.
+         *
+         * @default 1
+         *         */
         rate?: number;
+        /**
+         * The speech volume, from 0 to 1.
+         *
+         * @default 1
+         *         */
         volume?: number;
     }
 }
@@ -45,9 +73,13 @@ namespace SonificationSpeaker {
  *        Configuration for the speaker
  */
 class SonificationSpeaker {
+    /** @internal */
     private synthesis: SpeechSynthesis;
+    /** @internal */
     private voice?: SpeechSynthesisVoice;
+    /** @internal */
     private scheduled: number[];
+    /** @internal */
     private masterVolume = 1;
 
     constructor(private options: SonificationSpeaker.SpeakerOptions) {
@@ -123,7 +155,7 @@ class SonificationSpeaker {
 
     /**
      * Stop speech and release any used resources
-     * @private
+     * @internal
      */
     destroy(): void {
         // Ran on TimelineChannel.destroy
@@ -147,7 +179,7 @@ class SonificationSpeaker {
 
     /**
      * Set the active synthesis voice for the speaker.
-     * @private
+     * @internal
      */
     private setVoice(): void {
         if (this.synthesis) {

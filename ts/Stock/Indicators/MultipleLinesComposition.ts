@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: LicenseRef-Highcharts
 /**
  *
- *  (c) 2010-2025 Wojciech Chmiel
+ *  (c) 2010-2026 Highsoft AS
+ *  Author: Wojciech Chmiel
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -28,12 +30,8 @@ import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
 const {
     sma: { prototype: smaProto }
 } = SeriesRegistry.seriesTypes;
-import U from '../../Core/Utilities.js';
-const {
-    defined,
-    error,
-    merge
-} = U;
+import { defined, merge } from '../../Shared/Utilities.js';
+import { error } from '../../Core/Utilities.js';
 
 /* *
  *
@@ -163,7 +161,6 @@ namespace MultipleLinesComposition {
      * Generate the API name of the line
      *
      * @private
-     * @param propertyName name of the line
      */
     function getLineName(
         propertyName: string
@@ -179,10 +176,6 @@ namespace MultipleLinesComposition {
      * Create translatedLines Collection based on pointArrayMap.
      *
      * @private
-     * @param {string} [excludedValue]
-     *        Main line id
-     * @return {Array<string>}
-     *         Returns translated lines names without excluded value.
      */
     function getTranslatedLinesNames(
         indicator: SMAIndicator,
@@ -326,7 +319,6 @@ namespace MultipleLinesComposition {
      * If indicator.nextPoints option is defined, create the areaFill.
      *
      * @private
-     * @param points Points on which the path should be created
      */
     function indicatorGetGraphPath(
         this: IndicatorComposition,

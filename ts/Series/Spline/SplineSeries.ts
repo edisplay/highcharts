@@ -1,10 +1,11 @@
 /* *
  *
- *  (c) 2010-2025 Torstein Honsi
+ *  (c) 2010-2026 Highsoft AS
+ *  Author: Torstein Honsi
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -24,11 +25,7 @@ import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
 const {
     line: LineSeries
 } = SeriesRegistry.seriesTypes;
-import U from '../../Core/Utilities.js';
-const {
-    merge,
-    pick
-} = U;
+import { merge, pick } from '../../Shared/Utilities.js';
 
 /* *
  *
@@ -83,7 +80,6 @@ class SplineSeries extends LineSeries {
      *
      * */
 
-    /* eslint-disable valid-jsdoc */
 
     /**
      * Get the spline segment from a given point's previous neighbour to the
@@ -257,7 +253,6 @@ class SplineSeries extends LineSeries {
         return ret;
     }
 
-    /* eslint-enable valid-jsdoc */
 
 }
 

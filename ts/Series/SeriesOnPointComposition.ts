@@ -1,10 +1,11 @@
 /* *
  *
- *  (c) 2010-2025 Rafal Sebestjanski, Piotr Madej
+ *  (c) 2010-2026 Highsoft AS
+ *  Author: Rafal Sebestjanski, Piotr Madej
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -28,14 +29,13 @@ import SeriesRegistry from '../Core/Series/SeriesRegistry.js';
 const { bubble } = SeriesRegistry.seriesTypes;
 import SVGRenderer from '../Core/Renderer/SVG/SVGRenderer.js';
 import SVGElement from '../Core/Renderer/SVG/SVGElement.js';
-import U from '../Core/Utilities.js';
-const {
+import {
     addEvent,
     defined,
     find,
     isNumber,
     pushUnique
-} = U;
+} from '../Shared/Utilities.js';
 
 /* *
  *
@@ -101,12 +101,6 @@ namespace SeriesOnPointComposition {
      * Extends the series with a small addition.
      *
      * @private
-     *
-     * @param SeriesClass
-     * Series class to use.
-     *
-     * @param ChartClass
-     * Chart class to use.
      */
     export function compose<T extends typeof Series>(
         SeriesClass: T,

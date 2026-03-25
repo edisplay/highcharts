@@ -2,11 +2,11 @@
  *
  *  Grid Context Menu Button class
  *
- *  (c) 2020-2025 Highsoft AS
+ *  (c) 2020-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Dawid Dragula
@@ -26,8 +26,8 @@ import type ContextMenu from './ContextMenu';
 import type Button from './Button';
 import type Popup from './Popup';
 
-import SvgIcons from './SvgIcons.js';
-import Globals from '../Globals.js';
+import { createGridIcon } from './SvgIcons.js';
+import Globals, { ClassNameKey } from '../Globals.js';
 import GridUtils from '../GridUtils.js';
 
 const { makeHTMLElement } = GridUtils;
@@ -39,7 +39,7 @@ const { makeHTMLElement } = GridUtils;
  *
  * */
 
-class ContextMenuButton implements Button {
+export class ContextMenuButton implements Button {
 
     /* *
      *
@@ -72,7 +72,7 @@ class ContextMenuButton implements Button {
     /**
      * The options for the context menu button.
      */
-    protected options: ContextMenuButton.Options;
+    protected options: ContextMenuButtonOptions;
 
     /**
      * The container for the icon element.
@@ -101,7 +101,7 @@ class ContextMenuButton implements Button {
      *
      * */
 
-    constructor(options: ContextMenuButton.Options) {
+    constructor(options: ContextMenuButtonOptions) {
         this.options = options;
     }
 
@@ -157,7 +157,11 @@ class ContextMenuButton implements Button {
         this.refreshState();
 
         if (cfg.chevron) {
-            chevronEl.appendChild(SvgIcons.createGridIcon('chevronRight'));
+            const grid = this.contextMenu?.grid;
+            chevronEl.appendChild(createGridIcon(
+                'chevronRight',
+                grid?.options?.rendering?.icons
+            ));
         }
 
         if (cfg.icon) {
@@ -188,15 +192,19 @@ class ContextMenuButton implements Button {
      * Sets the icon for the button.
      *
      * @param icon
-     * The icon to set.
+     * The icon to set (built-in name or custom name from rendering.icons).
      */
-    public setIcon(icon?: SvgIcons.GridIconName): void {
+    public setIcon(icon?: string): void {
         this.icon?.remove();
         if (!icon) {
             return;
         }
 
-        this.icon = SvgIcons.createGridIcon(icon);
+        const grid = this.contextMenu?.grid;
+        this.icon = createGridIcon(
+            icon,
+            grid?.options?.rendering?.icons
+        );
         this.iconWrapper?.appendChild(this.icon);
     }
 
@@ -274,57 +282,50 @@ class ContextMenuButton implements Button {
 
 /* *
  *
- *  Namespace
+ *  Declarations
  *
  * */
 
-namespace ContextMenuButton {
+export interface ContextMenuButtonOptions {
+    /**
+     * The label for the button.
+     */
+    label?: string;
 
     /**
-     * Options for the context menu button.
+     * The icon for the button (built-in name or custom from rendering.icons).
      */
-    export interface Options {
-        /**
-         * The label for the button.
-         */
-        label?: string;
+    icon?: string;
 
-        /**
-         * The icon for the button.
-         */
-        icon?: SvgIcons.GridIconName;
+    /**
+     * A class name key applied to the `<li>` wrapper of the button.
+     */
+    classNameKey?: ClassNameKey;
 
-        /**
-         * A class name key applied to the `<li>` wrapper of the button.
-         */
-        classNameKey?: Globals.ClassNameKey;
+    /**
+     * The icon for the active state of the button.
+     */
+    activeIcon?: string;
 
-        /**
-         * The icon for the active state of the button.
-         */
-        activeIcon?: SvgIcons.GridIconName;
+    /**
+     * The icon for the highlighted state of the button.
+     */
+    highlightedIcon?: string;
 
-        /**
-         * The icon for the highlighted state of the button.
-         */
-        highlightedIcon?: SvgIcons.GridIconName;
+    /**
+     * The tooltip string for the button.
+     */
+    tooltip?: string;
 
-        /**
-         * The tooltip string for the button.
-         */
-        tooltip?: string;
+    /**
+     * If the chevron icon should be rendered.
+     */
+    chevron?: boolean;
 
-        /**
-         * If the chevron icon should be rendered.
-         */
-        chevron?: boolean;
-
-        /**
-         * The click handler for the button.
-         */
-        onClick?: (event: MouseEvent, button: ContextMenuButton) => void;
-    }
-
+    /**
+     * The click handler for the button.
+     */
+    onClick?: (event: MouseEvent, button: ContextMenuButton) => void;
 }
 
 

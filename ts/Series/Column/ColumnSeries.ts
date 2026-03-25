@@ -1,10 +1,11 @@
 /* *
  *
- *  (c) 2010-2025 Torstein Honsi
+ *  (c) 2010-2026 Highsoft AS
+ *  Author: Torstein Honsi
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -38,8 +39,7 @@ import H from '../../Core/Globals.js';
 const { noop } = H;
 import Series from '../../Core/Series/Series.js';
 import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
-import U from '../../Core/Utilities.js';
-const {
+import {
     clamp,
     crisp,
     defined,
@@ -48,9 +48,9 @@ const {
     isArray,
     isNumber,
     merge,
-    pick,
-    objectEach
-} = U;
+    objectEach,
+    pick
+} from '../../Shared/Utilities.js';
 
 /* *
  *
@@ -129,7 +129,6 @@ class ColumnSeries extends Series {
      *
      * */
 
-    /* eslint-disable valid-jsdoc */
 
     /**
      * Animate the column heights one by one from zero.
@@ -501,14 +500,12 @@ class ColumnSeries extends Series {
             // This ensures consistent dimensions between null/normal points.
             dense = series.dense =
                 (series.closestPointRange as any) * series.xAxis.transA < 2,
-            borderWidth = series.borderWidth = pick(
-                options.borderWidth,
-                dense ? 0 : 1 // #3635
-            ),
+            borderWidth = series.borderWidth =
+            options.borderWidth ?? (dense ? 0 : 1), // #3635
             xAxis = series.xAxis,
             yAxis = series.yAxis,
             threshold = options.threshold,
-            minPointLength = pick(options.minPointLength, 5),
+            minPointLength = options.minPointLength ?? 5,
             metrics = series.getColumnMetrics(),
             seriesPointWidth = metrics.width,
             seriesXOffset = series.pointXOffset = metrics.offset,
@@ -532,7 +529,7 @@ class ColumnSeries extends Series {
 
         // Record the new values
         series.points.forEach(function (point): void {
-            const yBottom = pick(point.yBottom, translatedThreshold as any),
+            const yBottom = point.yBottom ?? (translatedThreshold as any),
                 safeDistance = 999 + Math.abs(yBottom),
                 plotX = point.plotX || 0,
                 // Don't draw too far outside plot area (#1303, #2241,
@@ -579,7 +576,7 @@ class ColumnSeries extends Series {
                         barY - (translatedThreshold as any)
                     ) > minPointLength ?
                         // ...keep position
-                        yBottom - minPointLength :
+                        yBottom - (up ? minPointLength : 0) :
                         // #1485, #4051
                         (translatedThreshold as any) -
                         (up ? minPointLength : 0)
@@ -680,6 +677,7 @@ class ColumnSeries extends Series {
             p2o = (this as any).pointAttrToOptions || {},
             strokeOption = p2o.stroke || 'borderColor',
             strokeWidthOption = p2o['stroke-width'] || 'borderWidth';
+
         let stateOptions: SeriesStateHoverOptions,
             zone,
             brightness,
@@ -722,9 +720,7 @@ class ColumnSeries extends Series {
             stateOptions = merge(
                 (options.states as any)[state],
                 // #6401
-                point.options.states &&
-                (point.options.states as any)[state] ||
-                {}
+                point.options.states?.[state] || {}
             );
             brightness = stateOptions.brightness;
             fill =
@@ -963,7 +959,6 @@ class ColumnSeries extends Series {
         Series.prototype.remove.apply(series, arguments as any);
     }
 
-    /* eslint-enable valid-jsdoc */
 
 }
 

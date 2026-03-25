@@ -2,11 +2,11 @@
  *
  *  Grid HeaderCell class
  *
- *  (c) 2020-2025 Highsoft AS
+ *  (c) 2020-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Dawid Dragula
@@ -24,27 +24,24 @@
  * */
 
 import type { GroupedHeaderOptions } from '../../Options';
+import type { NoIdColumnOptions } from '../Column';
+import type CSSObject from '../../../../Core/Renderer/CSSObject';
 
 import Cell from '../Cell.js';
 import Column from '../Column';
 import Row from '../Row';
-import GridUtils from '../../GridUtils.js';
-import ColumnSorting from '../Actions/ColumnSorting.js';
-import Globals from '../../Globals.js';
-import Utilities from '../../../../Core/Utilities.js';
-import TableHeader from './TableHeader.js';
-import ColumnToolbar from './ColumnToolbar/ColumnToolbar.js';
-
-const {
+import {
     makeHTMLElement,
     setHTMLContent,
-    createOptionsProxy
-} = GridUtils;
-const {
-    fireEvent,
-    isString
-} = Utilities;
-
+    createOptionsProxy,
+    resolveStyleValue,
+    mergeStyleValues
+} from '../../GridUtils.js';
+import ColumnSorting from '../Actions/ColumnSorting.js';
+import Globals from '../../Globals.js';
+import TableHeader from './TableHeader.js';
+import ColumnToolbar from './ColumnToolbar/ColumnToolbar.js';
+import { fireEvent, isString } from '../../../../Shared/Utilities.js';
 
 /* *
  *
@@ -78,7 +75,7 @@ class HeaderCell extends Cell {
      * the column options.
      * @internal
      */
-    public readonly superColumnOptions: Partial<Column.Options> = {};
+    public readonly superColumnOptions: Partial<NoIdColumnOptions> = {};
 
     /**
      * List of columns that are subordinated to the header cell.
@@ -159,24 +156,25 @@ class HeaderCell extends Cell {
     public override init(): HTMLTableCellElement {
         const elem = document.createElement('th', {});
         elem.classList.add(Globals.getClassName('headerCell'));
+        elem.setAttribute('role', 'columnheader');
         return elem;
     }
 
     /**
      * Render the cell container.
      */
-    public override render(): void {
+    public override async render(): Promise<void> {
         const { column } = this;
         const options = createOptionsProxy(
             this.superColumnOptions,
             column?.options
         );
         const headerCellOptions = options.header || {};
-        const isSortableData = options.sorting?.sortable && column?.data;
+        const headerValue = column ?
+            headerCellOptions.formatter?.call(column) : void 0;
 
-
-        if (headerCellOptions.formatter) {
-            this.value = headerCellOptions.formatter.call(this).toString();
+        if (headerValue) {
+            this.value = headerValue.toString();
         } else if (isString(headerCellOptions.format)) {
             this.value = column ?
                 column.format(headerCellOptions.format) :
@@ -210,12 +208,7 @@ class HeaderCell extends Cell {
 
         if (column) {
             this.htmlElement.setAttribute('data-column-id', column.id);
-
-            if (isSortableData) {
-                column.viewport.grid.accessibility?.addSortableColumnHint(
-                    this.headerContent
-                );
-            }
+            this.htmlElement.setAttribute('aria-label', column.id);
 
             // Add user column classname
             if (column.options.className) {
@@ -238,14 +231,47 @@ class HeaderCell extends Cell {
             this.initColumnSorting();
         }
 
+        // Set alignment in column cells based on column data type
+        this.htmlElement.classList[
+            column?.dataType === 'number' ? 'add' : 'remove'
+        ](Globals.getClassName('rightAlign'));
+
+        // Add custom class name from column options
         this.setCustomClassName(options.header?.className);
 
-        // Add alignment to number column
-        if (column?.dataType === 'number') {
-            this.setCustomClassName(Globals.getClassName('rightAlign'));
-        }
+        this.setCustomStyles(this.getColumnStyles());
 
         fireEvent(this, 'afterRender', { column });
+
+        return Promise.resolve();
+    }
+
+    /**
+     * Returns merged header styles from defaults and current column options.
+     *
+     */
+    private getColumnStyles(): (CSSObject | undefined) {
+        const { column } = this;
+
+        if (!column) {
+            return resolveStyleValue(this.superColumnOptions.header?.style);
+        }
+
+        const { grid } = this.row.viewport;
+        const rawColumnOptions = grid.columnOptionsMap?.[column.id]?.options;
+
+        return {
+            ...mergeStyleValues(
+                column,
+                grid.options?.columnDefaults?.style,
+                rawColumnOptions?.style
+            ),
+            ...mergeStyleValues(
+                column,
+                grid.options?.columnDefaults?.header?.style,
+                rawColumnOptions?.header?.style
+            )
+        };
     }
 
     public override reflow(): void {
@@ -267,7 +293,7 @@ class HeaderCell extends Cell {
         this.toolbar?.reflow();
     }
 
-    protected override onKeyDown(e: KeyboardEvent): void {
+    public override onKeyDown(e: KeyboardEvent): void {
         if (!this.column || e.target !== this.htmlElement) {
             return;
         }
@@ -281,20 +307,22 @@ class HeaderCell extends Cell {
         super.onKeyDown(e);
     }
 
-    protected override onClick(e: MouseEvent): void {
-        const column = this.column;
-
+    public override onClick(e: MouseEvent): void {
         if (
-            !column || (
-                e.target !== this.htmlElement &&
-                e.target !== column.header?.headerContent
-            ) || column.viewport.columnsResizer?.isResizing
+            !this.column ||
+            !this.htmlElement.contains(e.target as Node) ||
+            this.column.viewport.columnsResizer?.isResizing
         ) {
             return;
         }
 
-        if (column.options.sorting?.sortable) {
-            column.sorting?.toggle();
+        // Toggle sort only when clicking header text/area, not toolbar icons
+        if (
+            !this.toolbar?.container?.contains(e.target as Node) &&
+            (this.column.options.sorting?.enabled ??
+                this.column.options.sorting?.sortable)
+        ) {
+            this.column.sorting?.toggle(e);
         }
 
         fireEvent(this, 'click', {

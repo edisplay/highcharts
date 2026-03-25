@@ -2,11 +2,12 @@
  *
  *  Organization chart module
  *
- *  (c) 2018-2025 Torstein Honsi
+ *  (c) 2018-2026 Highsoft AS
+ *  Author: Torstein Honsi
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -142,7 +143,6 @@ const OrganizationSeriesDefaults: OrganizationSeriesOptions = {
      */
     dataLabels: {
 
-        /* eslint-disable valid-jsdoc */
         /**
          * A callback for defining the format for _nodes_ in the
          * organization chart. The `nodeFormat` option takes precedence
@@ -253,7 +253,6 @@ const OrganizationSeriesDefaults: OrganizationSeriesOptions = {
                 '</div>';
             return html;
         },
-        /* eslint-enable valid-jsdoc */
 
         style: {
             /** @internal */

@@ -1,12 +1,13 @@
 /* *
  *
- *  (c) 2009-2025 Øystein Moseng
+ *  (c) 2009-2026 Highsoft AS
+ *  Author: Øystein Moseng
  *
  *  Small MIDI file writer for sonification export.
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -16,9 +17,9 @@
 
 import type TimelineChannel from './TimelineChannel';
 import SonificationInstrument from './SonificationInstrument.js';
-import U from '../../Core/Utilities.js';
-const { pick } = U;
+import { pick } from '../../Shared/Utilities.js';
 
+/** @internal */
 interface MIDIEvent {
     timeMS: number;
     type: 'NON'|'NOF'|'CTRL_CHG';
@@ -182,7 +183,7 @@ const freqToNote = (f: number): number => Math.round(
  *
  * Outputs multi-track MIDI for Timelines with multiple channels.
  *
- * @private
+ * @internal
  */
 function toMIDI(channels: TimelineChannel[]): Uint8Array {
     const channelsToAdd = channels.filter((c): boolean => !!c.events.length),
@@ -202,4 +203,5 @@ function toMIDI(channels: TimelineChannel[]): Uint8Array {
             }, [] as number[])));
 }
 
+/** @internal */
 export default toMIDI;

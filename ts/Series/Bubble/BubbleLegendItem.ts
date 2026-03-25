@@ -1,12 +1,12 @@
 /* *
  *
- *  (c) 2010-2025 Highsoft AS
+ *  (c) 2010-2026 Highsoft AS
  *
  *  Author: Paweł Potaczek
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -39,15 +39,14 @@ import H from '../../Core/Globals.js';
 const { noop } = H;
 import Legend from '../../Core/Legend/Legend.js';
 import Series from '../../Core/Series/Series.js';
-import U from '../../Core/Utilities.js';
-const {
+import {
     arrayMax,
     arrayMin,
     isNumber,
     merge,
     pick,
     stableSort
-} = U;
+} from '../../Shared/Utilities.js';
 
 /* *
  *
@@ -528,7 +527,7 @@ class BubbleLegendItem {
         const { numberFormatter } = this.chart;
 
         return format ? F.format(format, range, this.chart) :
-            formatter ? formatter.call(range) :
+            formatter ? formatter.call(range, range) :
                 numberFormatter(range.value, 1);
     }
 

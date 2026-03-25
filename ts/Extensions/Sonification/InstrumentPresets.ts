@@ -1,12 +1,13 @@
 /* *
  *
- *  (c) 2009-2025 Øystein Moseng
+ *  (c) 2009-2026 Highsoft AS
+ *  Author: Øystein Moseng
  *
  *  Presets for SynthPatch.
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -14,6 +15,7 @@
 
 import type SynthPatch from './SynthPatch';
 
+/** @internal */
 const InstrumentPresets: Record<string, SynthPatch.SynthPatchOptions> = {
 
     // PIANO ----------------------------
@@ -894,6 +896,7 @@ const InstrumentPresets: Record<string, SynthPatch.SynthPatchOptions> = {
  *
  * */
 
+/** @internal */
 export default InstrumentPresets;
 
 

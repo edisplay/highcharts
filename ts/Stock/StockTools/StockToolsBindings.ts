@@ -1,12 +1,14 @@
+// SPDX-License-Identifier: LicenseRef-Highcharts
 /**
  *
  *  Events generator for Stock tools
  *
- *  (c) 2009-2025 Paweł Fus
+ *  (c) 2009-2026 Highsoft AS
+ *  Author: Paweł Fus
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -45,12 +47,8 @@ const {
     updateNthPoint,
     updateRectSize
 } = STU;
-import U from '../../Core/Utilities.js';
 import FibonacciTimeZones from '../../Extensions/Annotations/Types/FibonacciTimeZones';
-const {
-    fireEvent,
-    merge
-} = U;
+import { fireEvent, merge } from '../../Shared/Utilities.js';
 
 /* *
  *
@@ -1253,7 +1251,7 @@ const StockToolsBindings: Record<string, NavigationBindingsOptions> = {
 
             this.verticalCounter++;
 
-            (annotation.options.events.click as any).call(annotation, {});
+            (annotation.options.events?.click as any).call(annotation, {});
         }
     },
     /**
@@ -1305,7 +1303,7 @@ const StockToolsBindings: Record<string, NavigationBindingsOptions> = {
                 ),
                 annotation = this.chart.addAnnotation(options);
 
-            (annotation.options.events.click as any).call(annotation, {});
+            (annotation.options.events?.click as any).call(annotation, {});
 
             return annotation;
         },
@@ -1359,7 +1357,7 @@ const StockToolsBindings: Record<string, NavigationBindingsOptions> = {
                 ),
                 annotation = this.chart.addAnnotation(options);
 
-            (annotation.options.events.click as any).call(annotation, {});
+            (annotation.options.events?.click as any).call(annotation, {});
         }
     },
     /**
@@ -1425,7 +1423,7 @@ const StockToolsBindings: Record<string, NavigationBindingsOptions> = {
                 ),
                 annotation = this.chart.addAnnotation(options);
 
-            (annotation.options.events.click as any).call(annotation, {});
+            (annotation.options.events?.click as any).call(annotation, {});
         }
     },
     /**
@@ -1487,8 +1485,8 @@ const StockToolsBindings: Record<string, NavigationBindingsOptions> = {
                 e: PointerEvent,
                 annotation: FibonacciTimeZones
             ): void {
-                const mockPointOpts = annotation.options.typeOptions.points,
-                    x = mockPointOpts && mockPointOpts[0].x,
+                const mockPointOpts = annotation.options.typeOptions?.points,
+                    x = (mockPointOpts?.[0] as any).x,
                     [coordsX, coordsY] = this.getCoords(e);
 
                 if (coordsX && coordsY) {

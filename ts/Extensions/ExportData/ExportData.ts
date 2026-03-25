@@ -2,11 +2,12 @@
  *
  *  Experimental data export module for Highcharts
  *
- *  (c) 2010-2025 Torstein Honsi
+ *  (c) 2010-2026 Highsoft AS
+ *  Author: Torstein Honsi
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -23,7 +24,8 @@
  * */
 
 import type Axis from '../../Core/Axis/Axis';
-import type Exporting from '../Exporting/Exporting';
+import type { EventCallback } from '../../Core/Callback';
+import type { Exporting } from '../Exporting/Exporting';
 import type HTMLAttributes from '../../Core/Renderer/HTML/HTMLAttributes';
 import type { HTMLDOMElement } from '../../Core/Renderer/DOMElementType';
 import type {
@@ -40,8 +42,10 @@ const {
     getOptions,
     setOptions
 } = D;
-import DownloadURL from '../../Shared/DownloadURL.js';
-const { downloadURL, getBlobFromContent } = DownloadURL;
+import {
+    downloadURL,
+    getBlobFromContent
+} from '../../Shared/DownloadURL.js';
 import ExportDataDefaults from './ExportDataDefaults.js';
 import G from '../../Core/Globals.js';
 const {
@@ -49,8 +53,7 @@ const {
     doc,
     win
 } = G;
-import U from '../../Core/Utilities.js';
-const {
+import {
     addEvent,
     defined,
     extend,
@@ -59,7 +62,7 @@ const {
     isNumber,
     pick,
     pushUnique
-} = U;
+} from '../../Shared/Utilities.js';
 
 /* *
  *
@@ -70,71 +73,99 @@ const {
 declare module '../../Core/Chart/ChartBase'{
     interface ChartBase {
         /**
-         * Deprecated in favor of [Exporting.downloadCSV](https://api.highcharts.com/class-reference/Highcharts.Exporting#downloadCSV).
+         * Deprecated. Use
+         * [Exporting.downloadCSV](https://api.highcharts.com/class-reference/Highcharts.Exporting#downloadCSV)
+         * instead.
          *
-         * @deprecated */
+         * @deprecated 12.2.0
+         */
         downloadCSV(): void;
 
         /**
-         * Deprecated in favor of [Exporting.downloadXLS](https://api.highcharts.com/class-reference/Highcharts.Exporting#downloadXLS).
+         * Deprecated. Use
+         * [Exporting.downloadXLS](https://api.highcharts.com/class-reference/Highcharts.Exporting#downloadXLS)
+         * instead.
          *
-         * @deprecated */
+         * @deprecated 12.2.0
+         */
         downloadXLS(): void;
 
         /**
-         * Deprecated in favor of [Exporting.getCSV](https://api.highcharts.com/class-reference/Highcharts.Exporting#getCSV).
+         * Deprecated. Use
+         * [Exporting.getCSV](https://api.highcharts.com/class-reference/Highcharts.Exporting#getCSV)
+         * instead.
          *
-         * @deprecated */
+         * @deprecated 12.2.0
+         */
         getCSV(
             useLocalDecimalPoint?: boolean
         ): (string | undefined);
 
         /**
-         * Deprecated in favor of [Exporting.getDataRows](https://api.highcharts.com/class-reference/Highcharts.Exporting#getDataRows).
+         * Deprecated. Use
+         * [Exporting.getDataRows](https://api.highcharts.com/class-reference/Highcharts.Exporting#getDataRows)
+         * instead.
          *
-         * @deprecated */
+         * @deprecated 12.2.0
+         */
         getDataRows(
             multiLevelHeaders?: boolean
         ): (Array<Array<(number | string)>> | undefined);
 
         /**
-         * Deprecated in favor of [Exporting.getTable](https://api.highcharts.com/class-reference/Highcharts.Exporting#getTable).
+         * Deprecated. Use
+         * [Exporting.getTable](https://api.highcharts.com/class-reference/Highcharts.Exporting#getTable)
+         * instead.
          *
-         * @deprecated */
+         * @deprecated 12.2.0
+         */
         getTable(
             useLocalDecimalPoint?: boolean
         ): (string | undefined);
 
         /**
-         * Deprecated in favor of [Exporting.getTableAST](https://api.highcharts.com/class-reference/Highcharts.Exporting#getTableAST).
+         * Deprecated. Use
+         * [Exporting.getTableAST](https://api.highcharts.com/class-reference/Highcharts.Exporting#getTableAST)
+         * instead.
          *
-         * @deprecated */
+         * @deprecated 12.2.0
+         */
         getTableAST(
             useLocalDecimalPoint?: boolean
         ): (AST.Node | undefined);
 
         /**
-         * Deprecated in favor of [Exporting.hideData](https://api.highcharts.com/class-reference/Highcharts.Exporting#hideData).
+         * Deprecated. Use
+         * [Exporting.hideData](https://api.highcharts.com/class-reference/Highcharts.Exporting#hideData)
+         * instead.
          *
-         * @deprecated */
+         * @deprecated 12.2.0
+         */
         hideData(): void;
 
         /**
-         * Deprecated in favor of [Exporting.toggleDataTable](https://api.highcharts.com/class-reference/Highcharts.Exporting#toggleDataTable).
+         * Deprecated. Use
+         * [Exporting.toggleDataTable](https://api.highcharts.com/class-reference/Highcharts.Exporting#toggleDataTable)
+         * instead.
          *
-         * @deprecated */
+         * @deprecated 12.2.0
+         */
         toggleDataTable(
             show?: boolean
         ): void;
 
         /**
-         * Deprecated in favor of [Exporting.viewData](https://api.highcharts.com/class-reference/Highcharts.Exporting#viewData).
+         * Deprecated. Use
+         * [Exporting.viewData](https://api.highcharts.com/class-reference/Highcharts.Exporting#viewData)
+         * instead.
          *
-         * @deprecated */
+         * @deprecated 12.2.0
+         */
         viewData(): void;
     }
 }
 
+/** @internal */
 declare module '../../Core/Series/SeriesBase' {
     interface SeriesBase {
         exportKey?: string;
@@ -144,42 +175,211 @@ declare module '../../Core/Series/SeriesBase' {
 
 declare module '../../Extensions/Exporting/ExportingBase' {
     interface ExportingBase {
-        ascendingOrderInTable?: boolean
+        /** @internal */
+        ascendingOrderInTable?: boolean;
+
+        /** @internal */
         dataTableDiv?: HTMLDivElement;
+
+        /** @internal */
         isDataTableVisible?: boolean;
-        /** @requires modules/export-data */
+
+        /**
+         * Generates a data URL of CSV for local download in the browser. This
+         * is the default action for a click on the 'Download CSV' button.
+         *
+         * See {@link Highcharts.Exporting#getCSV} to get the CSV data itself.
+         *
+         * @function Highcharts.Exporting#downloadCSV
+         *
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         downloadCSV(): void;
-        /** @requires modules/export-data */
+
+        /**
+         * Generates a data URL of an XLS document for local download in the
+         * browser. This is the default action for a click on the 'Download XLS'
+         * button.
+         *
+         * See {@link Highcharts.Exporting#getTable} to get the table data
+         * itself.
+         *
+         * @function Highcharts.Exporting#downloadXLS
+         *
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         downloadXLS(): void;
-        /** @requires modules/export-data */
+
+        /**
+         * Returns the current chart data as a CSV string.
+         *
+         * @function Highcharts.Exporting#getCSV
+         *
+         * @param {boolean} [useLocalDecimalPoint]
+         * Whether to use the local decimal point as detected from the browser.
+         * This makes it easier to export data to Excel in the same locale as
+         * the user is.
+         *
+         * @return {string}
+         * CSV representation of the data.
+         *
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         getCSV(
             useLocalDecimalPoint?: boolean
         ): string;
-        /** @requires modules/export-data */
+
+        /**
+         * Returns a two-dimensional array containing the current chart data.
+         *
+         * @function Highcharts.Exporting#getDataRows
+         *
+         * @param {boolean} [multiLevelHeaders]
+         * Use multilevel headers for the rows by default. Adds an extra row
+         * with top level headers. If a custom columnHeaderFormatter is defined,
+         * this can override the behavior.
+         *
+         * @return {Array<Array<(number | string)>>}
+         * The current chart data
+         *
+         * @emits Highcharts.Chart#event:exportData
+         *
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         getDataRows(
             multiLevelHeaders?: boolean
         ): Array<Array<(number | string)>>;
-        /** @requires modules/export-data */
+
+        /**
+         * Build a HTML table with the chart's current data.
+         *
+         * @sample highcharts/export-data/viewdata/
+         * View the data from the export menu
+         *
+         * @function Highcharts.Exporting#getTable
+         *
+         * @param {boolean} [useLocalDecimalPoint]
+         * Whether to use the local decimal point as detected from the browser.
+         * This makes it easier to export data to Excel in the same locale as
+         * the user is.
+         *
+         * @return {string}
+         * HTML representation of the data.
+         *
+         * @emits Highcharts.Chart#event:afterGetTable
+         *
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         getTable(
             useLocalDecimalPoint?: boolean
         ): string;
-        /** @requires modules/export-data */
+
+        /**
+         * @internal
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         getTableAST(
             useLocalDecimalPoint?: boolean
         ): AST.Node;
-        /** @requires modules/export-data */
+
+        /**
+         * Hide the data table when visible.
+         *
+         * @function Highcharts.Exporting#hideData
+         *
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         hideData(): void;
-        /** @requires modules/export-data */
+
+        /**
+         * @internal
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         toggleDataTable(
             show?: boolean
         ): void;
-        /** @requires modules/export-data */
+
+        /**
+         * View the data in a table below the chart.
+         *
+         * @function Highcharts.Exporting#viewData
+         *
+         * @emits Highcharts.Chart#event:afterViewData
+         *
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         viewData(): void;
-        /** @requires modules/export-data */
+
+        /**
+         * @internal
+         * @requires modules/exporting
+         * @requires modules/export-data
+         */
         wrapLoading(
             fn: Function
         ): void
     }
+}
+
+declare module '../../Core/Chart/ChartOptions' {
+    interface ChartEventsOptions {
+        /**
+         * Callback that fires while exporting data. This allows the
+         * modification of data rows before processed into the final format.
+         *
+         * @type      {Highcharts.ExportDataCallbackFunction}
+         * @since     7.2.0
+         * @context   Highcharts.Chart
+         * @requires  modules/exporting
+         * @requires  modules/export-data
+         * @apioption chart.events.exportData
+         */
+        exportData?: ExportDataCallbackFunction;
+    }
+}
+
+/**
+ * Function callback to execute while data rows are processed for exporting.
+ * This allows the modification of data rows before processed into the final
+ * format.
+ *
+ * @callback Highcharts.ExportDataCallbackFunction
+ * @extends Highcharts.EventCallbackFunction<Highcharts.Chart>
+ *
+ * @param {Highcharts.Chart} this
+ * Chart context where the event occurred.
+ *
+ * @param {Highcharts.ExportDataEventObject} event
+ * Event object with data rows that can be modified.
+ */
+export interface ExportDataCallbackFunction extends EventCallback<Chart> {
+    (
+        this: Chart,
+        event: ExportDataEventObject
+    ): void;
+}
+
+/**
+ * Contains information about the export data event.
+ *
+ * @interface Highcharts.ExportDataEventObject
+ */
+export interface ExportDataEventObject {
+    /**
+     * Contains the data rows for the current export task and can be modified.
+     * @name Highcharts.ExportDataEventObject#dataRows
+     * @type {Array<Array<string>>}
+     */
+    dataRows: Array<Array<string>>;
 }
 
 /* *
@@ -188,6 +388,7 @@ declare module '../../Extensions/Exporting/ExportingBase' {
  *
  * */
 
+/** @internal */
 namespace ExportData {
 
     /* *
@@ -228,7 +429,7 @@ namespace ExportData {
     /**
      * Composition function.
      *
-     * @private
+     * @internal
      * @function Highcharts.Exporting#compose
      *
      * @param {ChartClass} ChartClass
@@ -327,7 +528,7 @@ namespace ExportData {
             // Update with defaults of the export data module
             setOptions(ExportDataDefaults);
 
-            // Additionaly, extend the menuItems with the export data variants
+            // Additionally, extend the menuItems with the export data variants
             const menuItems =
                 getOptions().exporting?.buttons?.contextButton?.menuItems;
             menuItems && menuItems.push(
@@ -926,7 +1127,7 @@ namespace ExportData {
         }
         dataRows = dataRows.concat(rowArr);
 
-        fireEvent(chart, 'exportData', { dataRows: dataRows });
+        fireEvent(chart, 'exportData', { dataRows } as ExportDataEventObject);
 
         return dataRows;
     }
@@ -992,7 +1193,7 @@ namespace ExportData {
     /**
      * Get the AST of a HTML table representing the chart data.
      *
-     * @private
+     * @internal
      * @function Highcharts.Exporting#getTableAST
      *
      * @param {boolean} [useLocalDecimalPoint]
@@ -1267,8 +1468,8 @@ namespace ExportData {
     /**
      * Toggle showing data table.
      *
-     * @private
-     * @function Highcharts.Exporting#hideData
+     * @internal
+     * @function Highcharts.Exporting#toggleDataTable
      *
      * @param {boolean} [show]
      * Whether to show data table or not.
@@ -1365,9 +1566,9 @@ namespace ExportData {
 
     /**
      * Wrapper function for the download functions, which handles showing and
-     * hiding the loading message
+     * hiding the loading message.
      *
-     * @private
+     * @internal
      *
      * @requires modules/exporting
      * @requires modules/export-data
@@ -1399,7 +1600,7 @@ namespace ExportData {
     /**
      * Function that runs on the chart's 'afterViewData' event.
      *
-     * @private
+     * @internal
      * @function Highcharts.Chart#onChartAfterViewData
      *
      * @requires modules/exporting
@@ -1477,7 +1678,7 @@ namespace ExportData {
      * Function that runs on the chart's 'render' event. Handle the showTable
      * option.
      *
-     * @private
+     * @internal
      * @function Highcharts.Chart#onChartRenderer
      *
      * @requires modules/exporting
@@ -1498,7 +1699,7 @@ namespace ExportData {
      * Function that runs on the chart's 'destroy' event. Handle cleaning up the
      * dataTableDiv element.
      *
-     * @private
+     * @internal
      * @function Highcharts.Chart#onChartDestroy
      *
      * @requires modules/exporting
@@ -1517,6 +1718,7 @@ namespace ExportData {
  *
  * */
 
+/** @internal */
 export default ExportData;
 
 /* *

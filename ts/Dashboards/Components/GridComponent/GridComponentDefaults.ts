@@ -1,10 +1,10 @@
 /* *
  *
- *  (c) 2009-2025 Highsoft AS
+ *  (c) 2009-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Karol Kolodziej
@@ -20,15 +20,12 @@
  *
  * */
 
-import type Component from '../Component';
+import type { ConnectorTypes as ComponentConnectorTypes } from '../Component';
 import type { Options } from './GridComponentOptions';
 import type { DeepPartial } from '../../../Shared/Types';
 
 import DataConverter from '../../../Data/Converters/DataConverter.js';
-import U from '../../../Core/Utilities.js';
-const {
-    uniqueKey
-} = U;
+import { uniqueKey } from '../../../Core/Utilities.js';
 
 /* *
  *
@@ -37,7 +34,7 @@ const {
  * */
 
 const GridComponentDefaults: DeepPartial<Options> = {
-    gridClassName: 'grid-container',
+    gridClassName: 'highcharts-grid-container',
     gridID: 'grid-' + uniqueKey(),
     gridOptions: {},
     editableOptions: [
@@ -110,7 +107,7 @@ const GridComponentDefaults: DeepPartial<Options> = {
                                 'gridOptions',
                                 'columnDefaults',
                                 'sorting',
-                                'sortable'
+                                'enabled'
                             ],
                         type: 'toggle'
                     }, {
@@ -136,7 +133,7 @@ const GridComponentDefaults: DeepPartial<Options> = {
             type: 'input'
         }
     ],
-    onUpdate: (e: KeyboardEvent, connector: Component.ConnectorTypes): void => {
+    onUpdate: (e: KeyboardEvent, connector: ComponentConnectorTypes): void => {
         const inputElement = e.target as HTMLInputElement;
         if (inputElement) {
             const parentRow = inputElement

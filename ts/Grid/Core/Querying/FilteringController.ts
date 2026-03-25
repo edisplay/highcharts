@@ -2,11 +2,11 @@
  *
  *  Grid Filtering Controller class
  *
- *  (c) 2020-2025 Highsoft AS
+ *  (c) 2020-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Dawid Dragula
@@ -29,10 +29,7 @@ import type { FilteringCondition } from '../Options.js';
 
 import FilterModifier from '../../../Data/Modifiers/FilterModifier.js';
 import QueryingController from './QueryingController.js';
-import U from '../../../Core/Utilities.js';
-const {
-    isString
-} = U;
+import { isString } from '../../../Shared/Utilities.js';
 
 
 /* *

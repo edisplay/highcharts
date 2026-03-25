@@ -1,10 +1,11 @@
 /* *
  *
- *  (c) 2010-2025 Pawel Lysy Grzegorz Blachlinski
+ *  (c) 2010-2026 Highsoft AS
+ *  Author: Pawel Lysy Grzegorz Blachlinski
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -24,13 +25,8 @@ import type { OrganizationLinkOptions } from '../Organization/OrganizationSeries
 import Point from '../../Core/Series/Point.js';
 import TreegraphPoint from './TreegraphPoint.js';
 import TreegraphPointOptions from './TreegraphPointOptions.js';
-import U from '../../Core/Utilities.js';
-
-const {
-    pick,
-    extend
-} = U;
 import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
+import { extend, pick } from '../../Shared/Utilities.js';
 const {
     seriesTypes: {
         column: {
@@ -55,7 +51,7 @@ export interface TreegraphLinkOptions extends OrganizationLinkOptions {
      * percentage defines the relative position on the link. For example, a
      * `bendAt` of `50%` means that the link bends in the middle.
      *
-     * @since next
+     * @since 12.5.0
      * @default '50%'
      */
     bendAt?: number|string;

@@ -1,10 +1,10 @@
 /* *
  *
- *  (c) 2009-2025 Highsoft AS
+ *  (c) 2009-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Karol Kolodziej
@@ -24,11 +24,8 @@ import type { DeepPartial } from '../../../Shared/Types';
 import type Options from './HighchartsComponentOptions';
 
 import Component from '../Component.js';
-import U from '../../../Core/Utilities.js';
-const {
-    merge,
-    uniqueKey
-} = U;
+import { merge } from '../../../Shared/Utilities.js';
+import { uniqueKey } from '../../../Core/Utilities.js';
 
 
 /* *

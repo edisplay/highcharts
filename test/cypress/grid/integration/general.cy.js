@@ -1,6 +1,6 @@
 describe('Remove the dashboard.', () => {
     before(() => {
-        cy.visit('/dashboards/cypress/grid-hidden');
+        cy.visit('/grid-lite/e2e/hidden');
     });
 
     it('Rows should be visible when grid is switched from hidden.', () => {
@@ -19,12 +19,34 @@ describe('Remove the dashboard.', () => {
 
 describe('Grid rows removal.', () => {
     before(() => {
-        cy.visit('/grid-lite/basic/destroy-grid');
+        cy.visit('grid-lite/basic/destroy-grid');
     });
 
     it('Remove all grid rows.', () => {
         cy.get('#delete-rows-btn').click();
         // All grid rows should be removed.
         cy.get('tbody').should('be.empty');
+    });
+});
+
+describe('Rendering size.', () => {
+    before(() => {
+        cy.visit('grid-lite/e2e/rendering-size');
+    });
+
+    it('Fixed height grid.', () => {
+        cy.get('#container').should('have.css', 'height', '200px');
+    });
+
+    it('Percentage height grid inside fixed container.', () => {
+        cy.get('#grid2').should('have.css', 'height', '200px');
+    });
+
+    it('Max height inside fixed container.', () => {
+        cy.get('#grid3').should('have.css', 'height', '180px');
+    });
+
+    it('Flex grow inside fixed flexbox.', () => {
+        cy.get('#grid4').should('have.css', 'height', '200px');
     });
 });

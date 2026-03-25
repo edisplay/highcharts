@@ -4,19 +4,18 @@
  *
  * */
 
-import type BBoxObject from '../../Core/Renderer/BBoxObject';
+import type { BBoxObject } from '../../Core/Renderer/BBoxObject';
 import type Chart from '../../Core/Chart/Chart';
 import type Pane from './Pane';
 import type Pointer from '../../Core/Pointer';
 import type Series from '../../Core/Series/Series';
 
-import U from '../../Core/Utilities.js';
-const {
+import {
     addEvent,
     correctFloat,
     defined,
     pick
-} = U;
+} from '../../Shared/Utilities.js';
 
 /* *
  *
@@ -24,7 +23,8 @@ const {
  *
  * */
 
-declare module '../../Core/Chart/ChartBase'{
+/** @internal */
+declare module '../../Core/Chart/ChartBase' {
     interface ChartBase {
         hoverPane?: Pane;
         pane?: Array<Pane>;
@@ -32,11 +32,12 @@ declare module '../../Core/Chart/ChartBase'{
     }
 }
 
-export interface PaneChart extends Chart {
+/** @internal */
+export type PaneChart = Chart & {
     hoverPane?: Pane;
     pane: Array<Pane>;
     getHoverPane(eventArgs: any): (Pane|undefined);
-}
+};
 
 /* *
  *
@@ -44,7 +45,7 @@ export interface PaneChart extends Chart {
  *
  * */
 
-/** @private */
+/** @internal */
 function chartGetHoverPane(
     this: PaneChart,
     eventArgs: {
@@ -71,7 +72,7 @@ function chartGetHoverPane(
 
 /**
  * Adjusts the clipBox based on the position of panes.
- * @private
+ * @internal
  */
 function onSetClip(
     this: Series,
@@ -105,7 +106,7 @@ function onSetClip(
     }
 }
 
-/** @private */
+/** @internal */
 function compose(
     ChartClass: typeof Chart,
     PointerClass: typeof Pointer,
@@ -118,14 +119,12 @@ function compose(
         chartProto.getHoverPane = chartGetHoverPane;
 
         addEvent(ChartClass, 'afterIsInsidePlot', onChartAfterIsInsiderPlot);
-
         addEvent(PointerClass, 'afterGetHoverData', onPointerAfterGetHoverData);
         addEvent(
             PointerClass,
             'beforeGetHoverData',
             onPointerBeforeGetHoverData
         );
-
         addEvent(SeriesClass, 'setClip', onSetClip);
     }
 
@@ -133,7 +132,7 @@ function compose(
 
 /**
  * Check whether element is inside or outside pane.
- * @private
+ * @internal
  * @param  {number} x
  * Element's x coordinate
  * @param  {number} y
@@ -202,7 +201,7 @@ function isInsidePane(
 
 /**
  * Check if (x, y) position is within pane for polar.
- * @private
+ * @internal
  */
 function onChartAfterIsInsiderPlot(
     this: Chart,
@@ -233,7 +232,7 @@ function onChartAfterIsInsiderPlot(
 }
 
 /**
- *
+ * @internal
  */
 function onPointerAfterGetHoverData(
     this: Pointer,
@@ -255,7 +254,7 @@ function onPointerAfterGetHoverData(
     }
 }
 
-/** @private */
+/** @internal */
 function onPointerBeforeGetHoverData(
     this: Pointer,
     eventArgs: {
@@ -290,8 +289,10 @@ function onPointerBeforeGetHoverData(
  *
  * */
 
+/** @internal */
 const PaneComposition = {
     compose
 };
 
+/** @internal */
 export default PaneComposition;

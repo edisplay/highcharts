@@ -67,7 +67,7 @@ To change the configuration of a specific link, you have to specify the link obj
 ```js
 data: [{
     name: 'parent',
-    id: 'id-1
+    id: 'id-1'
 }, {
     name: 'child',
     parent: 'id-1',
@@ -106,16 +106,13 @@ given in millions years ago, indirectly the similarity of items in terms of time
 since the last common ancestor.
 
 Some techniques to note:
-* We set the `link.radius` to 0 for all nodes, effectively hiding the marker for
+* We set the `marker.radius` to 0 for all nodes, effectively hiding the marker for
 nodes and focusing on the lines encoding the links.
 * We use two separate data label configurations, each with conditional
 formatting to distinguish labels of the leaf nodes from the branching nodes. The
 label for the branching nodes is used only to display the time of the split.
 
-<iframe
-    style="width: 100%; height: 700px; border: none;"
-    src="https://www.highcharts.com/samples/embed/highcharts/demo/dendrogram"
-    allow="fullscreen"></iframe>
+<iframe style="width: 100%; height: 700px; border: none;" src="https://www.highcharts.com/samples/embed/highcharts/demo/dendrogram" allow="fullscreen"></iframe>
 
 
 More demos

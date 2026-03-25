@@ -1,10 +1,11 @@
 /* *
  *
- *  (c) 2010-2025 Torstein Honsi
+ *  (c) 2010-2026 Highsoft AS
+ *  Author: Torstein Honsi
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -34,16 +35,9 @@ const {
     scatter: ScatterSeries
 } = SeriesRegistry.seriesTypes;
 import SVGRenderer from '../../Core/Renderer/SVG/SVGRenderer.js';
-import U from '../../Core/Utilities.js';
-const {
-    extend,
-    fireEvent,
-    isNumber,
-    merge
-} = U;
-
 import '../../Core/Defaults.js';
 import '../Scatter/ScatterSeries.js';
+import { extend, fireEvent, isNumber, merge } from '../../Shared/Utilities.js';
 
 /* *
  *
@@ -92,7 +86,6 @@ class MapPointSeries extends ScatterSeries {
      *
      * */
 
-    /* eslint-disable valid-jsdoc */
 
     public drawDataLabels(): void {
         super.drawDataLabels();
@@ -209,7 +202,6 @@ class MapPointSeries extends ScatterSeries {
         fireEvent(this, 'afterTranslate');
     }
 
-    /* eslint-enable valid-jsdoc */
 
 }
 

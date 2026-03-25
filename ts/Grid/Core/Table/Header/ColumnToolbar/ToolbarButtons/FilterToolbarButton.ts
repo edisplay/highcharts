@@ -2,11 +2,11 @@
  *
  *  Grid Filter Toolbar Button class
  *
- *  (c) 2020-2025 Highsoft AS
+ *  (c) 2020-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Dawid Dragula
@@ -27,9 +27,7 @@ import type ColumnToolbar from '../ColumnToolbar.js';
 import FilterPopup from '../FilterPopup.js';
 import ToolbarButton from '../../../../UI/ToolbarButton.js';
 import StateHelpers from '../StateHelpers.js';
-import U from '../../../../../../Core/Utilities.js';
-
-const { addEvent } = U;
+import { addEvent } from '../../../../../../Shared/Utilities.js';
 
 
 /* *
@@ -51,7 +49,6 @@ class FilterToolbarButton extends ToolbarButton {
 
     public override popup?: FilterPopup;
 
-
     /* *
      *
      *  Constructor
@@ -61,7 +58,12 @@ class FilterToolbarButton extends ToolbarButton {
     constructor() {
         super({
             icon: 'filter',
-            classNameKey: 'headerCellFilterIcon'
+            classNameKey: 'headerCellFilterIcon',
+            accessibility: {
+                ariaLabel: 'filter',
+                ariaExpanded: false,
+                ariaControls: 'filter-popup'
+            }
         });
     }
 
@@ -72,7 +74,7 @@ class FilterToolbarButton extends ToolbarButton {
      *
      * */
 
-    protected override refreshState(): void {
+    public override refreshState(): void {
         const column = this.toolbar?.column;
         if (column) {
             this.setActive(StateHelpers.isFiltered(column));

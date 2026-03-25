@@ -2,11 +2,11 @@
  *
  *  Grid Toolbar interface
  *
- *  (c) 2020-2025 Highsoft AS
+ *  (c) 2020-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Dawid Dragula
@@ -22,6 +22,7 @@
  *
  * */
 
+import type Grid from '../Grid';
 import type ToolbarButton from './ToolbarButton.js';
 
 /* *
@@ -45,6 +46,11 @@ interface Toolbar {
      * The index of the focused button in the toolbar.
      */
     focusCursor: number;
+
+    /**
+     * Optional reference to the Grid instance (e.g. for icon registry).
+     */
+    grid?: Grid;
 }
 
 

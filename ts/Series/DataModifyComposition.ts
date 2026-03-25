@@ -1,10 +1,11 @@
 /* *
  *
- *  (c) 2010-2025 Torstein Honsi
+ *  (c) 2010-2026 Highsoft AS
+ *  Author: Torstein Honsi
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -24,8 +25,7 @@ const {
     tooltipFormatter: pointTooltipFormatter
 } = Point.prototype;
 import Series from '../Core/Series/Series.js';
-import U from '../Core/Utilities.js';
-const {
+import {
     addEvent,
     arrayMax,
     arrayMin,
@@ -35,7 +35,7 @@ const {
     isNumber,
     isString,
     pick
-} = U;
+} from '../Shared/Utilities.js';
 
 /* *
  *
@@ -142,15 +142,6 @@ namespace DataModifyComposition {
      * compare and cumulative support.
      *
      * @private
-     *
-     * @param SeriesClass
-     * Series class to use.
-     *
-     * @param AxisClass
-     * Axis class to extend.
-     *
-     * @param PointClass
-     * Point class to use.
      */
     export function compose<T extends typeof Series>(
         SeriesClass: T,
@@ -261,6 +252,23 @@ namespace DataModifyComposition {
      * @function Highcharts.Series#init
      */
     function afterInit(this: Series): void {
+        // If linked series does not have compare option set, use the parent
+        // series' compare option, #21119.
+        const linkedTo = this.options.linkedTo,
+            chart = this.chart;
+
+        if (linkedTo) {
+            const linkedSeries = linkedTo === ':previous' ?
+                chart.series[this.index - 1] :
+                chart.get(linkedTo);
+
+            if (linkedSeries instanceof Series) {
+                this.options.compare = pick(
+                    this.userOptions.compare,
+                    linkedSeries.options.compare
+                );
+            }
+        }
         const compare = this.options.compare;
         let dataModify: Additions|undefined;
 
@@ -617,7 +625,7 @@ namespace DataModifyComposition {
                     } else {
                         const compareBase = this.series.options.compareBase;
 
-                        value = 100 * (value / compareValue) -
+                        value = 100 * (value / Math.abs(compareValue)) -
                             (compareBase === 100 ? 0 : 100);
                     }
 
@@ -707,7 +715,8 @@ export default DataModifyComposition;
  * or absolute change depending on whether `compare` is set to `"percent"`
  * or `"value"`. When this is applied to multiple series, it allows
  * comparing the development of the series against each other. Adds
- * a `change` field to every point object.
+ * a `change` field to every point object. If a `compare` value is not set on a
+ * linked series, it will be inherited from the parent series.
  *
  * @see [compareBase](#plotOptions.series.compareBase)
  * @see [Axis.setCompare()](/class-reference/Highcharts.Axis#setCompare)

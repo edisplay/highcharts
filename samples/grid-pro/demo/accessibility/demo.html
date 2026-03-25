@@ -23,6 +23,13 @@
                                 <span class="description">[ Enable accessibility announcements for the sorting ]</span>
                             </div>
                             <div class="option">
+                                <label for="filtering-enabled">filtering:</label>
+                                <input type="checkbox" id="filtering-enabled"
+                                    name="accessibility.announcements.filtering" />
+                                <span class="description">[ Enable accessibility announcements for the filtering
+                                    ]</span>
+                            </div>
+                            <div class="option">
                                 <label for="editing-enabled">cellEditing:</label>
                                 <input type="checkbox" id="editing-enabled"
                                     name="accessibility.announcements.cellEditing" />
@@ -39,9 +46,9 @@
                     <summary>sorting</summary>
                     <div class="option-group">
                         <div class="option">
-                            <label for="sortable">sortable:</label>
-                            <input type="text" id="sortable" name="lang.accessibility.sorting.sortable" />
-                            <span class="description">[ An additional hint read by the voice over after a sortable
+                            <label for="enabled">enabled:</label>
+                            <input type="text" id="enabled" name="lang.accessibility.sorting.enabled" />
+                            <span class="description">[ An additional hint read by the voice over after a sort enabled
                                 column name ]</span>
                         </div>
                     </div>
@@ -65,6 +72,32 @@
                                 <input type="text" id="sort-none"
                                     name="lang.accessibility.sorting.announcements.none" />
                                 <span class="description">[ Announcement for no sorting ]</span>
+                            </div>
+                        </div>
+                    </details>
+                </details>
+                <details>
+                    <summary>filtering</summary>
+                    <details>
+                        <summary>announcements</summary>
+                        <div class="option-group">
+                            <div class="option">
+                                <label for="filter-applied">filterApplied:</label>
+                                <input type="text" id="filter-applied"
+                                    name="lang.accessibility.filtering.announcements.filterApplied" />
+                                <span class="description">[ Announcement for filter applied ]</span>
+                            </div>
+                            <div class="option">
+                                <label for="empty-filter-applied">emptyFilterApplied:</label>
+                                <input type="text" id="empty-filter-applied"
+                                    name="lang.accessibility.filtering.announcements.emptyFilterApplied" />
+                                <span class="description">[ Announcement for empty filter applied ]</span>
+                            </div>
+                            <div class="option">
+                                <label for="filter-cleared">filterCleared:</label>
+                                <input type="text" id="filter-cleared"
+                                    name="lang.accessibility.filtering.announcements.filterCleared" />
+                                <span class="description">[ Announcement for filter cleared ]</span>
                             </div>
                         </div>
                     </details>
@@ -109,7 +142,7 @@
             time.</div>
     </div>
     <p class="highcharts-description">
-        A demo demonstrating the Grid's accessible table.
-        The Cell editing is a Pro feature.
+        Highlights accessible table structures, ARIA attributes, and
+        navigability. Notes that cell editing is available in the Pro version.
     </p>
 </div>

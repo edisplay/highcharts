@@ -98,7 +98,7 @@ Grid.grid('container', {
     time: {
         locale: ''
     },
-    dataTable: {
+    data: {
         columns: {
             Done: [false, false, false, false],
             Category: ['CL', 'SH', 'CL', 'GR'],
@@ -131,7 +131,7 @@ Grid.grid('container', {
     }
 });
 Grid.grid('container-done', {
-    dataTable: {
+    data: {
         columns: {
             Done: [true, true, true],
             Category: ['CK', 'GR', 'MT'],
@@ -173,12 +173,22 @@ function addCustomEvents(isTodoGrid) {
             const rowIndex = e.rowIndex;
             const rowData = dataTable.getRowObject(rowIndex);
             const data = { ...rowData, Completed: selected };
+            const accessibility = sourceGrid.accessibility;
+            const taskName = data.Task;
 
             targetGrid.dataTable.setRow(data);
             dataTable.deleteRows(rowIndex);
 
             sourceGrid.viewport.updateRows();
             targetGrid.viewport.updateRows();
+
+            // Accessibility
+            accessibility.announce(
+                `Moved ${taskName} to ${
+                    isTodoGrid && selected ? 'Done' : 'Todo'
+                }.`,
+                true
+            );
         }
     });
 }
@@ -236,9 +246,16 @@ columns.forEach(col => {
 
 openModal.addEventListener('click', () => {
     modal.style.display = 'flex';
+
+    document.getElementById('Category').focus();
 });
 closeModalBtn.addEventListener('click', () => {
     modal.style.display = 'none';
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        modal.style.display = 'none';
+    }
 });
 
 form.addEventListener('submit', function (e) {

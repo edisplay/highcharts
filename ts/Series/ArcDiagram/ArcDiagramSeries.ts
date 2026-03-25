@@ -2,11 +2,12 @@
  *
  *  Arc diagram module
  *
- *  (c) 2021 Piotr Madej, Grzegorz Blachliński
+ *  (c) 2021-2026 Highsoft AS
+ *  Author: Piotr Madej, Grzegorz Blachliński
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -28,9 +29,15 @@ import SankeyColumnComposition from '../Sankey/SankeyColumnComposition.js';
 import Series from '../../Core/Series/Series.js';
 import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
 import SVGRenderer from '../../Core/Renderer/SVG/SVGRenderer.js';
-import U from '../../Core/Utilities.js';
 import SVGElement from '../../Core/Renderer/SVG/SVGElement.js';
 import TextPath from '../../Extensions/TextPath.js';
+import {
+    crisp,
+    extend,
+    merge,
+    pick,
+    relativeLength
+} from '../../Shared/Utilities.js';
 TextPath.compose(SVGElement);
 
 const { prototype: { symbols } } = SVGRenderer;
@@ -40,13 +47,6 @@ const {
         sankey: SankeySeries
     }
 } = SeriesRegistry;
-const {
-    crisp,
-    extend,
-    merge,
-    pick,
-    relativeLength
-} = U;
 
 /* *
  *
@@ -55,7 +55,7 @@ const {
  * */
 
 /**
- * @private
+ * @internal
  * @class
  * @name Highcharts.seriesTypes.arcdiagram
  *
@@ -97,7 +97,7 @@ class ArcDiagramSeries extends SankeySeries {
     /**
      * Create node columns by analyzing the nodes and the relations between
      * incoming and outgoing links.
-     * @private
+     * @internal
      */
     public createNodeColumns(): Array<SankeyColumnComposition.ArrayComposition<ArcDiagramPoint>> {
         const series = this,
@@ -231,7 +231,7 @@ class ArcDiagramSeries extends SankeySeries {
 
     /**
      * Run translation operations for one link.
-     * @private
+     * @internal
      */
     public translateLink(point: ArcDiagramPoint): void {
         const series = this,
@@ -364,7 +364,7 @@ class ArcDiagramSeries extends SankeySeries {
 
     /**
      * Run translation operations for one node.
-     * @private
+     * @internal
      */
     public translateNode(
         node: ArcDiagramPoint,
@@ -401,7 +401,7 @@ class ArcDiagramSeries extends SankeySeries {
             markerOptions = merge(options.marker, node.options.marker),
             symbol = markerOptions.symbol,
             markerRadius = markerOptions.radius,
-            top = parseInt(options.offset, 10) *
+            top = parseInt(options.offset ?? '100', 10) *
                 (
                     (
                         chart.inverted ?
@@ -526,7 +526,6 @@ class ArcDiagramSeries extends SankeySeries {
         }
         return {};
     }
-    /* eslint-enable valid-jsdoc */
 }
 
 /* *
@@ -535,8 +534,9 @@ class ArcDiagramSeries extends SankeySeries {
  *
  * */
 
+/** @internal */
 interface ArcDiagramSeries {
-    orderNodes: boolean;
+    orderNodes: false;
     pointClass: typeof ArcDiagramPoint;
 }
 extend(ArcDiagramSeries.prototype, {
@@ -549,6 +549,7 @@ extend(ArcDiagramSeries.prototype, {
  *
  * */
 
+/** @internal */
 declare module '../../Core/Series/SeriesType' {
     interface SeriesTypeRegistry {
         arcdiagram: typeof ArcDiagramSeries;
@@ -563,4 +564,5 @@ SeriesRegistry.registerSeriesType('arcdiagram', ArcDiagramSeries);
  *
  * */
 
+/** @internal */
 export default ArcDiagramSeries;

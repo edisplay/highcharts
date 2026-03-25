@@ -2,11 +2,11 @@
  *
  *  Grid HeaderRow class
  *
- *  (c) 2020-2025 Highsoft AS
+ *  (c) 2020-2026 Highsoft AS
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
  *  - Dawid Dragula
@@ -28,9 +28,8 @@ import Row from '../Row.js';
 import HeaderCell from './HeaderCell.js';
 import Column from '../Column.js';
 import Globals from '../../Globals.js';
-import Utils from '../../../../Core/Utilities.js';
+import { isString } from '../../../../Shared/Utilities.js';
 
-const { isString } = Utils;
 
 /* *
  *
@@ -95,7 +94,7 @@ class HeaderRow extends Row {
      *
      * @internal
      */
-    public renderContent(level: number): void {
+    public async renderContent(level: number): Promise<void> {
         const headerOpt = this.viewport.grid.options?.header;
         const vp = this.viewport;
         const enabledColumns = vp.grid.enabledColumns || [];
@@ -105,7 +104,7 @@ class HeaderRow extends Row {
         this.htmlElement.classList.add(Globals.getClassName('headerRow'));
 
         if (!headerOpt) {
-            super.render();
+            await super.render();
         } else {
             const columnsOnLevel = this.getColumnsAtLevel(headerOpt, level);
 
@@ -163,7 +162,7 @@ class HeaderRow extends Row {
                     );
                 }
 
-                headerCell.render();
+                await headerCell.render();
 
                 if (columnId) {
                     headerCell.htmlElement.setAttribute(
@@ -253,17 +252,6 @@ class HeaderRow extends Row {
             this.level // Level (1-based)
         );
     }
-}
-
-
-/* *
- *
- *  Class Namespace
- *
- * */
-
-namespace HeaderRow {
-
 }
 
 

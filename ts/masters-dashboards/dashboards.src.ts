@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: LicenseRef-Highcharts
 /**
  * @license Highcharts Dashboards v@product.version@ (@product.date@)
  * @module dashboards/dashboards
  *
- * (c) 2009-2025 Highsoft AS
+ * (c) 2009-2026 Highsoft AS
  *
- * License: www.highcharts.com/license
+ * A commercial license may be required depending on use.
+ * See www.highcharts.com/license
  */
 
 'use strict';
@@ -50,13 +52,15 @@ import DataCursor from '../Data/DataCursor.js';
 import DataConverter from '../Data/Converters/DataConverter.js';
 import DataModifier from '../Data/Modifiers/DataModifier.js';
 import DataTable from '../Data/DataTable.js';
+import Defaults from '../Dashboards/Defaults.js';
 import Globals from '../Dashboards/Globals.js';
 import GridPlugin from '../Dashboards/Plugins/GridPlugin.js';
 import HighchartsPlugin from '../Dashboards/Plugins/HighchartsPlugin.js';
 import PluginHandler from '../Dashboards/PluginHandler.js';
 import Sync from '../Dashboards/Components/Sync/Sync.js';
 import Utilities from '../Dashboards/Utilities.js';
-import CoreUtilities from '../Core/Utilities.js';
+import { addEvent, merge, removeEvent } from '../Shared/Utilities.js';
+import { uniqueKey } from '../Core/Utilities.js';
 
 
 /* *
@@ -68,13 +72,15 @@ import CoreUtilities from '../Core/Utilities.js';
 
 declare global {
     interface Dashboards {
-        addEvent: typeof Utilities.addEvent;
+        addEvent: typeof addEvent;
         board: typeof Board.board;
         boards: typeof Globals.boards;
         error: typeof Utilities.error;
-        merge: typeof Utilities.merge;
-        removeEvent: typeof Utilities.removeEvent;
-        uniqueKey: typeof Utilities.uniqueKey;
+        merge: typeof merge;
+        removeEvent: typeof removeEvent;
+        setOptions: typeof Defaults.setOptions;
+        uniqueKey: typeof uniqueKey;
+        version: typeof Globals.version;
         win: typeof Globals.win;
         AST: typeof AST;
         Board: typeof Board;
@@ -86,6 +92,7 @@ declare global {
         DataModifier: typeof DataModifier;
         DataPool: typeof DataPool;
         DataTable: typeof DataTable;
+        defaultOptions: typeof Defaults.defaultOptions;
         GridPlugin: typeof GridPlugin;
         HighchartsPlugin: typeof HighchartsPlugin;
         PluginHandler: typeof PluginHandler;
@@ -110,11 +117,12 @@ declare global {
 const G = Globals as unknown as Dashboards;
 
 G.board = Board.board;
-G.addEvent = Utilities.addEvent;
+G.addEvent = addEvent;
 G.error = Utilities.error;
-G.merge = Utilities.merge;
-G.removeEvent = Utilities.removeEvent;
-G.uniqueKey = Utilities.uniqueKey;
+G.merge = merge;
+G.removeEvent = removeEvent;
+G.setOptions = Defaults.setOptions;
+G.uniqueKey = uniqueKey;
 G.AST = AST;
 G.Board = Board;
 G.Component = Component;
@@ -125,13 +133,11 @@ G.DataCursor = DataCursor;
 G.DataModifier = DataModifier;
 G.DataPool = DataPool;
 G.DataTable = DataTable;
+G.defaultOptions = Defaults.defaultOptions;
 G.GridPlugin = GridPlugin;
 G.HighchartsPlugin = HighchartsPlugin;
 G.PluginHandler = PluginHandler;
 G.Sync = Sync;
-
-// Extend with Core utilities
-CoreUtilities.extend(G, CoreUtilities);
 
 
 /* *

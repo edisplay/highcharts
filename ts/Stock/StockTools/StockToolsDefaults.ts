@@ -2,11 +2,12 @@
  *
  *  GUI generator for Stock tools
  *
- *  (c) 2009-2025 Sebastian Bochan
+ *  (c) 2009-2026 Highsoft AS
+ *  Author: Sebastian Bochan
  *
- *  License: www.highcharts.com/license
+ *  A commercial license may be required depending on use.
+ *  See www.highcharts.com/license
  *
- *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  * */
 
@@ -708,7 +709,7 @@ const stockTools: StockToolsOptions = {
                  * A collection of strings pointing to config options for
                  * the items.
                  *
-                 * @type {Array}
+                 * @type {Array<string>}
                  * @default [
                  *   'label',
                  *   'circle',
@@ -765,7 +766,7 @@ const stockTools: StockToolsOptions = {
                  * A collection of strings pointing to config options for
                  * the items.
                  *
-                 * @type {Array}
+                 * @type {Array<string>}
                  * @default [
                  *   'flagCirclepin',
                  *   'flagDiamondpin',
@@ -820,7 +821,7 @@ const stockTools: StockToolsOptions = {
                  * A collection of strings pointing to config options for
                  * the items.
                  *
-                 * @type {Array}
+                 * @type {Array<string>}
                  * @default [
                  *   'segment',
                  *   'arrowSegment',
@@ -912,7 +913,7 @@ const stockTools: StockToolsOptions = {
                  * A collection of strings pointing to config options for
                  * the items.
                  *
-                 * @type {Array}
+                 * @type {Array<string>}
                  * @default [
                  *   'elliott3',
                  *   'elliott5',
@@ -965,7 +966,7 @@ const stockTools: StockToolsOptions = {
                  * A collection of strings pointing to config options for
                  * the items.
                  *
-                 * @type {Array}
+                 * @type {Array<string>}
                  * @default [
                  *   'verticalCounter',
                  *   'verticalLabel',
@@ -1007,7 +1008,7 @@ const stockTools: StockToolsOptions = {
                  * A collection of strings pointing to config options for
                  * the items.
                  *
-                 * @type {Array}
+                 * @type {Array<string>}
                  * @default [
                  *   'fibonacci',
                  *   'fibonacciTimeZones',
@@ -1069,7 +1070,7 @@ const stockTools: StockToolsOptions = {
                  * A collection of strings pointing to config options for
                  * the items.
                  *
-                 * @type {Array}
+                 * @type {Array<string>}
                  * @default [
                  *   'measureXY',
                  *   'measureX',
@@ -1135,7 +1136,7 @@ const stockTools: StockToolsOptions = {
                  * A collection of strings pointing to config options for
                  * the items.
                  *
-                 * @type {Array}
+                 * @type {Array<string>}
                  * @default [
                  *   'zoomX',
                  *   'zoomY',
@@ -1177,7 +1178,7 @@ const stockTools: StockToolsOptions = {
                  * A collection of strings pointing to config options for
                  * the items.
                  *
-                 * @type {Array}
+                 * @type {Array<string>}
                  * @default [
                  *   'typeOHLC',
                  *   'typeLine',
