@@ -908,21 +908,8 @@ namespace BrokenAxis {
                             repeat: number,
                             min = axis.userMin ?? axis.min,
                             max = axis.userMax ?? axis.max,
-                            dataMin = axis.dataMin ?? min,
-                            dataMax = axis.dataMax ?? max,
                             start: (number|undefined),
                             i: number;
-
-                        if (isNumber(axis.threshold)) {
-                            dataMin = Math.min(
-                                dataMin ?? axis.threshold,
-                                axis.threshold
-                            );
-                            dataMax = Math.max(
-                                dataMax ?? axis.threshold,
-                                axis.threshold
-                            );
-                        }
 
                         // Min & max check (#4247) but not for gantt (#13898)
                         if (!axis.treeGrid?.tree) {
@@ -948,21 +935,31 @@ namespace BrokenAxis {
                         }
 
                         // Construct an array holding all breaks in the axis
-                        // for the current data range.
-                        if (isNumber(dataMin) && isNumber(dataMax)) {
+                        // for the current data range. Use min and max instead
+                        // of dataMin and dataMax to ensure that the breaks are
+                        // constructed correctly even if break happens outside
+                        // the data range, #23728.
+                        if (isNumber(min) && isNumber(max)) {
                             breaks.forEach(
                                 function (brk): void {
                                     start = brk.from;
                                     repeat = brk.repeat || Infinity;
 
-                                    while (start - repeat > dataMin) {
+                                    while (
+                                        isNumber(min) &&
+                                        start - repeat > min
+                                    ) {
                                         start -= repeat;
                                     }
-                                    while (start < dataMin) {
+                                    while (isNumber(min) && start < min) {
                                         start += repeat;
                                     }
 
-                                    for (i = start; i < dataMax; i += repeat) {
+                                    for (
+                                        i = start;
+                                        isNumber(max) && i < max;
+                                        i += repeat
+                                    ) {
                                         breakArrayTemp.push({
                                             value: i,
                                             move: 'in'
@@ -993,7 +990,7 @@ namespace BrokenAxis {
 
                         // Simplify the breaks
                         inBrk = 0;
-                        start = dataMin;
+                        start = min;
 
                         breakArrayTemp.forEach(
                             (brk: AxisBreakBorderObject): void => {
