@@ -105,7 +105,7 @@ export interface XRangePointPartialFillOptions {
      * The fill color to be used for partial fills. Defaults to a darker shade
      * of the point color.
      *
-     * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type {Highcharts.ColorType}
      *
      * @product highcharts highstock gantt
      */

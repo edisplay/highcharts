@@ -133,7 +133,7 @@ const PieSeriesDefaults: PieSeriesOptions = {
      * @sample {highcharts} highcharts/plotoptions/pie-emptyseries/
      *         Empty pie series
      *
-     * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type      {Highcharts.ColorType}
      * @default   ${palette.neutralColor20}
      * @apioption plotOptions.pie.color
      */
@@ -157,7 +157,7 @@ const PieSeriesDefaults: PieSeriesOptions = {
      * @sample {highcharts} highcharts/demo/pie-monochrome/
      *         Set default colors for all pies
      *
-     * @type      {Array<Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject>}
+     * @type      {Array<Highcharts.ColorType>}
      * @since     3.0
      * @product   highcharts highmaps
      * @apioption plotOptions.pie.colors
@@ -203,7 +203,7 @@ const PieSeriesDefaults: PieSeriesOptions = {
          * @sample {highcharts} highcharts/css/pie-point/
          *         Styled connectors
          *
-         * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+         * @type      {Highcharts.ColorType}
          * @since     2.1
          * @product   highcharts highmaps
          * @apioption plotOptions.pie.dataLabels.connectorColor
@@ -376,7 +376,7 @@ const PieSeriesDefaults: PieSeriesOptions = {
      * @sample {highcharts} highcharts/plotoptions/pie-emptyseries/
      *         Empty pie series
      *
-     * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type {Highcharts.ColorType}
      */
     fillColor: void 0,
 
@@ -559,7 +559,7 @@ const PieSeriesDefaults: PieSeriesOptions = {
      * @sample {highcharts} highcharts/plotoptions/pie-bordercolor-black/
      *         Black border
      *
-     * @type    {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type    {Highcharts.ColorType}
      * @default ${palette.backgroundColor}
      * @product highcharts highmaps
      */

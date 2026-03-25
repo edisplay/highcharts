@@ -104,7 +104,7 @@ const MapSeriesDefaults: MapSeriesOptions = {
      * @sample maps/demo/all-areas-as-null/
      *         Null color
      *
-     * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type {Highcharts.ColorType}
      *
      * @private
      */
@@ -160,7 +160,7 @@ const MapSeriesDefaults: MapSeriesOptions = {
      * @sample {highmaps} maps/plotoptions/series-border/
      *         Borders demo
      *
-     * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type      {Highcharts.ColorType}
      * @default   #cccccc
      * @product   highmaps
      * @apioption plotOptions.series.borderColor
@@ -254,7 +254,7 @@ const MapSeriesDefaults: MapSeriesOptions = {
              * @sample maps/plotoptions/series-states-hover/
              *         Hover options
              *
-             * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+             * @type      {Highcharts.ColorType}
              * @product   highmaps
              * @apioption plotOptions.series.states.hover.color
              */
@@ -262,7 +262,7 @@ const MapSeriesDefaults: MapSeriesOptions = {
             /**
              * The border color of the point in this state.
              *
-             * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+             * @type      {Highcharts.ColorType}
              * @product   highmaps
              * @apioption plotOptions.series.states.hover.borderColor
              */
@@ -313,7 +313,7 @@ const MapSeriesDefaults: MapSeriesOptions = {
         select: {
 
             /**
-             * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+             * @type      {Highcharts.ColorType}
              * @default   ${palette.neutralColor20}
              * @product   highmaps
              * @apioption plotOptions.series.states.select.color
@@ -424,7 +424,7 @@ const MapSeriesDefaults: MapSeriesOptions = {
  * of the global [colors](#colors) when [colorByPoint](
  * #plotOptions.map.colorByPoint) is true.
  *
- * @type      {Array<Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject>}
+ * @type      {Array<Highcharts.ColorType>}
  * @since     3.0
  * @product   highmaps
  * @apioption plotOptions.map.colors
@@ -434,7 +434,7 @@ const MapSeriesDefaults: MapSeriesOptions = {
  * Individual color for the point. By default the color is either used
  * to denote the value, or pulled from the global `colors` array.
  *
- * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+ * @type      {Highcharts.ColorType}
  * @product   highmaps
  * @apioption series.map.data.color
  */

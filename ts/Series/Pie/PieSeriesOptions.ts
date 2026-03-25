@@ -106,7 +106,7 @@ export interface PieSeriesOptions extends LineSeriesOptions {
      * @sample {highcharts} highcharts/plotoptions/pie-bordercolor-black/
      *         Black border
      *
-     * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type {Highcharts.ColorType}
      *
      * @default #ffffff
      *
@@ -185,7 +185,7 @@ export interface PieSeriesOptions extends LineSeriesOptions {
      * @sample {highcharts} highcharts/plotoptions/pie-emptyseries/
      *         Empty pie series
      *
-     * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type {Highcharts.ColorType}
      *
      * @default ${palette.neutralColor20}
      */
@@ -201,7 +201,7 @@ export interface PieSeriesOptions extends LineSeriesOptions {
      * @sample {highcharts} highcharts/demo/pie-monochrome/
      *         Set default colors for all pies
      *
-     * @type {Array<Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject>}
+     * @type {Array<Highcharts.ColorType>}
      *
      * @since 3.0
      *
@@ -309,7 +309,7 @@ export interface PieSeriesOptions extends LineSeriesOptions {
      * @sample {highcharts} highcharts/plotoptions/pie-emptyseries/
      *         Empty pie series
      *
-     * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type {Highcharts.ColorType}
      */
     fillColor?: ColorType;
 

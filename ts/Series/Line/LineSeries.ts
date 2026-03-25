@@ -507,7 +507,7 @@ export default LineSeries;
  * @sample {highcharts} highcharts/point/color/
  *         Mark the highest point
  *
- * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+ * @type      {Highcharts.ColorType}
  * @product   highcharts highstock gantt
  * @apioption series.line.data.color
  */

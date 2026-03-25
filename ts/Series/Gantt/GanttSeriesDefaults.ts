@@ -236,7 +236,7 @@ const GanttSeriesDefaults: GanttSeriesOptions = {
  * The fill of the progress indicator. Defaults to a darkened variety of the
  * main color.
  *
- * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+ * @type      {Highcharts.ColorType}
  * @apioption series.gantt.data.completed.fill
  */
 

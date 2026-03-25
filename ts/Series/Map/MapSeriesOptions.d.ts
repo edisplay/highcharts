@@ -47,7 +47,7 @@ import type {
  * @sample {highmaps} maps/plotoptions/series-border/
  *         Borders demo
  *
- * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+ * @type {Highcharts.ColorType}
  *
  * @default #cccccc
  *
@@ -199,7 +199,7 @@ export interface MapSeriesOptions
      * @sample maps/demo/all-areas-as-null/
      *         Null color
      *
-     * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type {Highcharts.ColorType}
      */
     nullColor?: ColorType;
 

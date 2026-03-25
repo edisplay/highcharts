@@ -69,7 +69,7 @@ const XRangeSeriesDefaults: XRangeSeriesOptions = {
      * The fill color to be used for partial fills. Defaults to a darker
      * shade of the point color.
      *
-     * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type      {Highcharts.ColorType}
      * @product   highcharts highstock gantt
      * @apioption plotOptions.xrange.partialFill.fill
      */
@@ -242,7 +242,7 @@ export default XRangeSeriesDefaults;
  * The fill color to be used for partial fills. Defaults to a darker shade
  * of the point color.
  *
- * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+ * @type      {Highcharts.ColorType}
  * @product   highcharts highstock gantt
  * @apioption series.xrange.data.partialFill.fill
  */

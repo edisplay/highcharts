@@ -161,7 +161,7 @@ const TreemapSeriesDefaults: TreemapSeriesOptions = {
      * of the global [colors](#colors) when
      * [colorByPoint](#plotOptions.treemap.colorByPoint) is true.
      *
-     * @type      {Array<Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject>}
+     * @type      {Array<Highcharts.ColorType>}
      * @since     3.0
      * @product   highcharts
      * @apioption plotOptions.treemap.colors
@@ -405,7 +405,7 @@ const TreemapSeriesDefaults: TreemapSeriesOptions = {
     /**
      * Can set a color on all points which lies on the same level.
      *
-     * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+     * @type      {Highcharts.ColorType}
      * @since     4.1.0
      * @product   highcharts
      * @apioption plotOptions.treemap.levels.color
@@ -624,7 +624,7 @@ const TreemapSeriesDefaults: TreemapSeriesOptions = {
          * Individual color for the grouped point. By default the color is
          * pulled from the parent color.
          *
-         * @type      {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
+         * @type      {Highcharts.ColorType}
          * @product   highcharts
          */
         color: void 0,
