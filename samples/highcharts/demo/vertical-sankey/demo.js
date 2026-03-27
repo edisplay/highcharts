@@ -99,7 +99,7 @@ Highcharts.chart('container', {
         }, {
             id: 'Other power (non-steam)',
             column: 4,
-            offsetHorizontal: '630%',
+            offsetHorizontal: '700%',
             color: 'rgba(108, 221, 202, 0.8)'
         }, {
             id: 'To direct water services',
@@ -149,7 +149,7 @@ Highcharts.chart('container', {
             }
         }, {
             id: 'Direct water services',
-            offsetHorizontal: '-560%',
+            offsetHorizontal: '-575%',
             color: 'rgba(76, 175, 254, 0.8)',
             dataLabels: {
                 style: {
@@ -164,7 +164,7 @@ Highcharts.chart('container', {
         }, {
             id: 'Direct steam use',
             column: 7,
-            offsetHorizontal: '480%',
+            offsetHorizontal: '440%',
             color: 'rgba(219, 239, 255, 0.8)',
             dataLabels: {
                 rotation: -90,
