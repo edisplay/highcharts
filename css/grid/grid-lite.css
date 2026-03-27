@@ -15,6 +15,7 @@
 @import url("./grid-link-variables.css");
 @import url("./grid-input-variables.css");
 @import url("./grid-button-variables.css");
+@import url("./grid-icon-variables.css");
 @import url("./grid-caption-variables.css");
 @import url("./grid-description-variables.css");
 @import url("./grid-pagination-variables.css");
@@ -275,7 +276,7 @@
         transition: max-width 0.3s ease, opacity 0.3s ease;
     }
 
-    .hcg-header-cell-icons .hcg-button.hcg-button-selected::after {
+    .hcg-header-cell-icons .hcg-icon-button.hcg-button-selected::after {
         content: "";
         position: absolute;
         top: 2px;
@@ -283,6 +284,7 @@
         width: 0.3em;
         height: 0.3em;
         border-radius: 50%;
+        background: currentColor;
     }
 
     :is(:hover, :focus-visible) .hcg-header-cell-icons,
@@ -300,7 +302,7 @@
         margin-left: 0;
     }
 
-    .hcg-header-cell-icons .hcg-header-cell-menu-icon button {
+    .hcg-header-cell-icons .hcg-header-cell-menu-icon .hcg-icon-button {
         padding-inline: 3px;
     }
 

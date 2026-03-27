@@ -128,6 +128,7 @@ class ToolbarButton implements Button {
             {
                 className: (
                     Globals.getClassName('button') +
+                    ' ' + Globals.getClassName('iconButton') +
                     (this.isActive ?
                         ' ' + Globals.getClassName('buttonSelected') :
                         ''
