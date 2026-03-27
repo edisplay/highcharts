@@ -131,8 +131,8 @@
     transition: background-color 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
 
     svg {
-        width: 1em;
-        height: 1em;
+        width: 0.9em;
+        height: 0.9em;
         display: block;
     }
 
