@@ -3,7 +3,7 @@
  *  Exporting module
  *
  *  (c) 2010-2026 Highsoft AS
- *  Author: Torstein Honsi
+ *  Author: Torstein Hønsi
  *
  *  A commercial license may be required depending on use.
  *  See www.highcharts.com/license
@@ -617,7 +617,7 @@ export class Exporting {
                 (type === 'image/svg+xml' ? 'svg' : type.split('/')[1])
             ),
             scale: exportingOptions?.scale || 1,
-            // Allow libURL to end with or without fordward slash
+            // Allow libURL to end with or without forward slash
             libURL: libURL?.slice(-1) !== '/' ? libURL + '/' : libURL
         };
     }
@@ -1626,7 +1626,7 @@ export class Exporting {
             // The local must be false to fallback to server for PDF export
             exportingOptions.local = false;
 
-            // Allow fallbacking to server only for PDFs that failed locally
+            // Allow fallback to server only for PDFs that failed locally
             await this.exportChart(exportingOptions);
         }
     }
@@ -1821,12 +1821,12 @@ export class Exporting {
 
         // Prepare for replicating the chart
         options.series = [];
-        chart.series.forEach(function (serie): void {
-            seriesOptions = merge(serie.userOptions, { // #4912
+        chart.series.forEach(function (s): void {
+            seriesOptions = merge(s.userOptions, { // #4912
                 animation: false, // Turn off animation
                 enableMouseTracking: false,
                 showCheckbox: false,
-                visible: serie.visible
+                visible: s.visible
             });
 
             // Used for the navigator series that has its own option set
