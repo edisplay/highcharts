@@ -940,26 +940,21 @@ namespace BrokenAxis {
                         // constructed correctly even if break happens outside
                         // the data range, #23728.
                         if (isNumber(min) && isNumber(max)) {
+                            const minVal = min,
+                                maxVal = max;
                             breaks.forEach(
                                 function (brk): void {
                                     start = brk.from;
                                     repeat = brk.repeat || Infinity;
 
-                                    while (
-                                        isNumber(min) &&
-                                        start - repeat > min
-                                    ) {
+                                    while (start - repeat > minVal) {
                                         start -= repeat;
                                     }
-                                    while (isNumber(min) && start < min) {
+                                    while (start < minVal) {
                                         start += repeat;
                                     }
 
-                                    for (
-                                        i = start;
-                                        isNumber(max) && i < max;
-                                        i += repeat
-                                    ) {
+                                    for (i = start; i < maxVal; i += repeat) {
                                         breakArrayTemp.push({
                                             value: i,
                                             move: 'in'
