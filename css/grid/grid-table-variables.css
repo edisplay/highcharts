@@ -152,16 +152,6 @@
         border-bottom-right-radius: var(--hcg-border-radius);
     }
 
-    .hcg-table tbody.hcg-tbody-pinned-top {
-        border-bottom: var(--ig-pinned-border);
-        box-shadow: var(--ig-pinned-top-shadow);
-    }
-
-    .hcg-table tbody.hcg-tbody-pinned-bottom {
-        border-top: var(--ig-pinned-border);
-        box-shadow: var(--ig-pinned-bottom-shadow);
-    }
-
     .hcg-table tbody tr {
         --ig-row-background-current: var(--hcg-row-background);
         --ig-row-color-current: var(--hcg-row-color);

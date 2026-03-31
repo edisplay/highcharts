@@ -188,14 +188,14 @@
     }
 
     /* <tbody> */
-    &.hcg-scrollable-content > tbody:not(.hcg-tbody-pinned) {
+    &.hcg-scrollable-content > tbody {
         height: 100%;
         overflow: auto;
         min-height: 0;
         flex: 1;
     }
 
-    &.hcg-virtualization > tbody:not(.hcg-tbody-pinned) {
+    &.hcg-virtualization > tbody {
         display: block;
         position: relative;
     }
@@ -226,11 +226,11 @@
         border-bottom: none;
     }
 
-    &.hcg-scrollable-content > tbody:not(.hcg-tbody-pinned) > tr {
+    &.hcg-scrollable-content > tbody > tr {
         display: block;
     }
 
-    &.hcg-virtualization > tbody:not(.hcg-tbody-pinned) > tr {
+    &.hcg-virtualization > tbody > tr {
         position: absolute;
     }
 
@@ -241,35 +241,6 @@
 
     > tbody td:focus {
         outline: none;
-    }
-}
-
-/* ----------------------------------------------------------
-  ROW PINNING ELEMENTS
------------------------------------------------------------- */
-.hcg-container .hcg-table {
-    > tbody.hcg-tbody-pinned {
-        display: block;
-        overflow: hidden;
-        flex: 0 0 auto;
-        position: relative;
-        z-index: 1;
-
-        > tr {
-            display: block;
-        }
-    }
-
-    > tbody:not(.hcg-tbody-pinned) {
-        > tr.hcg-row-pinned td {
-            font-weight: 600;
-        }
-    }
-
-    &:has(> tbody.hcg-tbody-pinned) {
-        > tbody:not(.hcg-tbody-pinned) {
-            height: auto;
-        }
     }
 }
 
