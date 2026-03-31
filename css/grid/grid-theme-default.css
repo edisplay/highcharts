@@ -2,6 +2,8 @@
 .highcharts-light .hcg-theme-default {
     --hcg-color: var(--highcharts-neutral-color-100);
     --hcg-background: var(--highcharts-background-color);
+
+    /* Row pinning */
     --hcg-pinned-border-color:
         color-mix(
             in srgb,
@@ -32,6 +34,7 @@
 
 @media (prefers-color-scheme: dark) {
     .hcg-theme-default {
+        /* Row pinning */
         --hcg-pinned-border-color:
             color-mix(
                 in srgb,
@@ -50,6 +53,7 @@
 }
 
 .highcharts-dark .hcg-theme-default {
+    /* Row pinning */
     --hcg-pinned-border-color:
         color-mix(
             in srgb,

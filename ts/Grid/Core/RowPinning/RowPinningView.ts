@@ -38,9 +38,9 @@ const { makeHTMLElement } = GridUtils;
  * The class names used by the row pinning functionality.
  */
 export const classNames = {
+    pinnedTbodyElement: Globals.classNamePrefix + 'tbody-pinned',
     pinnedTopTbodyElement: Globals.classNamePrefix + 'tbody-pinned-top',
     pinnedBottomTbodyElement: Globals.classNamePrefix + 'tbody-pinned-bottom',
-    pinnedTbodyElementActive: Globals.classNamePrefix + 'tbody-pinned-active',
     rowPinned: Globals.classNamePrefix + 'row-pinned',
     rowPinnedTop: Globals.classNamePrefix + 'row-pinned-top',
     rowPinnedBottom: Globals.classNamePrefix + 'row-pinned-bottom'
@@ -77,7 +77,12 @@ class RowPinningView {
 
         this.pinnedTopTbodyElement = makeHTMLElement(
             'tbody',
-            { className: classNames.pinnedTopTbodyElement }
+            {
+                className: [
+                    classNames.pinnedTbodyElement,
+                    classNames.pinnedTopTbodyElement
+                ].join(' ')
+            }
         );
         this.pinnedTopTbodyElement.setAttribute(
             'aria-label',
@@ -86,7 +91,12 @@ class RowPinningView {
 
         this.pinnedBottomTbodyElement = makeHTMLElement(
             'tbody',
-            { className: classNames.pinnedBottomTbodyElement }
+            {
+                className: [
+                    classNames.pinnedTbodyElement,
+                    classNames.pinnedBottomTbodyElement
+                ].join(' ')
+            }
         );
         this.pinnedBottomTbodyElement.setAttribute(
             'aria-label',
@@ -174,7 +184,7 @@ class RowPinningView {
             pinnedRows.bottomIds.length > 0;
         const pinnedSections = this.getPinnedSections(pinnedRows);
 
-        this.ensurePinnedBodiesRendered(hasPinning);
+        this.ensurePinnedBodiesRendered(pinnedSections);
 
         if (!hasPinning) {
             this.clearPinnedRows();
@@ -203,13 +213,6 @@ class RowPinningView {
         this.rebuildPinnedRowLookupMaps();
         this.updateScrollableRowAttributes();
         await viewport.syncAriaRowIndexes();
-
-        for (const section of pinnedSections) {
-            section.tbody.classList.toggle(
-                classNames.pinnedTbodyElementActive,
-                section.rowIds.length > 0
-            );
-        }
 
         viewport.tbodyElement.style.display = '';
 
@@ -640,30 +643,28 @@ class RowPinningView {
         }
     }
 
-    private ensurePinnedBodiesRendered(shouldRender: boolean): void {
+    private ensurePinnedBodiesRendered(
+        pinnedSections: PinnedSectionDescriptor[]
+    ): void {
         const tableElement = this.viewport.tableElement;
 
-        if (!shouldRender) {
-            for (const section of this.getPinnedSections()) {
+        for (const section of pinnedSections) {
+            if (!section.rowIds.length) {
                 if (section.tbody.parentElement === tableElement) {
                     section.tbody.remove();
                 }
-            }
-            return;
-        }
-
-        for (const section of this.getPinnedSections()) {
-            if (section.tbody.parentElement === tableElement) {
                 continue;
             }
 
-            if (section.position === 'top') {
-                tableElement.insertBefore(
-                    section.tbody,
-                    this.viewport.tbodyElement
-                );
-            } else {
-                tableElement.appendChild(section.tbody);
+            if (section.tbody.parentElement !== tableElement) {
+                if (section.position === 'top') {
+                    tableElement.insertBefore(
+                        section.tbody,
+                        this.viewport.tbodyElement
+                    );
+                } else {
+                    tableElement.appendChild(section.tbody);
+                }
             }
         }
     }
