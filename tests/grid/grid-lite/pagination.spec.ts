@@ -471,7 +471,7 @@ test.describe('Pagination', () => {
 
             const getScrollableIds = (): string[] => Array.from(
                 document.querySelectorAll(
-                    'tbody.hcg-tbody-scrollable td[data-column-id="ID"]'
+                    'tbody:not(.hcg-tbody-pinned) td[data-column-id="ID"]'
                 )
             ).map((el): string => (el.textContent || '').trim());
 

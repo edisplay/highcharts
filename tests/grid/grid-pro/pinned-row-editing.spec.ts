@@ -57,7 +57,7 @@ test.describe('Pinned row cell editing', () => {
 
         // Wait for the grid to render pinned rows
         await page.locator(
-            '#test-grid .hcg-tbody-pinned-top.hcg-tbody-pinned-active'
+            '#test-grid .hcg-tbody-pinned-top'
         ).waitFor();
     });
 
@@ -112,7 +112,7 @@ test.describe('Pinned row cell editing', () => {
 
         // The original value should be preserved (edit was discarded)
         const scrollableCell = page.locator(
-            `${grid} .hcg-tbody-scrollable ` +
+            `${grid} tbody:not(.hcg-tbody-pinned) ` +
             'tr[data-row-index="0"] td[data-column-id="product"]'
         );
         await expect(scrollableCell).toHaveAttribute('data-value', 'Apples');
@@ -123,7 +123,7 @@ test.describe('Pinned row cell editing', () => {
     }) => {
         // Find a cell in the scrollable area (Pears is at index 1)
         const cell = page.locator(
-            `${grid} .hcg-tbody-scrollable ` +
+            `${grid} tbody:not(.hcg-tbody-pinned) ` +
             'tr[data-row-index="1"] td[data-column-id="product"]'
         ).first();
 
@@ -179,7 +179,7 @@ test.describe('Pinned row cell editing', () => {
 
         // The edited value should persist in the scrollable area
         const scrollableCell = page.locator(
-            `${grid} .hcg-tbody-scrollable ` +
+            `${grid} tbody:not(.hcg-tbody-pinned) ` +
             'tr[data-row-index="0"] td[data-column-id="product"]'
         );
         await expect(scrollableCell).toHaveAttribute('data-value', 'Mangoes');

@@ -216,9 +216,7 @@ class Table {
         if (grid.options?.rendering?.header?.enabled) {
             this.theadElement = makeHTMLElement('thead', {}, tableElement);
         }
-        this.tbodyElement = makeHTMLElement('tbody', {
-            className: Globals.getClassName('scrollableTbody')
-        }, tableElement);
+        this.tbodyElement = makeHTMLElement('tbody', {}, tableElement);
 
         this.rowsVirtualizer = new RowsVirtualizer(this);
 

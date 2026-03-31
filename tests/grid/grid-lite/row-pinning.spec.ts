@@ -116,7 +116,7 @@ test.describe('Grid Pro row pinning', () => {
         await expect(page.locator('#pinnedBottom')).toHaveValue('ROW-060');
 
         const topActionCell = page.locator(
-            'tbody.hcg-tbody-scrollable tr[data-row-index="5"] td[data-column-id="id"]'
+            'tbody:not(.hcg-tbody-pinned) tr[data-row-index="5"] td[data-column-id="id"]'
         );
         await expect(topActionCell).toBeVisible();
 
@@ -132,7 +132,7 @@ test.describe('Grid Pro row pinning', () => {
         await expect(pinnedTopCell).toBeVisible();
 
         await expect(page.locator(
-            'tbody.hcg-tbody-scrollable td[data-column-id="id"]',
+            'tbody:not(.hcg-tbody-pinned) td[data-column-id="id"]',
             { hasText: 'ROW-006' }
         )).toHaveCount(1);
 
@@ -142,7 +142,7 @@ test.describe('Grid Pro row pinning', () => {
         await expect(page.locator('#pinnedTop')).toHaveValue('ROW-001');
 
         const bottomActionCell = page.locator(
-            'tbody.hcg-tbody-scrollable tr[data-row-index="6"] td[data-column-id="id"]'
+            'tbody:not(.hcg-tbody-pinned) tr[data-row-index="6"] td[data-column-id="id"]'
         );
         await expect(bottomActionCell).toBeVisible();
 
@@ -613,7 +613,7 @@ test.describe('Grid Pro row pinning', () => {
             const rows = Array.from(
                 document.querySelectorAll(
                     'tbody.hcg-tbody-pinned-top tr,' +
-                    'tbody.hcg-tbody-scrollable tr,' +
+                    'tbody:not(.hcg-tbody-pinned) tr,' +
                     'tbody.hcg-tbody-pinned-bottom tr'
                 )
             );
@@ -628,7 +628,7 @@ test.describe('Grid Pro row pinning', () => {
                 10
             ));
             const scrollIndexes = Array.from(document.querySelectorAll(
-                'tbody.hcg-tbody-scrollable tr'
+                'tbody:not(.hcg-tbody-pinned) tr'
             )).map((row): number => parseInt(
                 row.getAttribute('aria-rowindex') || '0',
                 10
