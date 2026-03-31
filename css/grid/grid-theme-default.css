@@ -57,4 +57,3 @@
     --hcg-row-hover-background: var(--ig-highlight-color-5, color-mix(in srgb, var(--hcg-color, #000000) 3%, var(--hcg-background, #ffffff)));
     --hcg-row-even-background: var(--highcharts-neutral-color-3, color-mix(in srgb, var(--hcg-color, #000000) 2%, var(--hcg-background, #ffffff)));
 }
-
