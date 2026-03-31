@@ -9,7 +9,7 @@
  *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
  *
  *  Authors:
- *  - Dawid Dragula
+ *  - Dawid Draguła
  *
  * */
 
@@ -27,11 +27,9 @@ import type {
     CellType as DataTableCellType,
     Column as DataTableColumnType
 } from '../../../Data/DataTable';
+import { defined } from '../../../Shared/Utilities.js';
 import type QueryingController from '../Querying/QueryingController';
 import type { ColumnDataType } from '../Table/Column';
-
-import U from '../../../Core/Utilities.js';
-const { defined } = U;
 
 
 /**
