@@ -80,7 +80,7 @@ export interface A11yAnnouncementsOptions {
     filtering?: boolean;
 
     /**
-     * Enable accessibility announcements for row pinning.
+     * Enable accessibility announcements for Grid Pro row pinning.
      *
      * @default true
      */
@@ -107,7 +107,8 @@ export interface LangAccessibilityOptions {
     filtering?: FilteringLangA11yOptions;
 
     /**
-     * Language options for the accessibility descriptions in row pinning.
+     * Language options for the accessibility descriptions in Grid Pro row
+     * pinning.
      */
     rowPinning?: RowPinningLangA11yOptions;
 
@@ -222,11 +223,12 @@ export interface FilteringLangA11yOptions {
 }
 
 /**
- * Accessibility options for row pinning announcements.
+ * Accessibility options for Grid Pro row pinning announcements.
  */
 export interface RowPinningLangA11yOptions {
     /**
-     * Language options for the accessibility descriptions in row pinning.
+     * Language options for the accessibility descriptions in Grid Pro row
+     * pinning.
      */
     announcements?: {
         /**

@@ -1,11 +1,12 @@
 ---
 sidebar_label: "Pinning"
+tags: ["grid-pro"]
 ---
 
 # Row pinning
 
-Row pinning lets you keep selected rows visible at the top or bottom while the
-main rows scroll normally.
+Row pinning is available in Highcharts Grid Pro. It lets you keep selected rows
+visible at the top or bottom while the main rows scroll normally.
 
 Pinned rows are existing `data.dataTable` rows. They remain in the scrollable
 area and are also rendered in dedicated pinned sections.
@@ -34,8 +35,8 @@ Grid.grid('container', {
 });
 ```
 
-Row pinning is enabled by default. Use `pinning.enabled: false` to disable row
-pinning UI:
+In Grid Pro, row pinning is enabled by default. Use `pinning.enabled: false` to
+disable row pinning UI:
 
 ```js
 Grid.grid('container', {

@@ -31,8 +31,8 @@ All `accessibility` options are optional. Use `announcements` to enable or disab
 
 ## Row pinning announcements
 
-Row pinning live announcements are enabled by default and can be toggled with
-`accessibility.announcements.rowPinning`.
+In Grid Pro, row pinning live announcements are enabled by default and can be
+toggled with `accessibility.announcements.rowPinning`.
 
 ```js
 {
@@ -46,7 +46,7 @@ Row pinning live announcements are enabled by default and can be toggled with
 
 ## Row pinning localization
 
-To customize row pinning announcements and ARIA descriptions, use
+To customize Grid Pro row pinning announcements and ARIA descriptions, use
 `lang.accessibility.rowPinning`:
 
 ```js

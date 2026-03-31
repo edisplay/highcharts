@@ -68,7 +68,9 @@ Grid Pro exposes these built-in row pinning action IDs:
 - `'pinRowBottom'`
 - `'unpinRow'`
 
-Built-ins and custom items can be mixed in one list:
+These built-in actions are not available in Grid Lite.
+
+Built-ins and custom items can be mixed in one list in Grid Pro:
 
 ```js
 contextMenu: {
@@ -115,6 +117,8 @@ Grid.grid('container', {
 
 Any action item can define `items` to become a branch item with a submenu.
 Branch items open submenus on click and do not execute leaf callbacks.
+
+The built-in row pinning submenu example below applies to Grid Pro only.
 
 ```js
 contextMenu: {

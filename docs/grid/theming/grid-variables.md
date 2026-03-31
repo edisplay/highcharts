@@ -129,8 +129,8 @@ These options exist mainly for [Conditional theming](https://www.highcharts.com/
 
 ### Pinned row separators
 
-When rows are pinned to the top or bottom, a separator line and shadow are
-shown to distinguish pinned rows from the scrollable area.
+In Grid Pro, when rows are pinned to the top or bottom, a separator line and
+shadow are shown to distinguish pinned rows from the scrollable area.
 
 | Variable                   | Default Value                      | Valid Values                                                                  |
 | -------------------------- | ---------------------------------- | ----------------------------------------------------------------------------- |

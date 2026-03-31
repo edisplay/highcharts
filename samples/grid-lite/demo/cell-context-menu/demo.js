@@ -266,13 +266,6 @@ Grid.grid('container', {
             price: [1.5, 2.53, 5, 4.5, 3.2]
         }
     },
-    rendering: {
-        rows: {
-            pinning: {
-                enabled: true
-            }
-        }
-    },
     columnDefaults: {
         cells: {
             contextMenu: {
@@ -283,5 +276,5 @@ Grid.grid('container', {
 });
 
 logEvent(
-    'Ready. Right-click a cell to open the menu with pinning and nested items.'
+    'Ready. Right-click a cell to open the menu with nested items.'
 );
