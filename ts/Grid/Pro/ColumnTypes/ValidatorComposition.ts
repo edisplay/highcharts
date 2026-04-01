@@ -96,8 +96,8 @@ declare module '../../Pro/CellEditing/CellEditingComposition' {
          * If not set, the validation rules are applied according to the data
          * type.
          *
-         * Can be an array of rule keys (strings) or an array of rule
-         * definitions (objects).
+         * Can be an array where each item can be 
+         * either a rule key (string) or a rule definition (object).
          */
         validationRules?: (RuleKey|RuleDefinition)[];
     }
