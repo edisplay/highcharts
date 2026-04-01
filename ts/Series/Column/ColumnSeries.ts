@@ -872,7 +872,13 @@ class ColumnSeries extends Series {
                         ) ||
                         // Allow specific series types to extend interaction
                         // outside the plot area, #24096
-                        series.allowOutsidePlotInteraction?.(e) ||
+                        (
+                            series.allowOutsidePlotInteraction &&
+                            pointer?.inClass(
+                                e.target as any,
+                                'highcharts-point'
+                            )
+                        ) ||
                         pointer?.inClass(
                             e.target as any,
                             'highcharts-data-label'

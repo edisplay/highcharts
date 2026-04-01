@@ -19,7 +19,6 @@
 
 import type ScatterPoint from './ScatterPoint';
 import type ScatterSeriesOptions from './ScatterSeriesOptions';
-import type PointerEvent from '../../Core/PointerEvent.js';
 
 import ScatterSeriesDefaults from './ScatterSeriesDefaults.js';
 import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
@@ -39,10 +38,10 @@ import { addEvent, extend, merge } from '../../Shared/Utilities.js';
 declare module '../../Core/Series/SeriesBase' {
     interface SeriesBase {
         /**
-         * Allow points outside the plot area to be interacted with.
-         * Implemented in the scatter series.
+         * Allow scatter points on the edge to be interacted
+         * with outside the plot.
          */
-        allowOutsidePlotInteraction?(e: PointerEvent): boolean;
+        allowOutsidePlotInteraction?: boolean;
     }
 }
 
@@ -87,25 +86,6 @@ class ScatterSeries extends LineSeries {
      *  Functions
      *
      * */
-
-    /**
-     * Allow scatter points on the edge to be interacted with outside the plot
-     * area.
-     *
-     * @internal
-     *
-     * @param {PointerEvent} e
-     * The pointer event.
-     *
-     * @return {boolean}
-     * True if interaction is allowed.
-     */
-    public allowOutsidePlotInteraction(e: PointerEvent): boolean {
-        return !!this.chart.pointer?.inClass(
-            e.target as any,
-            'highcharts-point'
-        );
-    }
 
     /* eslint-disable valid-jsdoc */
     /**
@@ -187,6 +167,7 @@ interface ScatterSeries {
     pointClass: typeof ScatterPoint;
 }
 extend(ScatterSeries.prototype, {
+    allowOutsidePlotInteraction: true,
     drawTracker: ColumnSeries.prototype.drawTracker,
     sorted: false,
     requireSorting: false,

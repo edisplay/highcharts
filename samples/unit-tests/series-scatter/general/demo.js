@@ -56,15 +56,11 @@ QUnit.test('Scatter series general tests.', function (assert) {
 
     // --- Added tests for #24096 ---
     // 1. Verify Scatter series allows outside plot interaction
-    const mockEvent = {
-        target: series.points[0].graphic.element
-    };
-
     assert.strictEqual(
-        series.allowOutsidePlotInteraction(mockEvent),
+        series.allowOutsidePlotInteraction,
         true,
-        'ScatterSeries should allow interaction when targeting a ' +
-        'highcharts-point element (#24096).'
+        'ScatterSeries should have the allowOutsidePlotInteraction flag set' +
+        'to true (#24096).'
     );
 
     // 2. Add a column series to verify the base Series class fallback
@@ -74,9 +70,9 @@ QUnit.test('Scatter series general tests.', function (assert) {
     });
 
     assert.strictEqual(
-        typeof columnSeries.allowOutsidePlotInteraction,
-        'undefined',
-        'Default series (Column) should NOT allow interaction outside ' +
-        'the plot area (#24096).'
+        columnSeries.allowOutsidePlotInteraction,
+        undefined, // Or check for falsy if preferred
+        'Default series (Column) should NOT have' +
+        'the allowOutsidePlotInteraction flag (#24096).'
     );
 });
