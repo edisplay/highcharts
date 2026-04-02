@@ -8,7 +8,7 @@ const commonOptions = {
     }
 };
 
-const imgPath = 'https://www.highcharts.com/samples/graphics/world-map-icons/';
+const imgPath = 'https://cdn.jsdelivr.net/gh/highcharts/highcharts@cb31d4cfc2/samples/graphics/world-map-icons/{filename}';
 
 function parseData(regionalExposureData) {
     // Mapping region code to relevant country ISO code and development status
@@ -327,10 +327,15 @@ function parseData(regionalExposureData) {
     // Mapping region code to icons
     const regionIconMap = {
         1: 'usa',
+        2: 'canada',
+        3: 'latin',
         4: 'uk',
         5: 'euro',
         6: 'euro',
+        7: 'euro',
         8: 'africa',
+        9: 'middle-east',
+        10: 'japan',
         11: 'au',
         12: 'asia',
         13: 'asia'
@@ -711,15 +716,10 @@ async function renderChart() {
             lineWidth: 0,
             labels: {
                 useHTML: true,
-                formatter: function () {
-                    const icon =
-                        this.axis.series[1].options.data[this.pos].iconPath ||
-                        'asia';
-                    return (
-                        `<img src="${imgPath}${icon}.svg" ` +
-                        'height="40" width="40" />'
-                    );
-                },
+                format:
+                    `<img src="${imgPath}` +
+                    '{axis.series.1.options.data.(pos).iconPath}.svg" ' +
+                    'height="40" width="40" />',
                 y: -12
             },
             type: 'category'
