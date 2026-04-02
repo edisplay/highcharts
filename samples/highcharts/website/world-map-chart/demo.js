@@ -530,12 +530,6 @@ async function renderChart() {
             }, false);
         });
 
-        allMapSeries.forEach(series => {
-            series.update({
-                color: series.options.nullColor
-            }, false);
-        });
-
         barChart.redraw();
         mapChart.mapView.zoomBy();
         mapChart.tooltip.hide(0);
@@ -647,6 +641,17 @@ async function renderChart() {
         credits: {
             enabled: false
         },
+        colorAxis: {
+            min: 0,
+            max: 100,
+            minColor: '#abbbed',
+            maxColor: '#0243d2',
+            labels: {
+                format: '{value}%',
+                overflow: 'allow'
+            },
+            width: '50%'
+        },
         tooltip: {
             useHTML: true,
             headerFormat: '',
@@ -661,7 +666,6 @@ async function renderChart() {
                 allAreas: false,
                 joinBy: ['iso-a2', 'code'],
                 nullColor: '#acabba',
-                color: '#acabba',
                 events: {
                     mouseOver() {
                         this.update({
@@ -688,9 +692,6 @@ async function renderChart() {
                             allMapSeries = this.chart.series;
 
                         this.chart.tooltip.hide(0);
-                        this.update({
-                            color: this.options.nullColor
-                        });
 
                         resetHighlight(barSeries, allMapSeries);
                     }
