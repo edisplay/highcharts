@@ -1,7 +1,7 @@
 /* *
  *
  *  (c) 2010-2026 Highsoft AS
- *  Author: Torstein Honsi
+ *  Author: Torstein Hønsi
  *
  *  A commercial license may be required depending on use.
  *  See www.highcharts.com/license
@@ -1691,7 +1691,7 @@ class Series {
 
             series.colorCounter = 0; // For series with colorByPoint (#1547)
 
-            // In turbo mode, look for one- or twodimensional arrays of numbers.
+            // In turbo mode, look for one- or 2-dimensional arrays of numbers.
             // The first and the last valid value are tested, and we assume that
             // all the rest are defined the same way. Although the 'for' loops
             // are similar, they are repeated inside each if-else conditional
@@ -5137,8 +5137,50 @@ class Series {
      * @internal
      */
     public drawLegendSymbol(legend: Legend, item: Legend.Item): void {
-        LegendSymbol[this.options.legendSymbol || 'rectangle']
-            ?.call(this, legend, item);
+        const renderer = this.chart.renderer,
+            legendSymbol = this.options.legendSymbol || 'rectangle',
+            legendItem = item.legendItem || {},
+            { options, symbolHeight, symbolWidth } = legend,
+            squareSymbol = options.squareSymbol,
+            adjustedSymbolWidth = squareSymbol ? symbolHeight : symbolWidth,
+            x = squareSymbol ? (symbolWidth - symbolHeight) / 2 : 0,
+            y = (legend.baseline || 0) - symbolHeight + 1,
+            w = adjustedSymbolWidth,
+            h = symbolHeight,
+            r = options.symbolRadius ?? symbolHeight;
+
+        const symbol: SVGElement|undefined = legendSymbol === 'rectangle' ?
+            // For the rectangle, use a true `rect` element because it renders
+            // sharper than a symbol with `path` and arcs
+            renderer.rect(x, y, w, h, r) :
+            (
+                renderer.symbols[
+                    legendSymbol as keyof typeof renderer.symbols
+                ] &&
+                renderer.symbol(
+                    legendSymbol as keyof typeof renderer.symbols,
+                    x,
+                    y,
+                    w,
+                    h,
+                    { r }
+                )
+            );
+
+        // Rectangle or SVGRenderer symbol
+        if (symbol) {
+            legendItem.symbol = symbol
+                .addClass('highcharts-point')
+                .attr({
+                    zIndex: 3
+                })
+                .add(legendItem.group);
+
+        // Symbol function defined in LegendSymbol
+        } else {
+            LegendSymbol[legendSymbol as keyof typeof LegendSymbol]
+                ?.call(this, legend, item);
+        }
     }
 
     // eslint-enable valid-jsdoc
