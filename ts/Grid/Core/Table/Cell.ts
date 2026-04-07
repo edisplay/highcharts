@@ -132,9 +132,15 @@ abstract class Cell {
      * @internal
      */
     protected init(): HTMLTableCellElement {
-        const cell = document.createElement('td', {});
+        const isRowHeader = !!this.column?.options.cells?.rowHeader;
+        const cell = document.createElement(isRowHeader ? 'th' : 'td', {});
 
-        cell.setAttribute('role', 'gridcell');
+        if (isRowHeader) {
+            cell.setAttribute('scope', 'row');
+            cell.setAttribute('role', 'rowheader');
+        } else {
+            cell.setAttribute('role', 'gridcell');
+        }
 
         return cell;
     }
