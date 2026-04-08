@@ -144,8 +144,18 @@ is set in exporting.chartConfig.`
     let fetchAttemptedForCrossOrigin = false;
 
     window.fetch = function (url) {
-        if (typeof url === 'string' && url.includes('fonts.googleapis.com')) {
-            fetchAttemptedForCrossOrigin = true;
+        if (typeof url === 'string') {
+            try {
+                const base = window.location && window.location.href ?
+                    window.location.href :
+                    undefined;
+                const parsedUrl = new URL(url, base);
+                if (parsedUrl.hostname === 'fonts.googleapis.com') {
+                    fetchAttemptedForCrossOrigin = true;
+                }
+            } catch (e) {
+                // Ignore invalid URLs; they are not relevant for this test.
+            }
         }
         return originalFetch.apply(this, arguments);
     };
