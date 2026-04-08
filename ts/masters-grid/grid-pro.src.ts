@@ -77,6 +77,8 @@ import '../Data/Modifiers/SortModifier.js';
 import '../Data/Modifiers/FilterModifier.js';
 
 // Compositions
+import '../Grid/Core/Responsive/ResponsiveComposition.js';
+import '../Grid/Core/RowPinning/RowPinningComposition.js';
 import '../Grid/Pro/GridEvents.js';
 import '../Grid/Pro/CellEditing/CellEditingComposition.js';
 import '../Grid/Pro/Credits/CreditsProComposition.js';
