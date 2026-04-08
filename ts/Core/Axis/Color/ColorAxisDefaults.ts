@@ -440,7 +440,6 @@ const colorAxisDefaults: DeepPartial<ColorAxisOptions> = {
      * @product   highcharts highstock highmaps
      */
     title: {
-        align: 'low',
         margin: 5
     },
 

@@ -301,8 +301,7 @@ class ColorAxis extends Axis implements ColorAxisBase {
         const sideSpecific = horiz ? { title: { rotation: 0 } } :
             {
                 title: {
-                    rotation: 270,
-                    align: 'middle',
+                    rotation: 90,
                     margin: 10
                 }
             };
@@ -532,14 +531,17 @@ class ColorAxis extends Axis implements ColorAxisBase {
      */
     public getTitlePosition(axisTitle: SVGElement): PositionObject {
         // Pass the argument down to the base class
-        const pos = super.getTitlePosition(axisTitle);
+        const pos = super.getTitlePosition(axisTitle),
+            titleMargin = this.options.title?.margin ?? 0;
 
         if (this.horiz && axisTitle) {
-            const titleMargin = this.options.title?.margin ?? 0;
             pos.y = this.top - titleMargin;
         } else if (!this.horiz && axisTitle) {
-            const titleBBox = axisTitle.getBBox();
-            pos.y = this.top + (this.len || 0) / 2 - (titleBBox.height / 2);
+            const labelOptions = this.options.labels || {},
+                labelDistance = labelOptions.x ?? labelOptions.distance ?? 0;
+
+            pos.x = this.left + this.width + labelDistance +
+            (this.maxLabelLength || 0) + titleMargin;
         }
 
         return pos;
