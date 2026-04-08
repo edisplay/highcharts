@@ -36,6 +36,8 @@
         mapView: {
             projection: {
                 name: 'Miller',
+                // Rotate to make sure the clip is in the Bering Strait, not on
+                // the eastern tip of Russia
                 rotation: [-11]
             }
         },
