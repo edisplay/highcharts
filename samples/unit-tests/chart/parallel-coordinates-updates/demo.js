@@ -242,4 +242,13 @@ QUnit.test('Update parallel coordinates plot', function (assert) {
         'The third yAxis\' max should be equal to the third point\'s high ' +
         'value.'
     );
+
+    const pathArray = chart.yAxis[0].ticks['8'].gridLine.pathArray;
+
+    assert.notOk(
+        pathArray[0][1] === pathArray[1][1] &&
+        pathArray[0][2] === pathArray[1][2],
+        'Parallel yAxis grid line path should have non-zero length, #24442.'
+    );
+
 });
