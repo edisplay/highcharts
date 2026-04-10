@@ -63,6 +63,12 @@ export interface TreeViewOptions {
      * Explicit set of expanded row IDs.
      */
     expandedRowIds?: RowId[];
+
+    /**
+     * Enables sticky parent rows.
+     * @default true
+     */
+    stickyParents?: boolean;
 }
 
 /**

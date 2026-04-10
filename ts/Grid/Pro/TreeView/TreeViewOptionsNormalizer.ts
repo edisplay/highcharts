@@ -55,6 +55,7 @@ export interface NormalizedTreeViewOptions {
     treeColumn?: string;
     initiallyExpanded: boolean;
     expandedRowIds: RowId[];
+    stickyParents: boolean;
 }
 
 const defaultOptions: NormalizedTreeViewOptions = {
@@ -63,7 +64,8 @@ const defaultOptions: NormalizedTreeViewOptions = {
         parentIdColumn: 'parentId'
     },
     initiallyExpanded: false,
-    expandedRowIds: []
+    expandedRowIds: [],
+    stickyParents: true
 };
 
 
@@ -112,6 +114,7 @@ export function normalizeTreeViewOptions(
     return {
         ...mergedOptions,
         input: normalizedInput,
-        expandedRowIds: mergedOptions.expandedRowIds.slice()
+        expandedRowIds: mergedOptions.expandedRowIds.slice(),
+        stickyParents: mergedOptions.stickyParents !== false
     };
 }

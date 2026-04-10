@@ -365,7 +365,7 @@ function getTreeToggleContext(
     }
 
     const controller = cell.row.viewport.grid.treeView;
-    const options = controller?.getOptions();
+    const options = controller?.options;
     const projectionState = controller?.getProjectionState();
     const treeColumn = (
         options?.treeColumn ||
@@ -783,7 +783,7 @@ function onTableAfterDestroy(this: Table): void {
 function onAfterCellRender(this: TableCell): void {
     const grid = this.row.viewport.grid;
     const controller = grid.treeView;
-    const options = controller?.getOptions();
+    const options = controller?.options;
     const projectionState = controller?.getProjectionState();
 
     if (!options || !projectionState) {

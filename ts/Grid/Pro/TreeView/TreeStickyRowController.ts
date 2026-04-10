@@ -40,6 +40,7 @@ type StickyCandidate = {
 
 const stickyRowClassName = Globals.classNamePrefix + 'tree-sticky-row';
 const stickyBodyClassName = Globals.classNamePrefix + 'tree-sticky-body';
+const maxStickyRows = 10;
 
 
 /* *
@@ -103,14 +104,26 @@ class TreeStickyRowController {
     }
 
     public getRenderedStickyRow(): TableRow | undefined {
+        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+            return;
+        }
+
         return this.stickyRows[0];
     }
 
     public getRenderedStickyRows(): TableRow[] {
+        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+            return [];
+        }
+
         return this.stickyRows;
     }
 
     public getStickyRowsHeight(): number {
+        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+            return 0;
+        }
+
         return this.stickyRows.reduce(
             (height, row): number =>
                 height + (
@@ -126,6 +139,11 @@ class TreeStickyRowController {
     }
 
     public handleScroll(): void {
+        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+            this.clearStickyRows();
+            return;
+        }
+
         const candidates = this.getCurrentCandidates();
 
         if (!candidates.length) {
@@ -148,6 +166,19 @@ class TreeStickyRowController {
         syncRow: boolean = false,
         reflowRow: boolean = false
     ): void {
+        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+            if (typeof this.animationFrameId === 'number') {
+                cancelAnimationFrame(this.animationFrameId);
+                delete this.animationFrameId;
+            }
+
+            this.needsRowSync = false;
+            this.needsRowReflow = false;
+            this.clearStickyRows();
+
+            return;
+        }
+
         this.needsRowSync = this.needsRowSync || syncRow;
         this.needsRowReflow = this.needsRowReflow || reflowRow;
 
@@ -297,6 +328,7 @@ class TreeStickyRowController {
             ?.getProjectionState();
 
         if (
+            !this.viewport.grid.treeView?.options?.stickyParents ||
             !projectionState ||
             !this.viewport.tbodyElement.isConnected ||
             this.viewport.tbodyElement.clientHeight <= 0
@@ -304,10 +336,16 @@ class TreeStickyRowController {
             return [];
         }
 
+        return this.getStackCandidates(projectionState);
+    }
+
+    private getStackCandidates(
+        projectionState: TreeProjectionState
+    ): StickyCandidate[] {
         const activeCandidates: StickyCandidate[] = [];
         let slotTop = this.viewport.tbodyElement.scrollTop;
 
-        for (let i = 0; i < 10; ++i) {
+        for (let i = 0; i < maxStickyRows; ++i) {
             const topVisibleRow = this.findTopVisibleRow(slotTop);
 
             if (
@@ -436,7 +474,10 @@ class TreeStickyRowController {
                 return [];
             }
 
-            if (rowState.hasChildren && rowState.isExpanded) {
+            if (
+                rowState.hasChildren &&
+                rowState.isExpanded
+            ) {
                 const rowIndex = this.getProjectedRowIndex(
                     currentRowId,
                     projectionState,

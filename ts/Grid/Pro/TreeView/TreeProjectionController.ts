@@ -75,8 +75,6 @@ class TreeProjectionController {
 
     private readonly grid: Grid;
 
-    private options?: NormalizedTreeViewOptions;
-
     private indexCache?: TreeIndexBuildResult;
 
     private projectionStateCache?: TreeProjectionState;
@@ -114,9 +112,12 @@ class TreeProjectionController {
      * Synchronizes internal state from current Grid options and provider.
      */
     public sync(): void {
-        const options = this.options = normalizeTreeViewOptions(
-            this.getDataOptions()?.treeView
-        );
+        const dataOptions = this.getDataOptions();
+        const options = normalizeTreeViewOptions(dataOptions?.treeView);
+
+        if (dataOptions) {
+            dataOptions.treeView = options;
+        }
 
         if (!options) {
             this.clearCache();
@@ -137,7 +138,6 @@ class TreeProjectionController {
         }
         const versionTag = table.getVersionTag();
 
-        const dataOptions = this.getDataOptions();
         const idColumn = dataOptions?.idColumn;
         if (!idColumn) {
             throw new Error(
@@ -174,10 +174,12 @@ class TreeProjectionController {
     }
 
     /**
-     * Returns normalized TreeView options.
+     * Returns normalized TreeView options from the Grid options.
      */
-    public getOptions(): NormalizedTreeViewOptions | undefined {
-        return this.options;
+    public get options(): NormalizedTreeViewOptions | undefined {
+        return this.getDataOptions()?.treeView as (
+            NormalizedTreeViewOptions | undefined
+        );
     }
 
     /**
@@ -369,7 +371,6 @@ class TreeProjectionController {
      * Destroys controller state.
      */
     public destroy(): void {
-        this.options = void 0;
         this.clearTreeRowMetaState();
         this.expansionStateSeedKey = void 0;
         this.clearCache();
