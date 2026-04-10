@@ -442,8 +442,11 @@ export class Exporting {
             visited.add(href);
 
             try {
-                const sheetOrigin = new URL(href, document.baseURI).origin;
-                if (sheetOrigin !== location.origin) {
+                const sheetOrigin = new URL(href, doc.baseURI).origin;
+                if (sheetOrigin !== win.location.origin) {
+                    // We skip all cross-origin stylesheets on purpose.
+                    // This prevents DOM SecurityErrors and unhandled network
+                    // rejections when the browser blocks cssRules access.
                     return;
                 }
             } catch {
