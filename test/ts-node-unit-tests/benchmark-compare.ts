@@ -2,7 +2,7 @@
 import type { BenchResults } from './benchmark.d.ts';
 import { opendir, readFile, appendFile, writeFile } from 'node:fs/promises';
 import type { Dir } from 'fs';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 
 const TMP_FILE_PATH = resolve(__dirname, '../../tmp/benchmarks');
 
@@ -71,6 +71,10 @@ function getOutliers (array: number[], Q1:number, Q3: number){
     return array.filter(r => r < Q1 - 1.5 * IQR || r > Q3 + 1.5 * IQR);
 }
 
+function getBenchmarkTitle (testField: string): string {
+    return basename(testField, '.bench.ts');
+}
+
 function getMedian (values: number[]): number | undefined {
     const sorted = [...values].sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
@@ -79,7 +83,9 @@ function getMedian (values: number[]): number | undefined {
 }
 
 async function compare (base: BenchResults, actual: BenchResults){
-    console.log(`Comparing ${actual[0].test}`);
+    const benchmarkTitle = getBenchmarkTitle(actual[0].test);
+
+    console.log(`Comparing ${benchmarkTitle}`);
 
     // Remove outliers by sample size
     const filtered: Record<'base'|'actual', BenchResults> = actual.reduce((carry,entry) =>{
@@ -199,19 +205,17 @@ async function compare (base: BenchResults, actual: BenchResults){
 
     await appendFile(
         join(TMP_FILE_PATH, 'table.md'),
-        `### ${actual[0].test}
+        `### ${benchmarkTitle}
 ${markdownTableHeader}
 ${markdownTableRows.join('\n')}
 
 `);
 
-    const chartName = actual[0].test.replace('.bench.ts', '');
-
     await appendFile(
         join(TMP_FILE_PATH, 'report.html'), `
-        <div id="${chartName}"></div>
+        <div id="${benchmarkTitle}"></div>
         <script type="text/javascript">
-        Highcharts.chart("${chartName}", ${JSON.stringify(chartConfig(chartName, series))});
+        Highcharts.chart("${benchmarkTitle}", ${JSON.stringify(chartConfig(benchmarkTitle, series))});
         </script>`
     );
 }
