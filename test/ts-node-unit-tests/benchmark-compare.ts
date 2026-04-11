@@ -71,6 +71,13 @@ function getOutliers (array: number[], Q1:number, Q3: number){
     return array.filter(r => r < Q1 - 1.5 * IQR || r > Q3 + 1.5 * IQR);
 }
 
+function getMedian (values: number[]): number | undefined {
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+
+    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
 async function compare (base: BenchResults, actual: BenchResults){
     console.log(`Comparing ${actual[0].test}`);
 
@@ -170,34 +177,31 @@ async function compare (base: BenchResults, actual: BenchResults){
         }
     });
 
-    const fmtResult = (num: number) =>
-        Math.round((num + Number.EPSILON) * 100) / 100;
-
-    // test, averages, diff
     const markdownTableRows = actual.map((entry, i) =>{
         const baseEntry = base.find(b => b.sampleSize === entry.sampleSize) ?? base[i];
-        const diff = entry.avg - baseEntry.avg;
 
-        return `| ${entry.sampleSize} | ${fmtResult(entry.avg)} | ${fmtResult(baseEntry.avg)} | ${fmtResult(diff)} | ${fmtResult((diff) / baseEntry.avg) * 100}%`;
+        const diff = entry.avg - baseEntry.avg;
+        const avgPerc = (diff / baseEntry.avg) * 100;
+
+        const medianPR = getMedian(entry.results);
+        const medianMaster = getMedian(baseEntry.results);
+        const medianDiff = medianPR - medianMaster;
+        const medianPerc = (medianDiff / medianMaster) * 100;
+
+        const fmt = (n: number | undefined, sign: string = '') =>
+            n === undefined || Number.isNaN(n) ? '—' : `${Math.round(n)}${sign}`;
+
+        return `| ${entry.sampleSize} | ${fmt(entry.avg)} | ${fmt(baseEntry.avg)} | ${fmt(diff)} | **${fmt(avgPerc, '%')}** | ${fmt(medianPR)} | ${fmt(medianMaster)} | ${fmt(medianDiff)} | **${fmt(medianPerc, '%')}** |`;
     });
 
-    const markdownTableHeader = `| Sample size | This PR avg (ms) | master avg (ms) | Diff | Percent diff |
-| --- | --- | --- | --- | --- |`;
+    const markdownTableHeader = `| Sample size | Avg: PR (ms) | Avg: Master (ms) | Avg Δ (ms) | Avg Δ (%) | Median: PR (ms) | Median: Master (ms) | Median Δ (ms) | Median Δ (%) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |`;
 
     await appendFile(
         join(TMP_FILE_PATH, 'table.md'),
         `### ${actual[0].test}
 ${markdownTableHeader}
-${markdownTableRows[markdownTableRows.length - 1]}
-
-<details><summary>See all</summary>
-
-
-${markdownTableHeader}
 ${markdownTableRows.join('\n')}
-
-
-</details>
 
 `);
 
