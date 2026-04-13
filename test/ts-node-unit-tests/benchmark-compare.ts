@@ -4,9 +4,13 @@ import { opendir, readFile, appendFile, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 
 const TMP_FILE_PATH = resolve(__dirname, '../../tmp/benchmarks');
-const REPORT_TABLE_INTRO = `> Rows with average difference between **−5%** and **+5%** are collapsed under a toggle inside each benchmark section.
+const QUIET_BAND_THRESHOLD_PERCENT = 5;
+const REPORT_TABLE_INTRO = `> Rows with average difference between **−${QUIET_BAND_THRESHOLD_PERCENT}%** and **+${QUIET_BAND_THRESHOLD_PERCENT}%** are collapsed under a toggle inside each benchmark section.
 
 `;
+
+let hasAnyLoudLines = false;
+const benchmarkTableSections: string[] = [];
 
 function regression (yValues: number[], xValues: number[]){
     const yMean = yValues.reduce((a, b) => a + b) / yValues.length;
@@ -200,13 +204,19 @@ async function compare (base: BenchResults, actual: BenchResults){
         const medianPerc = (medianDiff / medianMaster) * 100;
 
         const line = `| ${entry.sampleSize} | ${fmt(entry.avg)} | ${fmt(baseEntry.avg)} | ${fmt(diff)} | **${fmt(avgPerc, '%')}** | ${fmt(medianPR)} | ${fmt(medianMaster)} | ${fmt(medianDiff)} | **${fmt(medianPerc, '%')}** |`;
-        const inQuietBand = !Number.isNaN(avgPerc) && avgPerc >= -5 && avgPerc <= 5;
+        const inQuietBand = !Number.isNaN(avgPerc) &&
+            avgPerc >= -QUIET_BAND_THRESHOLD_PERCENT &&
+            avgPerc <= QUIET_BAND_THRESHOLD_PERCENT;
 
         return { line, inQuietBand };
     });
 
     const loudLines = rowBands.filter(r => !r.inQuietBand).map(r => r.line);
     const quietLines = rowBands.filter(r => r.inQuietBand).map(r => r.line);
+
+    if (loudLines.length > 0) {
+        hasAnyLoudLines = true;
+    }
 
     const detailsSummary = `See hidden ${benchmarkTitle} results.`;
 
@@ -233,9 +243,7 @@ ${quietLines.join('\n')}
 </details>`;
     }
 
-    await appendFile(
-        join(TMP_FILE_PATH, 'table.md'),
-        `### ${benchmarkTitle}
+    benchmarkTableSections.push(`### ${benchmarkTitle}
 ${benchSummaryMd}
 
 `);
@@ -304,8 +312,6 @@ async function compareDirectories(
     return comparisonsMade;
 }
 async function compareBenchmarks (){
-
-    await writeFile(join(TMP_FILE_PATH, 'table.md'), REPORT_TABLE_INTRO);
     await writeFile(join(TMP_FILE_PATH, 'report.html'), `
         <script src="https://code.highcharts.com/highcharts.js"></script>`);
 
@@ -314,6 +320,22 @@ async function compareBenchmarks (){
         join(TMP_FILE_PATH, 'base'),
         join(TMP_FILE_PATH, 'actual')
     );
+
+    const body = benchmarkTableSections.join('');
+
+    if (!hasAnyLoudLines) {
+        await writeFile(
+            join(TMP_FILE_PATH, 'table.md'),
+            `### No significant performance changes.
+
+<details><summary>See all tests.</summary>
+
+${REPORT_TABLE_INTRO}${body}</details>
+`
+        );
+    } else {
+        await writeFile(join(TMP_FILE_PATH, 'table.md'), `${REPORT_TABLE_INTRO}${body}`);
+    }
 
     if (comparisonsMade > 0){
         console.log('Report saved at', resolve(__dirname,TMP_FILE_PATH, 'report.html'));
