@@ -93,6 +93,13 @@ class TreeStickyRowController {
      *
      * */
 
+    /**
+     * Returns whether sticky parent rows are enabled.
+     */
+    public get enabled(): boolean {
+        return !!this.viewport.grid.treeView?.options?.stickyParents;
+    }
+
     public destroy(): void {
         if (typeof this.animationFrameId === 'number') {
             cancelAnimationFrame(this.animationFrameId);
@@ -104,7 +111,7 @@ class TreeStickyRowController {
     }
 
     public getRenderedStickyRow(): TableRow | undefined {
-        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+        if (!this.enabled) {
             return;
         }
 
@@ -112,7 +119,7 @@ class TreeStickyRowController {
     }
 
     public getRenderedStickyRows(): TableRow[] {
-        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+        if (!this.enabled) {
             return [];
         }
 
@@ -120,7 +127,7 @@ class TreeStickyRowController {
     }
 
     public getStickyRowsHeight(): number {
-        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+        if (!this.enabled) {
             return 0;
         }
 
@@ -139,7 +146,7 @@ class TreeStickyRowController {
     }
 
     public handleScroll(): void {
-        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+        if (!this.enabled) {
             this.clearStickyRows();
             return;
         }
@@ -166,7 +173,7 @@ class TreeStickyRowController {
         syncRow: boolean = false,
         reflowRow: boolean = false
     ): void {
-        if (!this.viewport.grid.treeView?.options?.stickyParents) {
+        if (!this.enabled) {
             if (typeof this.animationFrameId === 'number') {
                 cancelAnimationFrame(this.animationFrameId);
                 delete this.animationFrameId;
@@ -328,7 +335,7 @@ class TreeStickyRowController {
             ?.getProjectionState();
 
         if (
-            !this.viewport.grid.treeView?.options?.stickyParents ||
+            !this.enabled ||
             !projectionState ||
             !this.viewport.tbodyElement.isConnected ||
             this.viewport.tbodyElement.clientHeight <= 0
