@@ -29,10 +29,10 @@ import type {
 import type Grid from '../../Core/Grid';
 import type { RowMetaRecord } from '../../Core/Grid';
 import type { RowId } from '../../Core/Data/DataProvider';
+import type { DataProviderOptionsType } from '../../Core/Data/DataProviderType';
 import type { LocalDataProviderOptions } from '../../Core/Data/LocalDataProvider';
 import type {
     TreeIndexBuildResult,
-    TreeViewOptions,
     TreeProjectionRowState,
     TreeProjectionState
 } from './TreeViewTypes';
@@ -114,8 +114,9 @@ class TreeProjectionController {
      * Synchronizes internal state from current Grid options and provider.
      */
     public sync(): void {
+        const dataOptions = this.getDataOptions();
         const options = this.options = normalizeTreeViewOptions(
-            this.getDataOptions()?.treeView
+            dataOptions?.treeView
         );
 
         if (!options) {
@@ -137,7 +138,6 @@ class TreeProjectionController {
         }
         const versionTag = table.getVersionTag();
 
-        const dataOptions = this.getDataOptions();
         const idColumn = dataOptions?.idColumn;
         if (!idColumn) {
             throw new Error(
@@ -489,8 +489,14 @@ class TreeProjectionController {
     /**
      * Returns data options with TreeView extension for local provider.
      */
-    private getDataOptions(): DataOptionsWithTreeView | undefined {
-        return this.grid.options?.data as DataOptionsWithTreeView | undefined;
+    private getDataOptions(): LocalDataProviderOptions | undefined {
+        const dataOptions = this.grid.options?.data;
+
+        if (!TreeProjectionController.isLocalDataOptions(dataOptions)) {
+            return;
+        }
+
+        return dataOptions;
     }
 
     /**
@@ -1024,6 +1030,27 @@ class TreeProjectionController {
     }
 
     /**
+     * Runtime type guard for local data provider options.
+     *
+     * @param dataOptions
+     * Data provider options to test.
+     *
+     * @returns
+     * `true` when options belong to the local data provider.
+     */
+    private static isLocalDataOptions(
+        dataOptions?: DataProviderOptionsType
+    ): dataOptions is LocalDataProviderOptions {
+        return !!(
+            dataOptions &&
+            (
+                typeof dataOptions.providerType === 'undefined' ||
+                dataOptions.providerType === 'local'
+            )
+        );
+    }
+
+    /**
      * Runtime type guard for providers exposing `getDataTable`.
      *
      * @param provider
@@ -1054,14 +1081,6 @@ class TreeProjectionController {
  *  Declarations
  *
  * */
-
-interface DataOptionsWithTreeView extends LocalDataProviderOptions {
-    treeView?: TreeViewOptions;
-}
-
-interface TreeViewRowMetaFields {
-    expanded?: boolean;
-}
 
 /**
  * Browser event that triggered a tree row toggle.
@@ -1111,10 +1130,6 @@ export interface AfterTreeRowToggleEvent extends TreeRowToggleEvent {
      * Expanded state after the toggle.
      */
     expanded: boolean;
-}
-
-declare module '../../Core/Grid' {
-    interface RowMetaRecord extends TreeViewRowMetaFields {}
 }
 
 
