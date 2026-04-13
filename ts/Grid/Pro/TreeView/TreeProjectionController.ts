@@ -29,10 +29,10 @@ import type {
 import type Grid from '../../Core/Grid';
 import type { RowMetaRecord } from '../../Core/Grid';
 import type { RowId } from '../../Core/Data/DataProvider';
+import type { DataProviderOptionsType } from '../../Core/Data/DataProviderType';
 import type { LocalDataProviderOptions } from '../../Core/Data/LocalDataProvider';
 import type {
     TreeIndexBuildResult,
-    TreeViewOptions,
     TreeProjectionRowState,
     TreeProjectionState
 } from './TreeViewTypes';
@@ -50,7 +50,7 @@ import {
 import {
     normalizeTreeViewOptions
 } from './TreeViewOptionsNormalizer.js';
-import { fireEvent } from '../../../Shared/Utilities.js';
+import { defined, fireEvent } from '../../../Shared/Utilities.js';
 
 
 /* *
@@ -442,7 +442,7 @@ class TreeProjectionController {
      */
     private clearTreeRowMetaState(): void {
         for (const [rowId, rowMeta] of this.grid.rowMeta) {
-            if (typeof rowMeta.expanded === 'undefined') {
+            if (!defined(rowMeta.expanded)) {
                 continue;
             }
 
@@ -467,8 +467,8 @@ class TreeProjectionController {
      */
     private setRowMetaExpanded(rowId: RowId, expanded?: boolean): boolean {
         const rowMeta = this.grid.rowMeta.get(rowId);
-        if (typeof expanded === 'undefined') {
-            if (typeof rowMeta?.expanded === 'undefined') {
+        if (!defined(expanded)) {
+            if (!defined(rowMeta?.expanded)) {
                 return false;
             }
 
@@ -490,8 +490,14 @@ class TreeProjectionController {
     /**
      * Returns data options with TreeView extension for local provider.
      */
-    private getDataOptions(): DataOptionsWithTreeView | undefined {
-        return this.grid.options?.data as DataOptionsWithTreeView | undefined;
+    private getDataOptions(): LocalDataProviderOptions | undefined {
+        const dataOptions = this.grid.options?.data;
+
+        if (!TreeProjectionController.isLocalDataOptions(dataOptions)) {
+            return;
+        }
+
+        return dataOptions;
     }
 
     /**
@@ -564,7 +570,7 @@ class TreeProjectionController {
         }
 
         for (const [rowId, meta] of this.grid.rowMeta) {
-            if (typeof meta.expanded === 'undefined') {
+            if (!defined(meta.expanded)) {
                 continue;
             }
 
@@ -715,7 +721,7 @@ class TreeProjectionController {
                 (
                     explicitExpanded === true ||
                     (
-                        typeof explicitExpanded === 'undefined' &&
+                        !defined(explicitExpanded) &&
                         isAncestorOnly
                     )
                 )
@@ -1063,6 +1069,27 @@ class TreeProjectionController {
     }
 
     /**
+     * Runtime type guard for local data provider options.
+     *
+     * @param dataOptions
+     * Data provider options to test.
+     *
+     * @returns
+     * `true` when options belong to the local data provider.
+     */
+    private static isLocalDataOptions(
+        dataOptions?: DataProviderOptionsType
+    ): dataOptions is LocalDataProviderOptions {
+        return !!(
+            dataOptions &&
+            (
+                typeof dataOptions.providerType === 'undefined' ||
+                dataOptions.providerType === 'local'
+            )
+        );
+    }
+
+    /**
      * Runtime type guard for providers exposing `getDataTable`.
      *
      * @param provider
@@ -1093,14 +1120,6 @@ class TreeProjectionController {
  *  Declarations
  *
  * */
-
-interface DataOptionsWithTreeView extends LocalDataProviderOptions {
-    treeView?: TreeViewOptions;
-}
-
-interface TreeViewRowMetaFields {
-    expanded?: boolean;
-}
 
 /**
  * Browser event that triggered a tree row toggle.
@@ -1150,10 +1169,6 @@ export interface AfterTreeRowToggleEvent extends TreeRowToggleEvent {
      * Expanded state after the toggle.
      */
     expanded: boolean;
-}
-
-declare module '../../Core/Grid' {
-    interface RowMetaRecord extends TreeViewRowMetaFields {}
 }
 
 

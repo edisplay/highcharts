@@ -293,13 +293,20 @@ export class LocalDataProvider extends DataProvider {
      * The local (presentation table) row index to get the row ID for.
      */
     public override async getRowId(rowIndex: number): Promise<RowId | undefined> {
+        const idColId = this.options.idColumn;
+        if (idColId) {
+            const rawId = this.presentationTable?.getCell(idColId, rowIndex);
+            if (isString(rawId) || isNumber(rawId)) {
+                return Promise.resolve(rawId);
+            }
+        }
+
         const originalRowIndex =
             await this.getOriginalRowIndexFromLocal(rowIndex);
         if (!defined(originalRowIndex) || !this.dataTable) {
             return Promise.resolve(void 0);
         }
 
-        const idColId = this.options.idColumn;
         if (!idColId) {
             return Promise.resolve(originalRowIndex);
         }

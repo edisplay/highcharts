@@ -886,6 +886,13 @@ declare module '../../Core/Grid' {
     export default interface Grid {
         treeView?: TreeProjectionController;
     }
+
+    interface RowMetaRecord {
+        /**
+         * Explicit expansion state override for the row.
+         */
+        expanded?: boolean;
+    }
 }
 
 declare module '../../Core/Table/Table' {
@@ -918,6 +925,8 @@ declare module '../../Core/Data/LocalDataProvider' {
         treeView?: TreeViewOptions;
     }
 }
+
+
 /* *
  *
  *  Default export
