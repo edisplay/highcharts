@@ -202,7 +202,6 @@ export const {
  * */
 
 const wnd = G.win as { Highcharts?: unknown };
-
 if (wnd.Highcharts) {
     G.CellRendererRegistry.types.sparkline.useHighcharts(wnd.Highcharts);
 }

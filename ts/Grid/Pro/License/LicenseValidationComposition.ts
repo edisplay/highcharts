@@ -28,21 +28,11 @@ import LicenseValidation from './LicenseValidation.js';
 import Globals from '../../Core/Globals.js';
 import { addEvent, pushUnique } from '../../../Shared/Utilities.js';
 
-
 /* *
  *
- *  Functions
+ *  Composition
  *
  * */
-
-/**
- * License check handler.
- * @param this Grid instance.
- * @internal
- */
-function validateLicense(this: Grid): void {
-    LicenseValidation.checkLicense(this);
-}
 
 /**
  * Extends the grid classes with license validation.
@@ -61,6 +51,14 @@ function compose(GridClass: typeof Grid): void {
     addEvent(GridClass, 'afterUpdate', validateLicense);
 }
 
+/**
+ * Callback function called after the grid is loaded or updated.
+ *
+ * @param this Grid instance.
+ */
+function validateLicense(this: Grid): void {
+    LicenseValidation.validate(this);
+}
 
 /* *
  *
@@ -75,18 +73,17 @@ declare module '../../Core/Options' {
          * https://shop.highcharts.com
          *
          * The Grid Key can be set globally using `Grid.setOptions()` or
-         * on individual Grid instances. One Grid Key works for all
-         * Grid instances on a page.
+         * on individual Grid instances.
          *
          * @example
-         * Global setting (recommended)
-         * 
+         * Global setting.
+         *
          * Grid.setOptions({
          *   gridKey: 'XXXX-XXXX-XXXX-AYYY-ZZZZ-WWWW'
          * });
          *
          * @example
-         * Per instance (auto-promotes to global)
+         * Per instance.
          *
          * Grid.grid('container', {
          *   gridKey: 'XXXX-XXXX-XXXX-AYYY-ZZZZ-WWWW'
@@ -103,8 +100,6 @@ declare module '../../Core/Options' {
  *
  * */
 
-const LicenseValidationComposition = {
+export default {
     compose
 };
-
-export default LicenseValidationComposition;

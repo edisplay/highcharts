@@ -14,22 +14,36 @@ const KEY_PERPETUAL_SUPPORT_ENDED = 'LC4W-4MDA-95VZ-P1MO-07FY-0000';
 describe('Grid Pro license validation', () => {
     it('Valid key', () => {
         strictEqual(
-            LicenseValidation.validate(KEY_ANNUAL_VALID, REF),
+            LicenseValidation.getStatus(KEY_ANNUAL_VALID, REF),
             GridProLicenseValidity.VALID
         );
     });
 
     it('Annual expired key', () => {
         strictEqual(
-            LicenseValidation.validate(KEY_ANNUAL_EXPIRED, REF),
-            GridProLicenseValidity.ANNUAL
+            LicenseValidation.getStatus(KEY_ANNUAL_EXPIRED, REF),
+            GridProLicenseValidity.EXPIRED
         );
     });
 
-    it('Perpetual support ended key', () => {
+    it('Perpetual license past support end', () => {
         strictEqual(
-            LicenseValidation.validate(KEY_PERPETUAL_SUPPORT_ENDED, REF),
-            GridProLicenseValidity.PERPETUAL
+            LicenseValidation.getStatus(KEY_PERPETUAL_SUPPORT_ENDED, REF),
+            GridProLicenseValidity.EXPIRED
+        );
+    });
+
+    it('Missing key', () => {
+        strictEqual(
+            LicenseValidation.getStatus(void 0, REF),
+            GridProLicenseValidity.MISSING
+        );
+    });
+
+    it('Invalid key (malformed)', () => {
+        strictEqual(
+            LicenseValidation.getStatus('not-a-grid-key', REF),
+            GridProLicenseValidity.INVALID
         );
     });
 });

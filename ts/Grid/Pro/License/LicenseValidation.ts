@@ -10,9 +10,27 @@
  *
  *  Author:
  *  - Mikkel Espolin Birkeland
+ *  - Sebastian Bochan
  * */
 
 'use strict';
+
+
+/* *
+ *
+ *  Imports
+ *
+ * */
+
+import type Grid from '../../Core/Grid';
+import Globals from '../../../Core/Globals.js';
+import {
+    defined,
+    isNumber,
+    isObject,
+    isString
+} from '../../../Shared/Utilities.js';
+
 
 /* *
  *
@@ -20,13 +38,37 @@
  *
  * */
 
-const GRID_KEY_PART_REGEXP = /^[A-Z0-9]{4}$/;
+const GRID_KEY_PART = /^[A-Z0-9]{4}$/;
+const GRID_KEY_EPOCH = Date.UTC(2020, 0, 1);
+const GRID_KEY_DOC = 'https://www.highcharts.com/docs/grid/grid-key';
+
+/** Hostnames (exact or `*.domain`) where a Grid Key is not required. */
 const GRID_KEY_WILDCARD_DOMAINS = [
+    'localhost',
     'highcharts.com',
     'jsfiddle.net',
     'stackblitz.com',
     'highcharts.com.cn'
 ] as const;
+
+
+/* *
+ *
+ *  Declarations
+ *
+ * */
+
+/**
+ * Result of {@link getStatus} for a Grid Key string.
+ * @internal
+ */
+export enum GridProLicenseValidity {
+    VALID = 'valid',
+    MISSING = 'missing',
+    INVALID = 'invalid',
+    EXPIRED = 'expired'
+}
+
 
 /* *
  *
@@ -35,125 +77,254 @@ const GRID_KEY_WILDCARD_DOMAINS = [
  * */
 
 /**
- * Validates Grid Pro Grid Keys using checksum algorithm.
- * @internal
+ * The class that handles Grid Pro license keys: validation on load and update,
+ * parsing, and status checks for the grid.
  */
 class LicenseValidation {
 
     /* *
      *
-     *  Static Methods
+     *  Properties
      *
      * */
 
     /**
-     * Calculate checksum for Grid Key data.
-     *
-     * @param data
-     * First 12 characters of the Grid Key (3 groups of 4).
-     *
-     * @return
-     * 4-character checksum in uppercase alphanumeric format.
-     *
+     * Flag for emitted error on this page.
      * @internal
      */
-    public static calculateChecksum(data: string): string {
-        // Calculate weighted sum based on character position
+    private static licenseError = false;
+
+    /**
+     * Last `gridKey` passed to {@link validate}; same value again → skip work.
+     * @internal
+     */
+    private static verifiedLicenseKey: string | undefined;
+
+
+    /* *
+     *
+     *  Methods
+     *
+     * */
+
+    /**
+     * Segment 5 checksum: weighted char sum of payload, mod `36^4`, 4-char
+     * upper base-36.
+     * @internal
+     *
+     * @param integrityPayload16 Segments 1–4 joined, no hyphens (16 chars).
+     */
+    public static calculateChecksum(integrityPayload16: string): string {
         let sum = 0;
-        for (let i = 0; i < data.length; i++) {
-            sum += data.charCodeAt(i) * (i + 1);
+        for (let i = 0; i < integrityPayload16.length; i++) {
+            sum += integrityPayload16.charCodeAt(i) * (i + 1);
         }
+        const mod = sum % 1679616;
+        let checksum = mod.toString(36).toUpperCase();
 
-        // Take modulo to fit in 4-character space (36^4 = 1,679,616)
-        const checksumValue = sum % 1679616;
-
-        // Convert to base-36 and pad to 4 characters
-        let checksum = checksumValue.toString(36).toUpperCase();
         while (checksum.length < 4) {
             checksum = '0' + checksum;
         }
+
         return checksum;
     }
 
     /**
-     * Validate a Grid Pro Grid Key.
-     *
-     * @param key
-     * The Grid Key to validate.
-     *
-     * @return
-     * True if the Grid Key is valid, false otherwise.
-     *
+     * Parse a Grid Key (`XXXX-…-WWWW`, six hyphen-separated groups of four
+     * `A–Z`/`0–9`).
      * @internal
+     *
+     * @param key Raw key.
+     *
+     * @returns Segment 4, decoded `endDate`, and whether segment 5 matches
+     * {@link calculateChecksum}. `null` if structural rules fail; if the layout is
+     * valid but segment 5 is wrong, returns an object with `checksumMatches: false`.
+     *
+     * @see getStatus
      */
-    public static validate(key?: string): boolean {
-        // Handle non-string input (null, undefined, numbers, etc.)
-        if (!key || typeof key !== 'string') {
-            return false;
-        }
+    private static parseKey(
+        key: string
+    ): {
+        expirySegment: string;
+        endDate: Date;
+        checksumMatches: boolean;
+    } | null {
 
-        // Normalize: remove spaces, convert to uppercase
-        key = key.replace(/\s/g, '').toUpperCase();
+        // 1. Normalize (trim spaces, upper case).
+        const normalizedKey = key.replace(/\s/g, '').toUpperCase();
+        const segments = normalizedKey.split('-');
+        const expirySegment = segments[3] ?? '';
+        let daysSinceEpoch = 0;
+        let invalidSegment4Digits = false;
 
-        // Split by dash
-        const parts = key.split('-');
-
-        if (parts.length !== 4) {
-            return false;
-        }
-
-        for (const part of parts) {
-            if (!GRID_KEY_PART_REGEXP.test(part)) {
-                return false;
+        // 2. Convert base-36 digits to days since epoch.
+        for (let i = 1; i < 4; i++) {
+            const codeUnit = expirySegment.charCodeAt(i);
+            const digit =
+                codeUnit <= 57 ? codeUnit - 48 : 10 + (codeUnit - 65);
+            if (digit < 0 || digit > 35) {
+                invalidSegment4Digits = true;
+                break;
             }
+            daysSinceEpoch = daysSinceEpoch * 36 + digit;
         }
 
-        const data = parts.slice(0, 3).join('');
-        const providedChecksum = parts[3];
+        // 3. Calculate license expiry date.
+        const endDate = new Date(GRID_KEY_EPOCH + daysSinceEpoch * 864e5);
 
-        const calculatedChecksum = this.calculateChecksum(data);
+        // 4. Checksum of joined segments 1–4.
+        const integrityPayload = segments.slice(0, 4).join('');
+        const expectedSegment5 = this.calculateChecksum(integrityPayload);
+        const checksumMatches = segments[4] === expectedSegment5;
 
-        return providedChecksum === calculatedChecksum;
+        if (
+            !normalizedKey.length ||
+            segments.length !== 6 ||
+            !segments.every((part): boolean => GRID_KEY_PART.test(part)) ||
+            !/^[AP]/.test(expirySegment) ||
+            invalidSegment4Digits ||
+            !isNumber(endDate.getTime())
+        ) {
+            return null;
+        }
+
+        return {
+            expirySegment,
+            endDate,
+            checksumMatches
+        };
     }
 
     /**
-     * Check if the current URL is whitelisted (no license required).
+     * License status from key shape, checksum, and expiry vs UTC day of `now`.
+     * @internal
      *
-     * Whitelisted URLs:
-     * - localhost (any port)
-     * - *.highcharts.com (any subdomain, any port)
-     * - *.jsfiddle.net (any subdomain, any port)
-     * - *.stackblitz.com (any subdomain, any port)
-     * - *.highcharts.com.cn (any subdomain, any port)
+     * @param key Grid Key (optional).
      *
-     * @return
-     * True if the current URL is whitelisted, false otherwise.
+     * @param now Expiry reference; default today (UTC day).
      *
+     * @returns Status enum value for `key` at `now`.
+     */
+    public static getStatus(
+        key?: string,
+        now: Date = new Date()
+    ): GridProLicenseValidity {
+
+        // Check if the key is a string and not empty.
+        if (!isString(key)) {
+            return GridProLicenseValidity.MISSING;
+        }
+
+        const x = this.parseKey(key);
+
+        // Check if the key is valid and the checksum matches.
+        if (!x || !x.checksumMatches) {
+            return GridProLicenseValidity.INVALID;
+        }
+
+        // Check if the key is expired.
+        if (this.isExpired(x.endDate, now)) {
+            return GridProLicenseValidity.EXPIRED;
+        }
+
+        // Valid key.
+        return GridProLicenseValidity.VALID;
+    }
+
+    /**
+     * True when `now` (UTC date) is strictly after `end` (UTC date).
+     * @internal
+     *
+     * @param end Parsed license end date.
+     *
+     * @param now Defaults to `new Date()`.
+     */
+    public static isExpired(end: Date, now: Date = new Date()): boolean {
+        const y = now.getUTCFullYear(),
+            m = now.getUTCMonth(),
+            d = now.getUTCDate(),
+            ey = end.getUTCFullYear(),
+            em = end.getUTCMonth(),
+            ed = end.getUTCDate();
+
+        return (
+            y > ey ||
+            (y === ey && m > em) ||
+            (y === ey && m === em && d > ed)
+        );
+    }
+
+    /**
+     * Checks if domain is whitelisted (including subdomains).
      * @internal
      */
     public static isWhitelistedURL(): boolean {
-        // Skip in SSR environments (no window object)
-        if (typeof window === 'undefined') {
+        const { win } = Globals;
+        if (!defined(win.location)) {
             return false;
         }
+        const h = win.location.hostname.toLowerCase();
 
-        // Get hostname (already excludes port)
-        const hostname = window.location.hostname.toLowerCase();
+        // Support subdomains
+        return GRID_KEY_WILDCARD_DOMAINS.some(
+            (domain): boolean => h === domain || h.endsWith('.' + domain)
+        );
+    }
 
-        // Exact match: localhost
-        if (hostname === 'localhost') {
-            return true;
+    /**
+     * Checks key and errors once if not valid.
+     * @internal
+     *
+     * @param grid Grid instance
+     */
+    public static validate(grid: Grid): void {
+        if (this.isWhitelistedURL()) {
+            return;
         }
 
-        for (const domain of GRID_KEY_WILDCARD_DOMAINS) {
-            if (hostname === domain || hostname.endsWith(`.${domain}`)) {
-                return true;
+        const options = grid.options;
+        const gridKey = isObject(options) && isString(options.gridKey) ?
+            options.gridKey :
+            void 0;
+
+        if (
+            defined(this.verifiedLicenseKey) &&
+            gridKey === this.verifiedLicenseKey
+        ) {
+            return;
+        }
+
+        this.verifiedLicenseKey = gridKey;
+
+        const status = this.getStatus(gridKey);
+
+        if (
+            status !== GridProLicenseValidity.VALID &&
+            !this.licenseError
+        ) {
+            let statusPhrase: string;
+            switch (status) {
+                case GridProLicenseValidity.MISSING:
+                    statusPhrase = 'missing a valid Grid Key.';
+                    break;
+                case GridProLicenseValidity.EXPIRED:
+                    statusPhrase = 'using an expired Grid Key.';
+                    break;
+                default:
+                    statusPhrase = 'using an invalid Grid Key.';
+                    break;
             }
+            const message = (
+                'Highcharts Grid Pro is ' + statusPhrase + ' ' +
+                'Please visit ' + GRID_KEY_DOC + ' for more details.'
+            );
+            // eslint-disable-next-line no-console
+            console.error(message);
+            this.licenseError = true;
         }
-
-        return false;
     }
 }
+
 
 /* *
  *
