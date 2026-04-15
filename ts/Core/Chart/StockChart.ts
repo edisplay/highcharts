@@ -853,6 +853,8 @@ namespace StockChart {
                         // options are set on a horizontal x-axis, the grid
                         // lines should conform to that position.
                         hasCrossingBounds &&
+                        // In parallel coordinates, the axis height/width is 0,
+                        // so we need to skip that, #24442.
                         axis[crossingLenName] > 0 &&
                         !acrossPanes
                     ) {
