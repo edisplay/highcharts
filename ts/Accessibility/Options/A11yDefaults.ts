@@ -653,11 +653,8 @@ const Options: DeepPartial<A11yOptions> = {
                  * @since   6.0.3
                  */
                 style: {
-                    /** @internal */
                     color: Palette.highlightColor80,
-                    /** @internal */
                     lineWidth: 2,
-                    /** @internal */
                     borderRadius: 3
                 },
 

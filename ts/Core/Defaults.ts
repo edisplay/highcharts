@@ -2448,21 +2448,13 @@ const defaultOptions: DefaultOptions = {
          * @product highcharts highstock gantt
          */
         dateTimeLabelFormats: {
-            /** @internal */
             millisecond: '%[AebHMSL]',
-            /** @internal */
             second: '%[AebHMS]',
-            /** @internal */
             minute: '%[AebHM]',
-            /** @internal */
             hour: '%[AebHM]',
-            /** @internal */
             day: '%[AebY]',
-            /** @internal */
             week: '%v %[AebY]',
-            /** @internal */
             month: '%[BY]',
-            /** @internal */
             year: '%Y'
         },
 
@@ -2831,13 +2823,8 @@ const defaultOptions: DefaultOptions = {
          * @type {Highcharts.CSSObject}
          */
         style: {
-            /** @internal */
             color: Palette.neutralColor80,
-            /** @internal */
             cursor: 'default',
-            /**
-             * @type {number|string}
-             */
             fontSize: '0.8em'
         },
 
@@ -2922,10 +2909,6 @@ const defaultOptions: DefaultOptions = {
          *
          * @sample {highcharts} highcharts/credits/position-left/
          *         Left aligned
-         * @sample {highcharts} highcharts/credits/position-left/
-         *         Left aligned
-         * @sample {highmaps} maps/credits/customized/
-         *         Left aligned
          * @sample {highmaps} maps/credits/customized/
          *         Left aligned
          *
@@ -2933,13 +2916,9 @@ const defaultOptions: DefaultOptions = {
          * @since   2.1
          */
         position: {
-            /** @internal */
             align: 'right',
-            /** @internal */
             x: -10,
-            /** @internal */
             verticalAlign: 'bottom',
-            /** @internal */
             y: -5
         },
 
@@ -2952,9 +2931,7 @@ const defaultOptions: DefaultOptions = {
          * @type {Highcharts.CSSObject}
          */
         style: {
-            /** @internal */
             cursor: 'pointer',
-            /** @internal */
             color: Palette.neutralColor40,
             /**
              * @type {number|string}

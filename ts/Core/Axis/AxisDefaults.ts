@@ -1184,15 +1184,9 @@ namespace AxisDefaults {
              * @type      {Highcharts.CSSObject}
              */
             style: {
-                /** @internal */
                 color: Palette.neutralColor80,
-                /** @internal */
                 cursor: 'default',
-                /**
-                 * @type {number|string}
-                 */
                 fontSize: '0.8em',
-                /** @internal */
                 textOverflow: 'ellipsis'
             }
         },
@@ -2126,7 +2120,6 @@ namespace AxisDefaults {
              * @type    {Highcharts.CSSObject}
              */
             style: {
-                /** @internal */
                 color: Palette.neutralColor60,
                 /**
                  * @type {number|string}
@@ -3274,15 +3267,12 @@ namespace AxisDefaults {
              * @product highcharts
              */
             style: {
-                /** @internal */
                 color: Palette.neutralColor100,
                 /**
                  * @type {number|string}
                  */
                 fontSize: '0.7em',
-                /** @internal */
                 fontWeight: 'bold',
-                /** @internal */
                 textOutline: '1px contrast'
             }
         },
