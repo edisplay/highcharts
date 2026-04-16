@@ -2,18 +2,16 @@
 sidebar_label: "Grid Key (Grid Pro)"
 ---
 
-Grid Lite does not use a Grid Key. If you only use [Grid Lite](https://www.highcharts.com/docs/grid/general), you can skip this page.
-
 # Grid Key (Grid Pro)
 
 **Highcharts Grid Pro** is a commercial product. In the browser, the library checks for a valid **Grid Key** on hosts where a license applies.
+
+Grid Lite does not use a Grid Key. If you only use [Grid Lite](https://www.highcharts.com/docs/grid/general), you can skip this page.
 
 ## When you need a Grid Key
 
 The **Grid Key** as required whenever **Grid Pro** loads: staging and production, all need `gridKey` so the deployment matches your license.
 On **`localhost`** that check is skipped, so you can run Grid Pro locally without configuring a key.
-
-Buy Grid Pro and get your key from the [Highsoft shop](https://shop.highcharts.com), where you will also find pricing and license terms.
 
 ## How to set the Grid Key
 
