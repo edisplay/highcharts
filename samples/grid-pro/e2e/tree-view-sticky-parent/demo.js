@@ -106,7 +106,7 @@ window.grid = Grid.grid('container', {
             input: {
                 type: 'path'
             },
-            initiallyExpanded: true,
+            expandedRowIds: 'all',
             stickyParents: true,
             treeColumn: 'name'
         }

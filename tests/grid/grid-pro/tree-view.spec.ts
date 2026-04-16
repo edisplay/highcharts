@@ -95,11 +95,11 @@ test.describe('Grid Pro - tree view', () => {
         await expect(page.locator('tbody .hcg-row')).toHaveCount(1);
         expect(await getVisibleRowIds(page)).toStrictEqual(['1']);
 
-        await page.locator('.hcg-tree-toggle-button').first().click();
+        await page.locator('[data-hcg-tree-toggle]').first().click();
         await expect(page.locator('tbody .hcg-row')).toHaveCount(3);
         expect(await getVisibleRowIds(page)).toStrictEqual(['1', '2', '3']);
 
-        await page.locator('.hcg-tree-toggle-button').nth(1).click();
+        await page.locator('[data-hcg-tree-toggle]').nth(1).click();
         await expect(page.locator('tbody .hcg-row')).toHaveCount(4);
         expect(await getVisibleRowIds(page)).toStrictEqual([
             '1',
@@ -107,6 +107,37 @@ test.describe('Grid Pro - tree view', () => {
             '4',
             '3'
         ]);
+    });
+
+    test('seeds explicit expandedRowIds without expanding every branch', async ({ page }) => {
+        await loadGridPro(page);
+
+        await page.evaluate(async (): Promise<void> => {
+            (window as any).grid = await (window as any).Grid.grid('container', {
+                data: {
+                    columns: {
+                        id: [1, 2, 3, 4],
+                        parentId: [null, 1, 1, 2],
+                        name: ['Root', 'Sales', 'Marketing', 'EMEA']
+                    },
+                    idColumn: 'id',
+                    treeView: {
+                        expandedRowIds: [1],
+                        treeColumn: 'name'
+                    }
+                },
+                rendering: {
+                    rows: {
+                        virtualization: false
+                    }
+                }
+            }, true);
+        });
+
+        await expect(page.locator('tbody .hcg-row')).toHaveCount(3);
+        expect(await getVisibleRowIds(page)).toStrictEqual(['1', '2', '3']);
+        await expect(page.locator('[data-hcg-tree-toggle]').nth(1))
+            .toHaveAttribute('aria-expanded', 'false');
     });
 
     test('keeps generated path parents addressable after pagination', async ({ page }) => {
@@ -126,7 +157,7 @@ test.describe('Grid Pro - tree view', () => {
                             type: 'path'
                         },
                         treeColumn: 'name',
-                        initiallyExpanded: true
+                        expandedRowIds: 'all'
                     }
                 },
                 pagination: {
@@ -149,13 +180,13 @@ test.describe('Grid Pro - tree view', () => {
             '2'
         ]);
 
-        await page.locator('.hcg-tree-toggle-button').first().click();
+        await page.locator('[data-hcg-tree-toggle]').first().click();
 
         await expect(page.locator('tbody .hcg-row')).toHaveCount(1);
         expect(await getVisibleRowIds(page)).toStrictEqual([
             '__hcg_tree_path__:B'
         ]);
-        await expect(page.locator('.hcg-tree-toggle-button'))
+        await expect(page.locator('[data-hcg-tree-toggle]'))
             .toHaveAttribute('aria-expanded', 'false');
     });
 
@@ -190,7 +221,7 @@ test.describe('Grid Pro - tree view', () => {
                     idColumn: 'id',
                     treeView: {
                         treeColumn: 'name',
-                        initiallyExpanded: true
+                        expandedRowIds: 'all'
                     }
                 },
                 rendering: {
@@ -268,7 +299,7 @@ test.describe('Grid Pro - tree view', () => {
                     idColumn: 'id',
                     treeView: {
                         treeColumn: 'name',
-                        initiallyExpanded: true
+                        expandedRowIds: 'all'
                     }
                 },
                 rendering: {
@@ -349,7 +380,7 @@ test.describe('Grid Pro - tree view', () => {
                     idColumn: 'id',
                     treeView: {
                         treeColumn: 'name',
-                        initiallyExpanded: true
+                        expandedRowIds: 'all'
                     }
                 },
                 rendering: {
@@ -429,7 +460,7 @@ test.describe('Grid Pro - tree view', () => {
                     idColumn: 'id',
                     treeView: {
                         treeColumn: 'name',
-                        initiallyExpanded: true
+                        expandedRowIds: 'all'
                     }
                 },
                 rendering: {
@@ -446,7 +477,7 @@ test.describe('Grid Pro - tree view', () => {
             'table > tbody:not(.hcg-tree-sticky-body)'
         );
         const stickyToggleButton = page.locator(
-            '.hcg-tree-sticky-body tr[data-row-id="1"] .hcg-tree-toggle-button'
+            '.hcg-tree-sticky-body tr[data-row-id="1"] [data-hcg-tree-toggle]'
         );
 
         await expect.poll(async () => mainBody.evaluate(

@@ -21,8 +21,8 @@
  *
  * */
 
-import type { RowId } from '../../Core/Data/DataProvider';
 import type {
+    TreeExpandedRowIds,
     TreeViewOptions
 } from './TreeViewTypes';
 
@@ -53,19 +53,19 @@ export type NormalizedTreeInputOptions = (
 export interface NormalizedTreeViewOptions {
     input: NormalizedTreeInputOptions;
     treeColumn?: string;
-    initiallyExpanded: boolean;
-    expandedRowIds: RowId[];
+    expandedRowIds: TreeExpandedRowIds;
     stickyParents: boolean;
 }
 
-const defaultOptions: NormalizedTreeViewOptions = {
-    input: {
-        type: 'parentId',
-        parentIdColumn: 'parentId'
-    },
-    initiallyExpanded: false,
-    expandedRowIds: [],
-    stickyParents: true
+const defaultParentIdInput: NormalizedTreeInputParentIdOptions = {
+    type: 'parentId',
+    parentIdColumn: 'parentId'
+};
+
+const defaultPathInput: NormalizedTreeInputPathOptions = {
+    type: 'path',
+    pathColumn: 'path',
+    separator: '/'
 };
 
 
@@ -91,30 +91,21 @@ export function normalizeTreeViewOptions(
         return;
     }
 
-    const mergedOptions = merge(defaultOptions, treeView);
+    const expandedRowIds: TreeExpandedRowIds = treeView.expandedRowIds ?? [];
     const normalizedInput: NormalizedTreeInputOptions = (
-        mergedOptions.input.type === 'path' ?
-            merge(
-                {
-                    type: 'path',
-                    pathColumn: 'path',
-                    separator: '/'
-                },
-                mergedOptions.input
-            ) :
-            merge(
-                {
-                    type: 'parentId',
-                    parentIdColumn: 'parentId'
-                },
-                mergedOptions.input
-            )
+        treeView.input?.type === 'path' ?
+            merge(defaultPathInput, treeView.input) :
+            merge(defaultParentIdInput, treeView.input)
     );
 
     return {
-        ...mergedOptions,
         input: normalizedInput,
-        expandedRowIds: mergedOptions.expandedRowIds.slice(),
-        stickyParents: mergedOptions.stickyParents !== false
+        treeColumn: treeView.treeColumn,
+        expandedRowIds: (
+            expandedRowIds === 'all' ?
+                expandedRowIds :
+                expandedRowIds.slice()
+        ),
+        stickyParents: treeView.stickyParents !== false
     };
 }

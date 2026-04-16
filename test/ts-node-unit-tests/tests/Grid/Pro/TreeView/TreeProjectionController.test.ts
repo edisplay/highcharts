@@ -7,34 +7,20 @@ function installGridDOMGlobals(
     win: any,
     doc: Document
 ): void {
-    global.window = win;
-    global.document = doc;
-    global.HTMLElement = win.HTMLElement;
-    global.ResizeObserver = win.ResizeObserver;
-    global.MutationObserver = win.MutationObserver;
-
-    const requestAnimationFrame = (callback: FrameRequestCallback): number => {
+    const requestAnimationFrame = (
+        callback: FrameRequestCallback
+    ): number => {
         callback(0);
         return 0;
     };
-    const cancelAnimationFrame = (): void => {};
 
+    global.window = win;
+    global.document = doc;
+    global.ResizeObserver = win.ResizeObserver;
     global.requestAnimationFrame = requestAnimationFrame;
-    global.cancelAnimationFrame = cancelAnimationFrame;
+    global.cancelAnimationFrame = (): void => {};
     win.requestAnimationFrame = requestAnimationFrame;
-    win.cancelAnimationFrame = cancelAnimationFrame;
-}
-
-function loadGridPro(win: any): any {
-    let Grid = require('../../../../../../code/grid/grid-pro.src.js');
-
-    if (typeof Grid === 'function') {
-        Grid = Grid(win);
-    } else if (!Grid.win) {
-        Grid.win = win;
-    }
-
-    return Grid;
+    win.cancelAnimationFrame = (): void => {};
 }
 
 describe('TreeProjectionController', () => {
@@ -43,7 +29,7 @@ describe('TreeProjectionController', () => {
         mockObservers(win);
         installGridDOMGlobals(win, doc);
 
-        const Grid = loadGridPro(win);
+        const Grid = require('../../../../../../ts/masters-grid/grid-pro.src.ts');
 
         const grid = await Grid.grid(el, {
             data: {
@@ -54,7 +40,7 @@ describe('TreeProjectionController', () => {
                 },
                 idColumn: 'id',
                 treeView: {
-                    initiallyExpanded: true,
+                    expandedRowIds: 'all',
                     treeColumn: 'name'
                 }
             }

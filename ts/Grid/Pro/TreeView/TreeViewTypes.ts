@@ -54,15 +54,12 @@ export interface TreeViewOptions {
     treeColumn?: string;
 
     /**
-     * Default expansion mode for initial tree state.
-     * @default false
+     * Explicit set of expanded row IDs, or `'all'` to expand all tree rows
+     * initially.
+     *
+     * @default []
      */
-    initiallyExpanded?: boolean;
-
-    /**
-     * Explicit set of expanded row IDs.
-     */
-    expandedRowIds?: RowId[];
+    expandedRowIds?: TreeExpandedRowIds;
 
     /**
      * Enables sticky parent rows.
@@ -70,6 +67,11 @@ export interface TreeViewOptions {
      */
     stickyParents?: boolean;
 }
+
+/**
+ * Initial expansion seed for tree rows.
+ */
+export type TreeExpandedRowIds = RowId[] | 'all';
 
 /**
  * Tree input options variants supported by TreeView.
