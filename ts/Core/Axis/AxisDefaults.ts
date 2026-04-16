@@ -1184,6 +1184,9 @@ namespace AxisDefaults {
              * @type      {Highcharts.CSSObject}
              */
             style: {
+                /**
+                 * @type {Highcharts.ColorType}
+                 */
                 color: Palette.neutralColor80,
                 cursor: 'default',
                 fontSize: '0.8em',
@@ -2120,6 +2123,9 @@ namespace AxisDefaults {
              * @type    {Highcharts.CSSObject}
              */
             style: {
+                /**
+                 * @type {Highcharts.ColorType}
+                 */
                 color: Palette.neutralColor60,
                 /**
                  * @type {number|string}
@@ -2251,7 +2257,6 @@ namespace AxisDefaults {
          *         Bright grey lines from Y axis
          *
          * @type    {Highcharts.ColorType}
-         * @default #f2f2f2
          */
         minorGridLineColor: Palette.neutralColor5,
 
@@ -2279,7 +2284,6 @@ namespace AxisDefaults {
          *         Black tick marks on Y axis
          *
          * @type    {Highcharts.ColorType}
-         * @default #999999
          */
         minorTickColor: Palette.neutralColor40,
 
@@ -2335,7 +2339,6 @@ namespace AxisDefaults {
          *         Green lines
          *
          * @type    {Highcharts.ColorType}
-         * @default #e6e6e6
          */
         gridLineColor: Palette.neutralColor10,
 
@@ -3267,11 +3270,14 @@ namespace AxisDefaults {
              * @product highcharts
              */
             style: {
+                /** @type {Highcharts.ColorType} */
                 color: Palette.neutralColor100,
+
                 /**
                  * @type {number|string}
                  */
                 fontSize: '0.7em',
+
                 fontWeight: 'bold',
                 textOutline: '1px contrast'
             }

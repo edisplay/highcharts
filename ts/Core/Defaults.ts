@@ -386,6 +386,9 @@ const defaultOptions: DefaultOptions = {
              * CSS styling for the buttons' text
              */
             style: {
+                /**
+                 * @type {Highcharts.ColorType}
+                 */
                 color: Palette.neutralColor80,
                 cursor: 'pointer',
                 fontSize: '0.8em',
@@ -407,8 +410,14 @@ const defaultOptions: DefaultOptions = {
                  * addition to the normal state options
                  */
                 select: {
+                    /**
+                     * @type {Highcharts.ColorType}
+                     */
                     fill: Palette.highlightColor10,
                     style: {
+                        /**
+                         * @type {Highcharts.ColorType}
+                         */
                         color: Palette.neutralColor100,
                         fontWeight: 'bold'
                     }
@@ -671,6 +680,9 @@ const defaultOptions: DefaultOptions = {
          * @default   {highstock} { "color": "#333333", "fontSize": "16px" }
          */
         style: {
+            /**
+             * @type {Highcharts.ColorType}
+             */
             color: Palette.neutralColor80,
             fontWeight: 'bold'
         },
@@ -870,6 +882,9 @@ const defaultOptions: DefaultOptions = {
          * @default   {"color": "#666666"}
          */
         style: {
+            /**
+             * @type {Highcharts.ColorType}
+             */
             color: Palette.neutralColor60,
             /**
              * @type {number|string}
@@ -953,6 +968,9 @@ const defaultOptions: DefaultOptions = {
          * @default   {"color": "#666666"}
          */
         style: {
+            /**
+             * @type {Highcharts.ColorType}
+             */
             color: Palette.neutralColor60,
             /**
              * @type {number|string}
@@ -1112,27 +1130,25 @@ const defaultOptions: DefaultOptions = {
          * `Highcharts.addEvent` function.
          *
          * @declare Highcharts.LegendEventsOptionsObject
-         *
-         * @internal
          */
-        events: {},
-
-        /**
-         * Fires when the legend item belonging to the series is clicked. One
-         * parameter, `event`, is passed to the function. The default action
-         * is to toggle the visibility of the series, point or data class. This
-         * can be prevented by returning `false` or calling
-         * `event.preventDefault()`.
-         *
-         * @sample {highcharts} highcharts/legend/itemclick/
-         *         Confirm hiding and showing
-         * @sample {highcharts} highcharts/legend/pie-legend-itemclick/
-         *         Confirm toggle visibility of pie slices
-         *
-         * @type      {Highcharts.LegendItemClickCallbackFunction}
-         * @context   Highcharts.Legend
-         * @apioption legend.events.itemClick
-         */
+        events: {
+            /**
+             * Fires when the legend item belonging to the series is clicked.
+             * One parameter, `event`, is passed to the function. The default
+             * action is to toggle the visibility of the series, point or data
+             * class. This can be prevented by returning `false` or calling
+             * `event.preventDefault()`.
+             *
+             * @sample {highcharts} highcharts/legend/itemclick/
+             *         Confirm hiding and showing
+             * @sample {highcharts} highcharts/legend/pie-legend-itemclick/
+             *         Confirm toggle visibility of pie slices
+             *
+             * @type      {Highcharts.LegendItemClickCallbackFunction}
+             * @context   Highcharts.Legend
+             * @apioption legend.events.itemClick
+             */
+        },
 
         /**
          * When the legend is floating, the plot area ignores it and is allowed
@@ -2823,8 +2839,12 @@ const defaultOptions: DefaultOptions = {
          * @type {Highcharts.CSSObject}
          */
         style: {
+            /** @type {Highcharts.ColorType} */
             color: Palette.neutralColor80,
+
             cursor: 'default',
+
+            /** @type {number|string} */
             fontSize: '0.8em'
         },
 
@@ -2958,7 +2978,12 @@ const defaultOptions: DefaultOptions = {
          */
         style: {
             cursor: 'pointer',
+
+            /**
+             * @type {Highcharts.ColorType}
+             */
             color: Palette.neutralColor40,
+
             /**
              * @type {number|string}
              */

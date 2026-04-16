@@ -375,7 +375,6 @@ export interface MarkerClusterOptions {
      *
      * Defaults to a cluster symbol with radius 15, no line, and a line color
      * matching the chart background.
-     * @extends   plotOptions.series.marker
      *
      * @requires modules/marker-clusters
      */

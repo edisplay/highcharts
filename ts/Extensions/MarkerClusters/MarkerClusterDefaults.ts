@@ -254,6 +254,9 @@ const cluster: MarkerClusterOptions = {
         symbol: 'cluster',
         radius: 15,
         lineWidth: 0,
+        /**
+         * @type {Highcharts.ColorType}
+         */
         lineColor: Palette.backgroundColor
     },
 

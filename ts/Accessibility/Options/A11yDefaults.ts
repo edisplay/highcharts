@@ -653,6 +653,9 @@ const Options: DeepPartial<A11yOptions> = {
                  * @since   6.0.3
                  */
                 style: {
+                    /**
+                     * @type {Highcharts.ColorType}
+                     */
                     color: Palette.highlightColor80,
                     lineWidth: 2,
                     borderRadius: 3

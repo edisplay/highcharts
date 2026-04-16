@@ -149,8 +149,9 @@ export interface ColorAxisMarkerOptions {
     color?: ColorType;
 
     /**
-     * The width of the marker.
+     * Maps to stroke-width because marker options are passed as crosshair.
      *
+     * @internal
      * @default 0.01
      * @product highcharts highstock highmaps
      */
