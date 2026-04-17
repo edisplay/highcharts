@@ -54,6 +54,8 @@ type StickyFocusState = {
 
 const rowsContentNowrapClassName =
     Globals.getClassName('rowsContentNowrap');
+const rowEvenClassName = Globals.getClassName('rowEven');
+const rowOddClassName = Globals.getClassName('rowOdd');
 const maxStickyRows = 10;
 
 
@@ -828,6 +830,8 @@ class TreeStickyRowController {
             return;
         }
 
+        this.syncStickyRowParity(candidates);
+
         const { tbodyElement, rowsVirtualizer } = this.viewport;
         const scrollTop = tbodyElement.scrollTop;
         let stickyStackHeight = 0;
@@ -876,6 +880,39 @@ class TreeStickyRowController {
         }
 
         this.syncStickyBodyRenderedHeight();
+    }
+
+    /**
+     * Syncs sticky row parity classes with the visual sticky stack order.
+     *
+     * @param candidates
+     * Sticky row candidates rendered in the overlay.
+     */
+    private syncStickyRowParity(candidates: StickyCandidate[]): void {
+        const firstCandidate = candidates[0];
+
+        if (!firstCandidate) {
+            return;
+        }
+
+        const stickyRowsCount = Math.min(
+            candidates.length,
+            this.stickyRows.length
+        );
+
+        let visualRowIndex = firstCandidate.rowIndex;
+
+        for (
+            let i = 0, iEnd = stickyRowsCount;
+            i < iEnd;
+            ++i, ++visualRowIndex
+        ) {
+            const rowElement = this.stickyRows[i].htmlElement;
+            const isEvenRow = !!(visualRowIndex % 2);
+
+            rowElement.classList.toggle(rowEvenClassName, isEvenRow);
+            rowElement.classList.toggle(rowOddClassName, !isEvenRow);
+        }
     }
 
     /**
