@@ -1106,9 +1106,6 @@ class TreeStickyRowController {
                 stickyRow.reflow();
             }
 
-            stickyRow.htmlElement.classList.add(
-                TreeViewGlobals.classNames.rowSticky
-            );
             stickyRow.htmlElement.style.position = 'relative';
             stickyRow.htmlElement.style.top = '';
             stickyRow.htmlElement.style.left = '';
