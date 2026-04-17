@@ -245,9 +245,8 @@ QUnit.test('Update parallel coordinates plot', function (assert) {
 
     const pathArray = chart.yAxis[0].ticks['8'].gridLine.pathArray;
 
-    assert.notOk(
-        pathArray[0][1] === pathArray[1][1] &&
-        pathArray[0][2] === pathArray[1][2],
+    assert.ok(
+        pathArray[0][1] !== pathArray[1][1],
         'Parallel yAxis grid line path should have non-zero length, #24442.'
     );
 

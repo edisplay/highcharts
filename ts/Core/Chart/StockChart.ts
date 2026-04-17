@@ -710,6 +710,7 @@ namespace StockChart {
         e: (Event&Axis.PlotLinePathOptions)
     ): void {
         const axis = this,
+            axisOptions = axis.options,
             series = (
                 axis.isLinked && !axis.series && axis.linkedParent ?
                     axis.linkedParent.series :
@@ -724,8 +725,8 @@ namespace StockChart {
             ) || [],
             crossingPosName = horiz ? 'top' : 'left',
             crossingLenName = horiz ? 'height' : 'width',
-            hasCrossingBounds = defined(axis.options[crossingPosName]) ||
-                defined(axis.options[crossingLenName]),
+            hasCrossingBounds = defined(axisOptions[crossingPosName]) ||
+                defined(axisOptions[crossingLenName]),
             /**
              * Return the other axis based on either the axis option or on
              * related series.
@@ -733,9 +734,9 @@ namespace StockChart {
              */
             getAxis = (coll: string): Array<Axis> => {
                 const otherColl = coll === 'xAxis' ? 'yAxis' : 'xAxis',
-                    opt = (axis.options as AnyRecord)[otherColl];
+                    opt = (axisOptions as AnyRecord)[otherColl];
 
-                if (acrossPanes && !axis.options.isInternal) {
+                if (acrossPanes && !axisOptions.isInternal) {
                     return allPerpendicularAxes.filter((a): boolean =>
                         !a.options.isInternal
                     );
