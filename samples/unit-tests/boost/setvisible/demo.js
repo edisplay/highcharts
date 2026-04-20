@@ -77,31 +77,27 @@ QUnit.test(
     function (assert) {
         const chart = Highcharts.chart('container', {
             boost: {
-                enabled: true
+                enabled: true,
+                allowForce: true
             },
             plotOptions: {
                 series: {
                     boostThreshold: 1,
-                    states: {
-                        hover: {
-                            halo: {
-                                size: 10
-                            }
-                        }
+                    marker: {
+                        enabled: true,
+                        symbol: 'circle'
                     }
                 }
             },
             series: [{
-                data: [1, 3, 2, 4]
+                data: [1, 3, 2, 4, 5, 4]
             }, {
-                data: [4, 2, 5, 3]
+                data: [4, 2, 5, 3, 2, 1]
             }]
         });
 
-        let visibleSeries = chart.series[1],
-            visiblePoint = visibleSeries.boost.getPoint(
-                visibleSeries.points[1]
-            );
+        const visibleSeries = chart.series[1],
+            controller = new TestController(chart);
 
         assert.strictEqual(
             chart.series[0].markerGroup,
@@ -109,23 +105,29 @@ QUnit.test(
             'Boosted series should share one marker group.'
         );
 
-        visiblePoint.setState('hover');
-
-        assert.notStrictEqual(
-            visibleSeries.halo?.attr('visibility'),
-            'hidden',
-            'Halo is visible before hiding the other series.'
-        );
-
         chart.series[0].hide();
-        visibleSeries = chart.series[1];
-        visiblePoint = visibleSeries.boost.getPoint(visibleSeries.points[1]);
-        visiblePoint.setState('hover');
+
+        controller.moveTo(
+            chart.plotLeft + visibleSeries.points[1].plotX,
+            chart.plotTop + visibleSeries.points[1].plotY
+        );
 
         assert.notStrictEqual(
             visibleSeries.markerGroup?.attr('visibility'),
             'hidden',
             'Shared marker group stays visible for the remaining series.'
+        );
+
+        assert.strictEqual(
+            chart.hoverPoint?.series,
+            visibleSeries,
+            'Hover lands on the remaining visible boosted series.'
+        );
+
+        assert.notStrictEqual(
+            visibleSeries.stateMarkerGraphic?.attr('visibility'),
+            'hidden',
+            'Hover marker stays visible after hiding another boosted series.'
         );
 
         assert.notStrictEqual(

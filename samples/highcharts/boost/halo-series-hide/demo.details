@@ -1,0 +1,4 @@
+ name: Boost halo visible after series hide
+ authors:
+   - Highcharts
+ js_wrap: b
