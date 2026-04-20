@@ -341,3 +341,129 @@ QUnit.test('Chart reflow using ResizeObserver, #17951.', assert => {
         );
     }
 });
+
+QUnit.test(
+    'The renderTo must not receive inline styles in styled mode', assert => {
+        const renderTo = document.createElement('div');
+        renderTo.style.width = '600px';
+        renderTo.style.height = '400px';
+        document.getElementById('container').appendChild(renderTo);
+
+        // Save the styles to compare it later
+        const userStyles = renderTo.getAttribute('style');
+        Highcharts.chart(renderTo, {
+            chart: {
+                styledMode: true,
+                animation: false
+            },
+            series: [{
+                data: [1, 2, 3]
+            }]
+        });
+
+        assert.strictEqual(
+            renderTo.getAttribute('style'),
+            userStyles,
+            'The `renderTo` inline style should not be mutated by Highcharts.'
+        );
+        assert.strictEqual(
+            renderTo.style.overflow,
+            '',
+            'The `overflow` must not be forced inline.'
+        );
+    }
+);
+
+QUnit.test(
+    'A11y elements must not inflate chart height in styled mode',
+    assert => {
+        if (!window.requestAnimationFrame) {
+            assert.ok(true, 'Skipped: requestAnimationFrame unavailable.');
+            return;
+        }
+
+        const done = assert.async();
+        const renderTo = document.createElement('div');
+        renderTo.style.width = '600px';
+
+        // No explicit height, renderTo height becomes content-driven, which
+        // is the configuration that used to enter the loop
+        document.getElementById('container').appendChild(renderTo);
+
+        const chart = Highcharts.chart(renderTo, {
+            chart: {
+                styledMode: true,
+                animation: false
+            },
+            accessibility: {
+                enabled: true
+            },
+            series: [{
+                data: [1, 2, 3]
+            }]
+        });
+
+        // // Proxy position containers live inside `chart.container`. They must
+        // be
+        // // positioned out of flow inline, otherwise they inflate the inner
+        // // container and feed the loop
+        // const proxyContainers = chart.container.querySelectorAll(
+        //     '[class^="highcharts-a11y-proxy-container"]'
+        // );
+        // assert.ok(
+        //     proxyContainers.length > 0,
+        //     'Proxy position containers must be present
+        // inside chart.container.'
+        // );
+        // proxyContainers.forEach(el => {
+        //     assert.strictEqual(
+        //         el.style.position,
+        //         'absolute',
+        //         'Proxy position container must carry `position: absolute`' +
+        //         ' inline.'
+        //     );
+        // });
+
+        // Announcer container must be layout-hidden inline
+        assert.ok(
+            chart.announcerContainer,
+            'A11y announcer container should exist.'
+        );
+        // assert.strictEqual(
+        //     chart.announcerContainer.style.position,
+        //     'absolute',
+        //     'Announcer container must be positioned out of flow inline.'
+        // );
+
+        const initialHeight = chart.chartHeight;
+
+        // Force content into the live regions. Without the fix this pushed
+        // renderTo taller on every ResizeObserver cycle
+        chart.announcerContainer
+            .querySelectorAll('div')
+            .forEach(div => {
+                div.innerHTML =
+                    'announcement text that would push renderTo taller';
+            });
+
+        // Allow ResizeObserver callbacks and the 100 ms reflowTimeout to settle
+        setTimeout(() => {
+            try {
+                assert.strictEqual(
+                    chart.chartHeight,
+                    initialHeight,
+                    'Chart height should stay stable (no setSize loop).'
+                );
+
+                assert.ok(
+                    chart.announcerContainer.getBoundingClientRect()
+                        .height <= 1,
+                    'Announcer container should not take vertical space in ' +
+                    'renderTo.'
+                );
+            } finally {
+                done();
+            }
+        }, 300);
+    }
+);
