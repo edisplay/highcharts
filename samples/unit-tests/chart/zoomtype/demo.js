@@ -28,11 +28,6 @@ QUnit.test('Zoom type', function (assert) {
             ]
         },
 
-        lang: {
-            resetZoom: 'Test zoom label',
-            resetZoomTitle: 'Test zoom title'
-        },
-
         series: [
             {
                 data: [
@@ -102,17 +97,6 @@ QUnit.test('Zoom type', function (assert) {
         chart.resetZoomButton,
         'Y zoom should work when panning at the top of the plot on inverted ' +
         'chart (#18103)'
-    );
-
-    assert.strictEqual(
-        chart.resetZoomButton.textStr,
-        'Test zoom label',
-        'Zoom button should have a correct label #23429.'
-    );
-    assert.strictEqual(
-        chart.resetZoomButton.element.querySelector('title').textContent,
-        'Test zoom title',
-        'Zoom title should be correct #23429.'
     );
 });
 

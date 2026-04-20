@@ -908,17 +908,21 @@ namespace BrokenAxis {
                             repeat: number,
                             min = axis.userMin ?? axis.min,
                             max = axis.userMax ?? axis.max,
+                            dataMin = axis.dataMin ?? min,
+                            dataMax = axis.dataMax ?? max,
                             start: (number|undefined),
                             i: number;
 
-                        // Extend range to include visible breaks outside of
-                        // series data.
-                        const dataMin = isNumber(min) ?
-                                Math.min(axis.dataMin ?? min, min) :
-                                (axis.dataMin ?? min),
-                            dataMax = isNumber(max) ?
-                                Math.max(axis.dataMax ?? max, max) :
-                                (axis.dataMax ?? max);
+                        if (isNumber(axis.threshold)) {
+                            dataMin = Math.min(
+                                dataMin ?? axis.threshold,
+                                axis.threshold
+                            );
+                            dataMax = Math.max(
+                                dataMax ?? axis.threshold,
+                                axis.threshold
+                            );
+                        }
 
                         // Min & max check (#4247) but not for gantt (#13898)
                         if (!axis.treeGrid?.tree) {

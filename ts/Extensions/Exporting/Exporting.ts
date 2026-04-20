@@ -91,7 +91,6 @@ import {
     splat
 } from '../../Shared/Utilities.js';
 import { error, uniqueKey } from '../../Core/Utilities.js';
-import { Palette } from '../../Core/Color/Palettes';
 
 AST.allowedAttributes.push(
     'data-z-index',
@@ -524,48 +523,19 @@ export class Exporting {
         sheet: CSSStyleSheet,
         fontFaceRules: string[],
         usedFontFamilies: Set<string>,
-        svg: SVGSVGElement,
-        visited: Set<string> = new Set()
+        svg: SVGSVGElement
     ): Promise<void> {
-        const href = sheet.href;
-
-        if (href) {
-            if (visited.has(href)) {
-                return;
-            }
-            visited.add(href);
-
-            try {
-                const sheetOrigin = new URL(href, doc.baseURI).origin;
-                if (sheetOrigin !== win.location.origin) {
-                    // We skip all cross-origin stylesheets on purpose.
-                    // This prevents DOM SecurityErrors and unhandled network
-                    // rejections when the browser blocks cssRules access.
-                    return;
-                }
-            } catch {
-                // URL parsing failed, proceed to try/catch
-            }
-        }
-
         try {
             for (const rule of Array.from(sheet.cssRules)) {
                 if (rule instanceof CSSImportRule) {
-                    try {
-                        const importedSheet =
-                            await Exporting.fetchCSS(rule.href);
-
-                        if (importedSheet) {
-                            await Exporting.handleStyleSheet(
-                                importedSheet,
-                                fontFaceRules,
-                                usedFontFamilies,
-                                svg,
-                                visited
-                            );
-                        }
-                    } catch {
-                        // Silently ignore CORS errors on imported stylesheets
+                    const sheet = await Exporting.fetchCSS(rule.href);
+                    if (sheet) {
+                        await Exporting.handleStyleSheet(
+                            sheet,
+                            fontFaceRules,
+                            usedFontFamilies,
+                            svg
+                        );
                     }
                 }
 
@@ -585,8 +555,8 @@ export class Exporting {
                 if (rule instanceof CSSFontFaceRule) {
                     let cssText = rule.cssText;
 
-                    if (href) {
-                        const baseUrl = href,
+                    if (sheet.href) {
+                        const baseUrl = sheet.href,
                             regexp =
                         /url\(\s*(['"]?)(?![a-z]+:|\/\/)([^'")]+?)\1\s*\)/gi;
 
@@ -603,21 +573,16 @@ export class Exporting {
                     fontFaceRules.push(cssText);
                 }
             }
-        } catch (e: any) {
-            if (e.name === 'SecurityError' && href) {
-                try {
-                    const newSheet = await Exporting.fetchCSS(href);
-                    if (newSheet) {
-                        await Exporting.handleStyleSheet(
-                            newSheet,
-                            fontFaceRules,
-                            usedFontFamilies,
-                            svg,
-                            visited
-                        );
-                    }
-                } catch {
-                    // Silently ignore network failures on fallback
+        } catch {
+            if (sheet.href) {
+                const newSheet = await Exporting.fetchCSS(sheet.href);
+                if (newSheet) {
+                    await Exporting.handleStyleSheet(
+                        newSheet,
+                        fontFaceRules,
+                        usedFontFamilies,
+                        svg
+                    );
                 }
             }
         }
@@ -1364,27 +1329,11 @@ export class Exporting {
 
                     if (item.separator) {
                         element = createElement(
-                            'li',
-                            {
-                                className:
-                                'highcharts-menu-item highcharts-separator',
-                                role: 'separator'
-                            },
+                            'hr',
+                            void 0,
                             void 0,
                             innerMenu
                         );
-
-                        if (!chart.styledMode) {
-                            css(element, {
-                                border: 'none',
-                                backgroundColor: Palette.neutralColor40,
-                                height: '0.5px',
-                                margin: '10px 0',
-                                padding: 0,
-                                listStyle: 'none',
-                                'pointer-events': 'none'
-                            });
-                        }
                     } else {
                         // When chart initialized with the table, wrong button
                         // text displayed, #14352.

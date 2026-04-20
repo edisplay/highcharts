@@ -4019,8 +4019,9 @@ class Chart {
      * @emits Highcharts.Chart#event:beforeShowResetZoom
      */
     public showResetZoom(): void {
+
         const chart = this,
-            lang = chart.options.lang,
+            lang = defaultOptions.lang,
             btnOptions = chart.zooming.resetButton as any,
             theme = btnOptions.theme,
             alignTo = (
@@ -5176,7 +5177,7 @@ export default Chart;
  *        options, or a space character.
  *
  * @param {Highcharts.Chart} [ctx]
- *        Since v12.6.0, the chart context passed as an extra argument for
+ *        Since v12.5.0, the chart context passed as an extra argument for
  *        arrow functions.
  *
  * @return {string} The formatted number.

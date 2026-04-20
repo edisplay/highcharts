@@ -664,8 +664,6 @@ export interface TooltipOptions {
      *
      * @sample highcharts/tooltip/stickoncontact/
      *         Tooltip sticks on pointer contact
-     * @sample highcharts/tooltip/stickoncontact-anchor-link/
-     *         Tooltip with clickable links
      *
      * @since     8.0.1
      */

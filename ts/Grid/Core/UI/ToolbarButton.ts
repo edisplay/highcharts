@@ -127,9 +127,9 @@ class ToolbarButton implements Button {
             'button',
             {
                 className: (
-                    Globals.getClassName('icon') +
+                    Globals.getClassName('button') +
                     (this.isActive ?
-                        ' ' + Globals.getClassName('iconSelected') :
+                        ' ' + Globals.getClassName('buttonSelected') :
                         ''
                     )
                 )
@@ -197,13 +197,13 @@ class ToolbarButton implements Button {
     public setActive(active: boolean): void {
         this.isActive = active;
         this.buttonEl?.classList.toggle(
-            Globals.getClassName('iconSelected'), active
+            Globals.getClassName('buttonSelected'), active
         );
     }
 
     public setHighlighted(highlighted: boolean): void {
         this.buttonEl?.classList.toggle(
-            Globals.getClassName('iconHighlighted'), highlighted
+            Globals.getClassName('buttonHighlighted'), highlighted
         );
 
         const ariaExpanded = this.options.accessibility?.ariaExpanded;

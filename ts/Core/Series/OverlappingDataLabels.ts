@@ -104,12 +104,10 @@ function chartHideOverlappingLabels(
     function getAbsoluteBox(label: SVGElement): (BBoxObject|undefined) {
         if (label && (!label.alignAttr || label.placed)) {
             const padding = label.box ? 0 : (label.padding || 0),
-                pos = label.dataLabelPosition?.posAttribs || // #21725
-                    label.alignAttr ||
-                    {
-                        x: label.attr('x'),
-                        y: label.attr('y')
-                    },
+                pos = label.alignAttr || {
+                    x: label.attr('x'),
+                    y: label.attr('y')
+                },
                 { height, polygon, width } = label.getBBox(),
                 alignOffset = getAlignFactor(label.alignValue) * width;
 

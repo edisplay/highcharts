@@ -42,9 +42,9 @@ function createChart() {
                 },
                 threshold: null,
                 marker: {
-                    lineWidth: 2,
+                    lineWidth: 1,
                     lineColor: null,
-                    fillColor: 'var(--highcharts-background-color, #ffffff)'
+                    fillColor: 'white'
                 }
             }
         },

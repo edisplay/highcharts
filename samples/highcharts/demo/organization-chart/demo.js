@@ -5,7 +5,7 @@ Highcharts.chart('container', {
     },
 
     title: {
-        text: '2022 Highsoft Org Chart'
+        text: 'Highcharts Org Chart'
     },
 
     accessibility: {

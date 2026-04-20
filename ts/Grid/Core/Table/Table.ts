@@ -683,14 +683,12 @@ class Table {
             return;
         }
 
-        const cellElement = element.closest(
-            '.' + Globals.getClassName('cell')
-        );
-        if (!cellElement) {
+        const td = element.closest('td');
+        if (!td) {
             return;
         }
 
-        const tr = cellElement.parentElement;
+        const tr = td.parentElement;
         if (!tr) {
             return;
         }
@@ -708,10 +706,7 @@ class Table {
         }
 
         // Find cell index by position in row
-        const cellIndex = Array.prototype.indexOf.call(
-            tr.children,
-            cellElement
-        );
+        const cellIndex = Array.prototype.indexOf.call(tr.children, td);
         return row.cells[cellIndex];
     }
 
