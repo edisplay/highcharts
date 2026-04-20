@@ -36,6 +36,7 @@ import { merge } from '../Shared/Utilities.js';
 import Table from '../Grid/Core/Table/Table.js';
 import Column from '../Grid/Core/Table/Column.js';
 import HeaderCell from '../Grid/Core/Table/Header/HeaderCell.js';
+import TableRow from '../Grid/Core/Table/Body/TableRow.js';
 import TableCell from '../Grid/Core/Table/Body/TableCell.js';
 import SvgIcons from '../Grid/Core/UI/SvgIcons.js';
 
@@ -49,7 +50,7 @@ import ValidatorComposition from '../Grid/Pro/ColumnTypes/ValidatorComposition.j
 import CellRenderersComposition from '../Grid/Pro/CellRendering/CellRenderersComposition.js';
 import CellRendererRegistry from '../Grid/Pro/CellRendering/CellRendererRegistry.js';
 import PaginationComposition from '../Grid/Pro/Pagination/PaginationComposition.js';
-import RowPinningComposition from '../Grid/Core/RowPinning/RowPinningComposition.js';
+import RowPinningComposition from '../Grid/Pro/RowPinning/RowPinningComposition.js';
 import Pagination from '../Grid/Core/Pagination/Pagination.js';
 import CellContentPro from '../Grid/Pro/CellRendering/CellContentPro.js';
 import CellRenderer from '../Grid/Pro/CellRendering/CellRenderer.js';
@@ -78,7 +79,7 @@ import '../Data/Modifiers/FilterModifier.js';
 
 // Compositions
 import '../Grid/Core/Responsive/ResponsiveComposition.js';
-import '../Grid/Core/RowPinning/RowPinningComposition.js';
+import '../Grid/Pro/RowPinning/RowPinningComposition.js';
 import '../Grid/Pro/GridEvents.js';
 import '../Grid/Pro/CellEditing/CellEditingComposition.js';
 import '../Grid/Pro/Credits/CreditsProComposition.js';
@@ -137,6 +138,7 @@ const G = {
     SvgIcons,
     Table,
     TableCell,
+    TableRow,
     Templating,
     version: Globals.version,
     win: Globals.win
@@ -149,7 +151,10 @@ ExportingComposition.compose(G.Grid);
 ValidatorComposition.compose(G.Table);
 CellRenderersComposition.compose(G.Column);
 PaginationComposition.compose(G.Pagination);
-RowPinningComposition.compose(G.Grid, G.Table, G.Column);
+RowPinningComposition.compose(
+    G.Grid, G.Table, G.Column,
+    G.TableRow, G.TableCell
+);
 ResponsiveComposition.compose(G.Grid);
 
 

@@ -67,11 +67,6 @@ class TableRow extends Row {
     public id?: RowId;
 
     /**
-     * Section for pinned rendering. Undefined for scrollable rows.
-     */
-    public pinnedSection?: 'top'|'bottom';
-
-    /**
      * The vertical translation of the row.
      */
     public translateY: number = 0;
@@ -104,11 +99,6 @@ class TableRow extends Row {
     * */
 
     public async init(): Promise<void> {
-        if (this.pinnedSection) {
-            this.setRowAttributes();
-            return;
-        }
-
         this.id = await this.viewport.grid.dataProvider?.getRowId(this.index);
         await this.loadData();
         this.setRowAttributes();
@@ -131,7 +121,9 @@ class TableRow extends Row {
         }
 
         this.data = data;
-        this.viewport.grid.rowPinning?.rememberMaterializedRow(this.id, data);
+        fireEvent(this, 'afterLoadData', {
+            data
+        });
     }
 
     /**
@@ -139,11 +131,6 @@ class TableRow extends Row {
      * table.
      */
     public async update(): Promise<void> {
-        if (this.pinnedSection) {
-            await this.syncPinned(this.id, this.pinnedSection, this.data);
-            return;
-        }
-
         this.id = await this.viewport.grid.dataProvider?.getRowId(this.index);
         this.updateRowAttributes();
 
@@ -177,11 +164,9 @@ class TableRow extends Row {
         }
 
         this.index = index;
-        this.pinnedSection = void 0;
         this.id = await this.viewport.grid.dataProvider?.getRowId(index);
 
         this.htmlElement.setAttribute('data-row-index', index + '');
-        this.htmlElement.removeAttribute('data-pinned-section');
         this.updateRowAttributes();
         this.updateParityClass();
         this.updateStateClasses();
@@ -191,28 +176,6 @@ class TableRow extends Row {
         for (let i = 0, iEnd = this.cells.length; i < iEnd; ++i) {
             const cell = this.cells[i] as TableCell;
             await cell.setValue();
-        }
-
-        if (doReflow) {
-            this.reflow();
-        }
-    }
-
-    public async syncPinned(
-        rowId: RowId | undefined,
-        section: 'top'|'bottom',
-        data: DataTableRowObject,
-        index: number = this.index,
-        doReflow: boolean = true
-    ): Promise<void> {
-        this.index = index;
-        this.id = rowId;
-        this.pinnedSection = section;
-        this.data = data;
-        this.setRowAttributes();
-
-        if (this.rendered) {
-            await this.syncCellsWithRowData();
         }
 
         if (doReflow) {
@@ -231,7 +194,7 @@ class TableRow extends Row {
             Globals.getClassName('hoveredRow')
         );
 
-        if (hovered && !this.pinnedSection) {
+        if (hovered) {
             this.viewport.grid.hoveredRowIndex = this.index;
         }
     }
@@ -247,7 +210,7 @@ class TableRow extends Row {
             Globals.getClassName('syncedRow')
         );
 
-        if (synced && !this.pinnedSection) {
+        if (synced) {
             this.viewport.grid.syncedRowIndex = this.index;
         }
     }
@@ -260,15 +223,7 @@ class TableRow extends Row {
         const el = this.htmlElement;
 
         el.classList.add(Globals.getClassName('rowElement'));
-
-        if (this.pinnedSection) {
-            el.removeAttribute('data-row-index');
-            el.setAttribute('data-pinned-section', this.pinnedSection);
-        } else {
-            // Index of the row in the presentation data table
-            el.setAttribute('data-row-index', idx + '');
-            el.removeAttribute('data-pinned-section');
-        }
+        el.setAttribute('data-row-index', idx + '');
 
         this.updateRowAttributes();
 
@@ -292,17 +247,16 @@ class TableRow extends Row {
             el.setAttribute('data-row-id', this.id);
         }
 
-        if (!this.pinnedSection) {
-            // Calculate levels of header, 1 to avoid indexing from 0
-            a11y?.setRowIndex(el, idx + (vp.header?.rows.length ?? 0) + 1);
-        }
-        vp.rowPinningView?.updateRowAttributes(this);
+        // Calculate levels of header, 1 to avoid indexing from 0
+        a11y?.setRowIndex(el, idx + (vp.header?.rows.length ?? 0) + 1);
+
+        fireEvent(this, 'afterUpdateAttributes');
     }
 
     /**
      * Updates the row parity class based on index.
      */
-    private updateParityClass(): void {
+    protected updateParityClass(): void {
         const el = this.htmlElement;
         el.classList.remove(
             Globals.getClassName('rowEven'),
@@ -318,34 +272,19 @@ class TableRow extends Row {
     /**
      * Updates the hovered and synced classes based on grid state.
      */
-    private updateStateClasses(): void {
+    protected updateStateClasses(): void {
         const el = this.htmlElement;
         el.classList.remove(
             Globals.getClassName('hoveredRow'),
             Globals.getClassName('syncedRow')
         );
 
-        if (
-            !this.pinnedSection &&
-            this.viewport.grid.hoveredRowIndex === this.index
-        ) {
+        if (this.viewport.grid.hoveredRowIndex === this.index) {
             el.classList.add(Globals.getClassName('hoveredRow'));
         }
 
-        if (
-            !this.pinnedSection &&
-            this.viewport.grid.syncedRowIndex === this.index
-        ) {
+        if (this.viewport.grid.syncedRowIndex === this.index) {
             el.classList.add(Globals.getClassName('syncedRow'));
-        }
-    }
-
-    private async syncCellsWithRowData(): Promise<void> {
-        for (let i = 0, iEnd = this.cells.length; i < iEnd; ++i) {
-            const cell = this.cells[i] as TableCell;
-            await cell.setValue(
-                this.data[cell.column.id]
-            );
         }
     }
 

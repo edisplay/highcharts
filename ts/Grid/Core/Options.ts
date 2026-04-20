@@ -90,11 +90,16 @@ export type StyleValue<T> = CSSObject | StyleCallback<T>;
 export type ColumnSortingOrder = 'asc' | 'desc' | null;
 
 /**
- * Built-in action IDs for the cell context menu. These are registered by
- * composed features, such as row pinning in Grid Pro.
+ * Registry of built-in action IDs for the cell context menu.
+ * Composed features can extend this via module augmentation.
+ */
+export interface CellContextMenuBuiltInActionIdRegistry {}
+
+/**
+ * Built-in action ID for the cell context menu.
  */
 export type CellContextMenuActionId =
-    'pinRowTop' | 'pinRowBottom' | 'unpinRow';
+    keyof CellContextMenuBuiltInActionIdRegistry | (string & {});
 
 /**
  * Options for a single cell context menu item.
@@ -199,8 +204,8 @@ export type CellContextMenuItemOptions =
 export interface CellContextMenuOptions {
     /**
      * Whether the cell context menu is enabled. When omitted, the menu is
-     * enabled when `items` are provided, or when a composed feature such as
-     * Grid Pro row pinning is explicitly configured or currently active.
+     * enabled when `items` are provided, or when a composed feature registers
+     * visible built-in actions for the current cell.
      */
     enabled?: boolean;
 

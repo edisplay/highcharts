@@ -22,14 +22,14 @@
  * */
 
 import type Grid from '../../Core/Grid';
-import type Options from '../../Core/Options';
 import type { GridEvent } from '../../Core/GridUtils';
 import type DataTable from '../../../Data/DataTable';
+import type RowPinningView from './RowPinningView';
 import type {
     RowObject as RowObjectType,
     CellType as DataTableCellType
 } from '../../../Data/DataTable';
-import type { RowId as DataProviderRowId } from '../Data/DataProvider';
+import type { RowId as DataProviderRowId } from '../../Core/Data/DataProvider';
 
 import { formatText } from '../../Core/GridUtils.js';
 import {
@@ -48,12 +48,6 @@ import {
 export type RowId = DataProviderRowId;
 export type RowPinningPosition = 'top'|'bottom';
 export type RowPinningChangeAction = 'pin'|'unpin'|'toggle';
-
-export type GridRowPinningOptions = NonNullable<
-    NonNullable<
-        NonNullable<Options['rendering']>['rows']
-    >['pinning']
->;
 
 /**
  * Snapshot of pinned row IDs by section.
@@ -104,7 +98,28 @@ export interface RowPinningOptions {
     resolve?: (row: RowObjectType) => ('top'|'bottom'|null|undefined);
 }
 
+export type GridRowPinningOptions = RowPinningOptions;
+
+export interface RowPinningLangA11yOptions {
+    announcements?: {
+        pinned?: string;
+        unpinned?: string;
+    };
+    descriptions?: {
+        pinnedTop?: string;
+        pinnedBottom?: string;
+        alsoPinnedTop?: string;
+        alsoPinnedBottom?: string;
+    };
+}
+
 declare module '../../Core/Options' {
+    interface CellContextMenuBuiltInActionIdRegistry {
+        pinRowTop: never;
+        pinRowBottom: never;
+        unpinRow: never;
+    }
+
     interface LangOptions {
         pinRowTop?: string;
         pinRowBottom?: string;
@@ -116,9 +131,25 @@ declare module '../../Core/Options' {
     }
 }
 
+declare module '../../Core/Accessibility/A11yOptions' {
+    interface A11yAnnouncementsOptions {
+        rowPinning?: boolean;
+    }
+
+    interface LangAccessibilityOptions {
+        rowPinning?: RowPinningLangA11yOptions;
+    }
+}
+
 declare module '../../Core/Grid' {
     export default interface Grid {
         rowPinning?: RowPinningController;
+    }
+}
+
+declare module '../../Core/Table/Table' {
+    export default interface Table {
+        rowPinningView?: RowPinningView;
     }
 }
 
@@ -198,30 +229,67 @@ function didPinnedRowsChange(
  */
 class RowPinningController {
 
+    /**
+     * Owning grid instance.
+     */
     public readonly grid: Grid;
 
+    /**
+     * Explicitly pinned top row IDs from config or runtime API calls.
+     */
     private topRowIds: RowId[] = [];
 
+    /**
+     * Explicitly pinned bottom row IDs from config or runtime API calls.
+     */
     private bottomRowIds: RowId[] = [];
 
+    /**
+     * Top row IDs produced by the `pinning.resolve` callback.
+     */
     private resolvedTopRowIds: RowId[] = [];
 
+    /**
+     * Bottom row IDs produced by the `pinning.resolve` callback.
+     */
     private resolvedBottomRowIds: RowId[] = [];
 
+    /**
+     * Set of row IDs that were explicitly unpinned at runtime, overriding
+     * resolved pins.
+     */
     private explicitUnpinned: Set<RowId> = new Set();
 
+    /**
+     * Cache of row data objects for all currently pinned rows.
+     */
     private pinnedRowObjects: Map<RowId, RowObjectType> = new Map();
 
+    /**
+     * Whether the explicit pinned IDs need to be reloaded from options.
+     */
     private optionsDirty = true;
 
+    /**
+     * Creates a new row pinning controller for the given grid.
+     *
+     * @param grid
+     * Owning grid instance.
+     */
     constructor(grid: Grid) {
         this.grid = grid;
     }
 
+    /**
+     * Returns the current row pinning options from the grid.
+     */
     public getPinningOptions(): ReturnType<typeof getGridRowPinningOptions> {
         return getGridRowPinningOptions(this.grid);
     }
 
+    /**
+     * Reloads explicit pinned IDs from options when they are marked dirty.
+     */
     public loadOptions(): void {
         if (!this.optionsDirty) {
             return;
@@ -241,10 +309,17 @@ class RowPinningController {
         this.syncPinnedRowObjects();
     }
 
+    /**
+     * Marks pinning options as dirty so they are reloaded on the next access.
+     */
     public markOptionsDirty(): void {
         this.optionsDirty = true;
     }
 
+    /**
+     * Returns whether row pinning is effectively active (any rows are pinned
+     * or a resolve function is configured).
+     */
     public isEnabled(): boolean {
         this.loadOptions();
 
@@ -260,10 +335,25 @@ class RowPinningController {
         );
     }
 
+    /**
+     * Returns whether the `enabled` pinning option is not explicitly `false`.
+     */
     public isOptionEnabled(): boolean {
         return this.getPinningOptions()?.enabled !== false;
     }
 
+    /**
+     * Pins a row to the given section.
+     *
+     * @param rowId
+     * Row identifier to pin.
+     *
+     * @param position
+     * Target section — `'top'` (default) or `'bottom'`.
+     *
+     * @param index
+     * Zero-based insertion index within the section. Appends when omitted.
+     */
     public async pin(
         rowId: RowId,
         position: RowPinningPosition = 'top',
@@ -289,6 +379,15 @@ class RowPinningController {
         );
     }
 
+    /**
+     * Toggles a row between pinned and unpinned state.
+     *
+     * @param rowId
+     * Row identifier to toggle.
+     *
+     * @param position
+     * Section to pin to when the row is currently unpinned.
+     */
     public async toggle(
         rowId: RowId,
         position: RowPinningPosition = 'top'
@@ -321,6 +420,12 @@ class RowPinningController {
         );
     }
 
+    /**
+     * Unpins a row from whichever section it currently belongs to.
+     *
+     * @param rowId
+     * Row identifier to unpin.
+     */
     public async unpin(rowId: RowId): Promise<void> {
         const previous = this.getPinnedRows();
         const eventPayload = this.createChangeEvent(
@@ -339,6 +444,25 @@ class RowPinningController {
         );
     }
 
+    /**
+     * Returns the pinned row state that would result from applying an action,
+     * without mutating any internal state.
+     *
+     * @param previous
+     * Current pinned row state to derive from.
+     *
+     * @param action
+     * Whether to simulate a pin or unpin.
+     *
+     * @param rowId
+     * Row identifier to act on.
+     *
+     * @param position
+     * Target section for a pin action.
+     *
+     * @param index
+     * Insertion index within the section for a pin action.
+     */
     public previewPinnedRowsChange(
         previous: RowPinningState,
         action: 'pin'|'unpin',
@@ -365,6 +489,15 @@ class RowPinningController {
         return { topIds, bottomIds };
     }
 
+    /**
+     * Replaces the resolved (callback-derived) pinned row IDs.
+     *
+     * @param topIds
+     * Resolved top-section row IDs.
+     *
+     * @param bottomIds
+     * Resolved bottom-section row IDs.
+     */
     public setResolvedIds(topIds: RowId[], bottomIds: RowId[]): void {
         const normalized = RowPinningController.normalizeSections(
             topIds,
@@ -376,6 +509,12 @@ class RowPinningController {
         this.syncPinnedRowObjects();
     }
 
+    /**
+     * Removes the given row IDs from the explicit pin lists.
+     *
+     * @param rowIds
+     * Row IDs confirmed to be absent from the data source.
+     */
     public pruneMissingExplicitIds(rowIds: RowId[]): void {
         if (!rowIds.length) {
             return;
@@ -391,6 +530,10 @@ class RowPinningController {
         this.syncPinnedRowObjects();
     }
 
+    /**
+     * Returns the effective pinned row state — the union of explicit and
+     * resolved IDs, deduplicated and filtered by explicit unpins.
+     */
     public getPinnedRows(): RowPinningState {
         this.loadOptions();
 
@@ -419,10 +562,25 @@ class RowPinningController {
         };
     }
 
+    /**
+     * Returns the cached row data object for a pinned row, if available.
+     *
+     * @param rowId
+     * Row identifier to look up.
+     */
     public getPinnedRowObject(rowId: RowId): RowObjectType | undefined {
         return this.pinnedRowObjects.get(rowId);
     }
 
+    /**
+     * Caches the data object of a materialized row if it is currently pinned.
+     *
+     * @param rowId
+     * Row identifier.
+     *
+     * @param row
+     * Row data object to cache.
+     */
     public rememberMaterializedRow(
         rowId: RowId | undefined,
         row: RowObjectType
@@ -434,6 +592,13 @@ class RowPinningController {
         this.pinnedRowObjects.set(rowId, row);
     }
 
+    /**
+     * Attempts to hydrate row data objects for the given pinned row IDs from
+     * the materialized viewport rows or the source data table.
+     *
+     * @param rowIds
+     * Pinned row IDs to hydrate.
+     */
     public ensurePinnedRowsAvailable(rowIds: RowId[]): Promise<{
         hydratedRowIds: RowId[];
         definitiveMissingRowIds: RowId[];
@@ -498,6 +663,19 @@ class RowPinningController {
         });
     }
 
+    /**
+     * Updates a single cell value in the cached row data object of a pinned
+     * row.
+     *
+     * @param rowId
+     * Row identifier whose cache entry to update.
+     *
+     * @param columnId
+     * Column identifier of the cell to update.
+     *
+     * @param value
+     * New cell value.
+     */
     public updatePinnedRowValue(
         rowId: RowId,
         columnId: string,
@@ -510,10 +688,17 @@ class RowPinningController {
         }
     }
 
+    /**
+     * Clears all cached row data objects, forcing re-hydration on next render.
+     */
     public invalidatePinnedRowObjects(): void {
         this.pinnedRowObjects.clear();
     }
 
+    /**
+     * Re-runs the `pinning.resolve` callback over all rows in the data
+     * provider and updates the resolved pinned IDs accordingly.
+     */
     public async recomputeResolvedFromMaterializedRows(): Promise<void> {
         const resolve = this.getPinningOptions()?.resolve;
         const dataProvider = this.grid.dataProvider;
@@ -576,6 +761,19 @@ class RowPinningController {
         ]);
     }
 
+    /**
+     * Handles missing pinned rows reported after a render cycle by
+     * attempting to hydrate them or pruning them from the pin lists.
+     *
+     * @param result
+     * Render result containing IDs of rows that could not be rendered.
+     *
+     * @param result.missingPinnedRowIds
+     * IDs of pinned rows that were not found during the render cycle.
+     *
+     * @param source
+     * Whether the render was triggered by a query cycle or a runtime API call.
+     */
     public async handlePinnedRenderResult(
         result: { missingPinnedRowIds: RowId[] },
         source: 'query'|'runtime'
@@ -599,10 +797,13 @@ class RowPinningController {
             this.grid.viewport &&
             (hydratedRowIds.length || definitiveMissingRowIds.length)
         ) {
-            await this.grid.viewport.renderPinnedRows(true);
+            await this.grid.viewport.rowPinningView?.render(true);
         }
     }
 
+    /**
+     * Returns the normalized explicit (non-resolved) pinned row state.
+     */
     private getExplicitPinnedRows(): RowPinningState {
         return RowPinningController.normalizeSections(
             this.topRowIds,
@@ -610,6 +811,18 @@ class RowPinningController {
         );
     }
 
+    /**
+     * Mutates internal state to pin a row without firing events.
+     *
+     * @param rowId
+     * Row identifier to pin.
+     *
+     * @param position
+     * Target section.
+     *
+     * @param index
+     * Insertion index within the section.
+     */
     private async applyPin(
         rowId: RowId,
         position: RowPinningPosition = 'top',
@@ -631,6 +844,12 @@ class RowPinningController {
         await this.ensurePinnedRowsAvailable([rowId]);
     }
 
+    /**
+     * Mutates internal state to unpin a row without firing events.
+     *
+     * @param rowId
+     * Row identifier to unpin.
+     */
     private applyUnpin(rowId: RowId): void {
         this.loadOptions();
         const next = this.previewPinnedRowsChange(
@@ -645,6 +864,27 @@ class RowPinningController {
         this.pinnedRowObjects.delete(rowId);
     }
 
+    /**
+     * Builds the event payload for a pin/unpin/toggle operation.
+     *
+     * @param previous
+     * Pinned row state before the change.
+     *
+     * @param action
+     * Public action name (`'pin'`, `'unpin'`, or `'toggle'`).
+     *
+     * @param rowId
+     * Row identifier being acted on.
+     *
+     * @param nextAction
+     * Resolved action to apply (`'pin'` or `'unpin'`).
+     *
+     * @param position
+     * Target section for a pin action.
+     *
+     * @param index
+     * Insertion index within the section for a pin action.
+     */
     private createChangeEvent(
         previous: RowPinningState,
         action: RowPinningChangeAction,
@@ -674,6 +914,22 @@ class RowPinningController {
         };
     }
 
+    /**
+     * Fires events, applies a pin/unpin mutation, triggers a render, and
+     * announces the change for accessibility.
+     *
+     * @param eventPayload
+     * Pre-built event payload describing the change.
+     *
+     * @param applyChange
+     * Callback that mutates the internal pin state.
+     *
+     * @param announcementAction
+     * Whether to announce a pin or unpin for accessibility.
+     *
+     * @param announcementPosition
+     * Section to include in the pin announcement.
+     */
     private async runRuntimeChange(
         eventPayload: RowPinningChangeEvent,
         applyChange: () => Promise<void> | void,
@@ -697,7 +953,8 @@ class RowPinningController {
         }
 
         const renderResult = grid.viewport ?
-            await grid.viewport.renderPinnedRows(true) :
+            await grid.viewport.rowPinningView?.render(true) ||
+                { missingPinnedRowIds: [] } :
             { missingPinnedRowIds: [] };
 
         await this.handlePinnedRenderResult(renderResult, 'runtime');
@@ -713,7 +970,7 @@ class RowPinningController {
             eventPayload.changed &&
             eventPayload.position
         ) {
-            grid.viewport?.revealPinnedRowInSection(
+            grid.viewport?.rowPinningView?.revealRowInSection(
                 eventPayload.rowId,
                 eventPayload.position
             );
@@ -731,6 +988,15 @@ class RowPinningController {
         }
     }
 
+    /**
+     * Invokes the user-configured event callback for a pin change event.
+     *
+     * @param eventName
+     * Event name to look up in the pinning options.
+     *
+     * @param eventPayload
+     * Event payload to pass to the callback.
+     */
     private callEventCallback(
         eventName: 'beforeRowPin'|'afterRowPin',
         eventPayload: RowPinningChangeEvent
@@ -747,6 +1013,18 @@ class RowPinningController {
         } as (GridEvent<Grid> & RowPinningChangeEvent));
     }
 
+    /**
+     * Sends an accessibility announcement for a completed pin/unpin change.
+     *
+     * @param action
+     * Whether the row was pinned or unpinned.
+     *
+     * @param rowId
+     * Row identifier that was changed.
+     *
+     * @param position
+     * Section the row was pinned to (only relevant for pin actions).
+     */
     private announceChange(
         action: 'pin'|'unpin',
         rowId: RowId,
@@ -798,6 +1076,15 @@ class RowPinningController {
         }
     }
 
+    /**
+     * Returns whether a row ID appears in the effective pinned row state.
+     *
+     * @param rowId
+     * Row identifier to check.
+     *
+     * @param state
+     * Pinned row state to check against. Defaults to the current state.
+     */
     private isPinnedRowId(
         rowId: RowId,
         state: RowPinningState = this.getPinnedRows()
@@ -808,12 +1095,33 @@ class RowPinningController {
         );
     }
 
+    /**
+     * Returns the row data object from a currently rendered viewport row.
+     *
+     * @param rowId
+     * Row identifier to look up.
+     */
     private getMaterializedRowObjectById(
         rowId: RowId
     ): RowObjectType | undefined {
         return this.grid.viewport?.getRow(rowId)?.data;
     }
 
+    /**
+     * Returns the row data object from the source data table by row ID.
+     *
+     * @param rowId
+     * Row identifier to look up.
+     *
+     * @param dataTable
+     * Source data table to search.
+     *
+     * @param idColumn
+     * Column name used as the row identifier.
+     *
+     * @param sourceRowIndexesMap
+     * Pre-built map from row ID to row index for `idColumn` lookups.
+     */
     private getSourceRowObjectById(
         rowId: RowId,
         dataTable?: DataTable,
@@ -834,6 +1142,22 @@ class RowPinningController {
         return dataTable.getRowObject(rowIndex);
     }
 
+    /**
+     * Returns the numeric row index in the source data table for a given row
+     * ID.
+     *
+     * @param rowId
+     * Row identifier to resolve.
+     *
+     * @param dataTable
+     * Source data table.
+     *
+     * @param idColumn
+     * Column name used as the row identifier.
+     *
+     * @param sourceRowIndexesMap
+     * Pre-built map from row ID to row index for `idColumn` lookups.
+     */
     private getSourceRowIndexById(
         rowId: RowId,
         dataTable?: DataTable,
@@ -853,6 +1177,16 @@ class RowPinningController {
         }
     }
 
+    /**
+     * Builds a map from row ID to row index by scanning `idColumn` in the
+     * source data table.
+     *
+     * @param dataTable
+     * Source data table to scan.
+     *
+     * @param idColumn
+     * Column name whose values are the row identifiers.
+     */
     private getSourceRowIndexesMap(
         dataTable: DataTable,
         idColumn: string
@@ -877,6 +1211,22 @@ class RowPinningController {
         return rowIndexes;
     }
 
+    /**
+     * Returns whether the data source has enough information to confirm that a
+     * row ID does not exist (as opposed to simply not being loaded yet).
+     *
+     * @param rowId
+     * Row identifier to verify.
+     *
+     * @param dataTable
+     * Source data table.
+     *
+     * @param idColumn
+     * Column name used as the row identifier.
+     *
+     * @param sourceRowIndexesMap
+     * Pre-built map from row ID to row index for `idColumn` lookups.
+     */
     private canDeterminePinnedRowAbsence(
         rowId: RowId,
         dataTable?: DataTable,
@@ -894,6 +1244,16 @@ class RowPinningController {
         return isNumber(rowId);
     }
 
+    /**
+     * Deduplicates and resolves conflicts between top and bottom ID arrays,
+     * giving priority to top.
+     *
+     * @param topIds
+     * Candidate top-section row IDs.
+     *
+     * @param bottomIds
+     * Candidate bottom-section row IDs.
+     */
     private static normalizeSections(
         topIds: RowId[],
         bottomIds: RowId[]
@@ -909,6 +1269,12 @@ class RowPinningController {
         };
     }
 
+    /**
+     * Filters an array to unique, valid row IDs (strings and numbers only).
+     *
+     * @param values
+     * Raw values to filter and deduplicate.
+     */
     private static uniqueRowIds(values: unknown[]): RowId[] {
         const result: RowId[] = [];
         const seen = new Set<RowId>();

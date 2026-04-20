@@ -228,17 +228,6 @@ export class Column {
 
         const sourceColumnId = this.viewport.grid.columnPolicy
             .getColumnSourceId(this.id);
-
-        if (cell.row.pinnedSection) {
-            if (this.id in cell.row.data) {
-                return cell.row.data[this.id] as DataTableCellType;
-            }
-            if (sourceColumnId && sourceColumnId in cell.row.data) {
-                return cell.row.data[sourceColumnId] as DataTableCellType;
-            }
-            return void 0;
-        }
-
         if (!sourceColumnId) {
             return void 0;
         }

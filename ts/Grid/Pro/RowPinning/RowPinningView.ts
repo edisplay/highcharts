@@ -23,14 +23,15 @@
  * */
 
 import type { CellType as DataTableCellType } from '../../../Data/DataTable';
-import type { RowId } from '../Data/DataProvider';
+import type { RowId } from '../../Core/Data/DataProvider';
 
-import Table from '../Table/Table.js';
-import TableCell from '../Table/Body/TableCell.js';
-import TableRow from '../Table/Body/TableRow.js';
-import GridUtils from '../GridUtils.js';
-import Globals from '../Globals.js';
+import Table from '../../Core/Table/Table.js';
+import TableCell from '../../Core/Table/Body/TableCell.js';
+import TableRow from '../../Core/Table/Body/TableRow.js';
+import GridUtils from '../../Core/GridUtils.js';
+import Globals from '../../Core/Globals.js';
 import { getGridRowPinningOptions } from './RowPinningController.js';
+import PinnedTableRow from './PinnedTableRow.js';
 
 const { makeHTMLElement } = GridUtils;
 
@@ -49,9 +50,9 @@ export const classNames = {
 interface PinnedSectionDescriptor {
     position: 'top'|'bottom';
     rowIds: RowId[];
-    rows: TableRow[];
+    rows: PinnedTableRow[];
     tbody: HTMLElement;
-    rowById: Map<RowId, TableRow>;
+    rowById: Map<RowId, PinnedTableRow>;
 }
 
 export interface PinningViewportCompensationState {
@@ -68,13 +69,14 @@ class RowPinningView {
 
     public readonly pinnedBottomTbodyElement: HTMLElement;
 
-    private readonly pinnedTopRows: TableRow[] = [];
+    private readonly pinnedTopRows: PinnedTableRow[] = [];
 
-    private readonly pinnedBottomRows: TableRow[] = [];
+    private readonly pinnedBottomRows: PinnedTableRow[] = [];
 
-    private readonly pinnedTopRowById: Map<RowId, TableRow> = new Map();
+    private readonly pinnedTopRowById: Map<RowId, PinnedTableRow> = new Map();
 
-    private readonly pinnedBottomRowById: Map<RowId, TableRow> = new Map();
+    private readonly pinnedBottomRowById: Map<RowId, PinnedTableRow> =
+        new Map();
 
     private scrollbarCompensationQueued = false;
 
@@ -108,6 +110,33 @@ class RowPinningView {
             'aria-label',
             'Pinned bottom rows'
         );
+
+        viewport.registerBodySection({
+            id: 'top',
+            position: 'before',
+            tbodyElement: this.pinnedTopTbodyElement,
+            getRows: (): TableRow[] => this.pinnedTopRows,
+            getRowByElement: (rowElement: HTMLElement): (
+                TableRow | undefined
+            ) => this.pinnedTopRows.find((row): boolean =>
+                row.htmlElement === rowElement
+            ),
+            getRowById: (rowId: RowId): (TableRow | undefined) =>
+                this.pinnedTopRowById.get(rowId)
+        });
+        viewport.registerBodySection({
+            id: 'bottom',
+            position: 'after',
+            tbodyElement: this.pinnedBottomTbodyElement,
+            getRows: (): TableRow[] => this.pinnedBottomRows,
+            getRowByElement: (rowElement: HTMLElement): (
+                TableRow | undefined
+            ) => this.pinnedBottomRows.find((row): boolean =>
+                row.htmlElement === rowElement
+            ),
+            getRowById: (rowId: RowId): (TableRow | undefined) =>
+                this.pinnedBottomRowById.get(rowId)
+        });
     }
 
     public getRows(section: 'top'|'bottom'): TableRow[] {
@@ -242,6 +271,9 @@ class RowPinningView {
     }
 
     public destroy(): void {
+        this.viewport.unregisterBodySection('top');
+        this.viewport.unregisterBodySection('bottom');
+
         for (let i = 0, iEnd = this.pinnedTopRows.length; i < iEnd; ++i) {
             this.pinnedTopRows[i].destroy();
         }
@@ -396,7 +428,10 @@ class RowPinningView {
             classNames.rowPinnedBottom
         );
 
-        if (row.pinnedSection === 'top') {
+        if (
+            row instanceof PinnedTableRow &&
+            row.bodySectionId === 'top'
+        ) {
             el.classList.add(classNames.rowPinned);
             el.setAttribute(
                 'aria-roledescription',
@@ -406,7 +441,10 @@ class RowPinningView {
             return;
         }
 
-        if (row.pinnedSection === 'bottom') {
+        if (
+            row instanceof PinnedTableRow &&
+            row.bodySectionId === 'bottom'
+        ) {
             el.classList.add(classNames.rowPinned);
             el.setAttribute(
                 'aria-roledescription',
@@ -451,7 +489,8 @@ class RowPinningView {
         rowId: RowId,
         columnId: string,
         value: DataTableCellType,
-        sourceRow: TableRow
+        sourceRow: TableRow,
+        sourceColumnId?: string
     ): Promise<void> {
         const renderedRows = new Set<TableRow>();
         const dataProvider = this.viewport.grid.dataProvider;
@@ -480,6 +519,9 @@ class RowPinningView {
             }
 
             row.data[columnId] = value;
+            if (sourceColumnId && sourceColumnId !== columnId) {
+                row.data[sourceColumnId] = value;
+            }
 
             const cell = row.cells.find((tableCell): boolean =>
                 tableCell instanceof TableCell &&
@@ -615,13 +657,13 @@ class RowPinningView {
     }
 
     private async syncPinnedRowsByIds(
-        targetRows: TableRow[],
+        targetRows: PinnedTableRow[],
         tbody: HTMLElement,
         rowIds: RowId[],
         section: 'top'|'bottom'
     ): Promise<RowId[]> {
         const missingPinnedRowIds: RowId[] = [];
-        const nextRows: TableRow[] = [];
+        const nextRows: PinnedTableRow[] = [];
 
         for (let i = 0; i < rowIds.length; ++i) {
             const rowId = rowIds[i];
@@ -638,18 +680,19 @@ class RowPinningView {
             let row = targetRows[nextIndex];
 
             if (!row) {
-                row = new TableRow(this.viewport, nextIndex);
-                await row.syncPinned(rowId, section, rowData, nextIndex, false);
+                row = new PinnedTableRow(this.viewport, section, nextIndex);
+                await row.sync(rowId, rowData, nextIndex, false);
                 await row.init();
                 await row.render();
                 tbody.appendChild(row.htmlElement);
             } else {
-                await row.syncPinned(rowId, section, rowData, nextIndex, false);
+                await row.sync(rowId, rowData, nextIndex, false);
                 if (!row.htmlElement.isConnected) {
                     tbody.appendChild(row.htmlElement);
                 }
             }
 
+            this.updateRowAttributes(row);
             row.reflow();
             nextRows.push(row);
         }
@@ -680,7 +723,7 @@ class RowPinningView {
 
     private updateScrollableRowAttributes(): void {
         for (let i = 0, iEnd = this.viewport.rows.length; i < iEnd; ++i) {
-            this.viewport.rows[i].updateRowAttributes();
+            this.updateRowAttributes(this.viewport.rows[i]);
         }
     }
 

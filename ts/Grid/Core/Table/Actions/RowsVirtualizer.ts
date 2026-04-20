@@ -104,6 +104,12 @@ class RowsVirtualizer {
     public afterRenderRows?: () => Promise<void>;
 
     /**
+     * Optional extension hook invoked before the first visible rows render.
+     * @internal
+     */
+    public beforeInitialRenderRows?: () => Promise<void>;
+
+    /**
      * Cached max element height in CSS pixels.
      */
     private static maxElementHeight?: number;
@@ -262,7 +268,7 @@ class RowsVirtualizer {
             this.viewport.reflow();
         }
 
-        await this.viewport.refreshPinnedRowsFromQueryCycle();
+        await this.beforeInitialRenderRows?.();
 
         // Load & render rows
         await this.renderRows(this.rowCursor);
@@ -721,7 +727,7 @@ class RowsVirtualizer {
             // Focus the cell if the focus cursor is set.
             if (vp.focusCursor) {
                 const focusCursor = vp.focusCursor;
-                if (focusCursor.section === 'scroll') {
+                if (!focusCursor.bodySectionId) {
                     const focusedRow = rows.find((row): boolean =>
                         row.id === focusCursor.rowId
                     );

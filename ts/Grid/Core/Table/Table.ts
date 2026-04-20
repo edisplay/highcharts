@@ -26,7 +26,6 @@ import type DataTable from '../../../Data/DataTable';
 import type DataProvider from '../Data/DataProvider';
 import type TableCell from './Body/TableCell';
 import type { RowId } from '../Data/DataProvider';
-import type RowPinningView from '../RowPinning/RowPinningView';
 
 import GridUtils from '../GridUtils.js';
 import ColumnResizing from './ColumnResizing/ColumnResizing.js';
@@ -99,33 +98,9 @@ class Table {
     public rows: TableRow[] = [];
 
     /**
-     * The rendered top pinned rows.
+     * Additional rendered body sections composed into the table.
      */
-    public get pinnedTopRows(): TableRow[] {
-        return this.rowPinningView?.getRows('top') || [];
-    }
-
-    /**
-     * The rendered bottom pinned rows.
-     */
-    public get pinnedBottomRows(): TableRow[] {
-        return this.rowPinningView?.getRows('bottom') || [];
-    }
-
-    /**
-     * The HTML element containing top pinned rows.
-     */
-    public get pinnedTopTbodyElement(): HTMLElement {
-        return this.rowPinningView?.pinnedTopTbodyElement || this.tbodyElement;
-    }
-
-    /**
-     * The HTML element containing bottom pinned rows.
-     */
-    public get pinnedBottomTbodyElement(): HTMLElement {
-        return this.rowPinningView?.pinnedBottomTbodyElement ||
-            this.tbodyElement;
-    }
+    private readonly bodySections: TableBodySection[] = [];
 
     /**
      * The resize observer for the table container.
@@ -180,9 +155,10 @@ class Table {
     private cellContextMenu?: CellContextMenu;
 
     /**
-     * Row pinning viewport helper, available only in Grid Pro.
+     * Async hooks executed after the main row update cycle.
+     * @internal
      */
-    public rowPinningView?: RowPinningView;
+    public readonly afterUpdateRowsHooks: Array<() => Promise<void>> = [];
 
     /**
      * Whether the table body min-height was set by the grid.
@@ -228,14 +204,6 @@ class Table {
 
         this.tbodyElement.addEventListener('scroll', this.onScroll);
         this.addBodyEventListeners(this.tbodyElement);
-        if (this.rowPinningView) {
-            this.addBodyEventListeners(
-                this.rowPinningView.pinnedTopTbodyElement
-            );
-            this.addBodyEventListeners(
-                this.rowPinningView.pinnedBottomTbodyElement
-            );
-        }
     }
 
     /* *
@@ -337,6 +305,42 @@ class Table {
     }
 
     /**
+     * Registers an auxiliary table body section.
+     *
+     * @param section
+     * Body section descriptor.
+     *
+     * @internal
+     */
+    public registerBodySection(section: TableBodySection): void {
+        this.unregisterBodySection(section.id);
+        this.bodySections.push(section);
+        this.addBodyEventListeners(section.tbodyElement);
+    }
+
+    /**
+     * Unregisters an auxiliary table body section.
+     *
+     * @param sectionId
+     * Body section ID.
+     *
+     * @internal
+     */
+    public unregisterBodySection(sectionId: string): void {
+        const sectionIndex = this.bodySections.findIndex(
+            (section): boolean => section.id === sectionId
+        );
+        if (sectionIndex < 0) {
+            return;
+        }
+
+        this.removeBodyEventListeners(
+            this.bodySections[sectionIndex].tbodyElement
+        );
+        this.bodySections.splice(sectionIndex, 1);
+    }
+
+    /**
      * Sets the minimum height of the table body.
      */
     private setTbodyMinHeight(): void {
@@ -357,10 +361,13 @@ class Table {
             return;
         }
 
-        const pinnedRowsCount = this.rowPinningView?.getPinnedRowsCount() || 0;
+        const extraRowsCount = this.bodySections.reduce(
+            (count, section): number => count + section.getRows().length,
+            0
+        );
         const minScrollableRows = Math.max(
             0,
-            minVisibleRows - pinnedRowsCount
+            minVisibleRows - extraRowsCount
         );
 
         tbody.style.minHeight = (
@@ -420,8 +427,6 @@ class Table {
         if (!vp.grid.dataProvider) {
             return;
         }
-        const oldPinningMaxHeightSignature =
-            this.rowPinningView?.getPinnedBodyMaxHeightSignature();
         const focusCursor = vp.focusCursor;
 
         try {
@@ -451,13 +456,6 @@ class Table {
                 );
                 shouldRerender = true;
             }
-            const pinningMaxHeightChanged = (
-                oldPinningMaxHeightSignature !==
-                this.rowPinningView?.getPinnedBodyMaxHeightSignature()
-            );
-            if (pinningMaxHeightChanged) {
-                shouldRerender = true;
-            }
 
             const newRowCount = await vp.grid.dataProvider.getRowCount();
             if (shouldRerender) {
@@ -475,31 +473,16 @@ class Table {
                 }
             }
 
-            await vp.refreshPinnedRowsFromQueryCycle(true);
+            for (const hook of vp.afterUpdateRowsHooks) {
+                await hook();
+            }
 
             // Update the pagination controls
             vp.grid.pagination?.updateControls();
             vp.reflow();
 
-            if (focusCursor?.section === 'scroll') {
-                const newRowIndex = await vp.grid.dataProvider?.getRowIndex(
-                    focusCursor.rowId
-                );
-                if (newRowIndex !== void 0) {
-                    vp.scrollToRow(newRowIndex);
-                    setTimeout((): void => {
-                        vp.getRenderedRowByIndex(newRowIndex)
-                            ?.cells[focusCursor.columnIndex]
-                            .htmlElement.focus();
-                    });
-                }
-            } else if (focusCursor) {
-                setTimeout((): void => {
-                    vp.getRenderedPinnedRowById(
-                        focusCursor.rowId,
-                        focusCursor.section
-                    )?.cells[focusCursor.columnIndex].htmlElement.focus();
-                });
+            if (focusCursor) {
+                vp.focusCellFromCursor(focusCursor, true);
             }
         } finally {
             this.grid.hideLoading();
@@ -526,7 +509,6 @@ class Table {
             this.rowsVirtualizer.applyMeasuredRowHeight(measuredRowHeight);
         }
         this.setTbodyMinHeight();
-        this.rowPinningView?.reflow();
 
         // Reflow the pagination
         this.grid.pagination?.reflow();
@@ -537,6 +519,7 @@ class Table {
         });
 
         this.grid.dirtyFlags.delete('reflow');
+        fireEvent(this, 'afterReflow');
     }
 
     /**
@@ -565,9 +548,11 @@ class Table {
             void this.rowsVirtualizer.scroll();
         }
 
-        this.rowPinningView?.syncHorizontalScroll(this.tbodyElement.scrollLeft);
-
         this.header?.scrollHorizontally(this.tbodyElement.scrollLeft);
+        fireEvent(this, 'bodyScroll', {
+            scrollLeft: this.tbodyElement.scrollLeft,
+            scrollTop: this.tbodyElement.scrollTop
+        });
     };
 
     /**
@@ -829,21 +814,7 @@ class Table {
         }
 
         let row: TableRow | undefined;
-        const pinnedSection = this.rowPinningView?.getSectionForBody(tbody);
-
-        if (pinnedSection) {
-            const rowId = tr.getAttribute('data-row-id');
-
-            if (rowId !== null) {
-                row = this.getRenderedPinnedRowById(rowId, pinnedSection);
-                if (!row && /^-?\d+(\.\d+)?$/.test(rowId)) {
-                    row = this.getRenderedPinnedRowById(
-                        Number(rowId),
-                        pinnedSection
-                    );
-                }
-            }
-        } else {
+        if (tbody === this.tbodyElement) {
             const rowIndexAttr = tr.getAttribute('data-row-index');
             if (rowIndexAttr === null) {
                 return;
@@ -851,6 +822,10 @@ class Table {
 
             const rowIndex = parseInt(rowIndexAttr, 10);
             row = this.getRenderedRowByIndex(rowIndex);
+        } else {
+            row = this.bodySections.find(
+                (section): boolean => section.tbodyElement === tbody
+            )?.getRowByElement(tr);
         }
 
         if (!row) {
@@ -871,14 +846,12 @@ class Table {
     public destroy(): void {
         this.tbodyElement.removeEventListener('scroll', this.onScroll);
         this.removeBodyEventListeners(this.tbodyElement);
-        if (this.rowPinningView) {
+        for (const section of this.bodySections) {
             this.removeBodyEventListeners(
-                this.rowPinningView.pinnedTopTbodyElement
-            );
-            this.removeBodyEventListeners(
-                this.rowPinningView.pinnedBottomTbodyElement
+                section.tbodyElement
             );
         }
+        this.bodySections.length = 0;
         this.resizeObserver.disconnect();
         this.columnsResizer?.removeEventListeners();
         this.header?.destroy();
@@ -888,7 +861,6 @@ class Table {
         for (let i = 0, iEnd = this.rows.length; i < iEnd; ++i) {
             this.rows[i]?.destroy();
         }
-        this.rowPinningView?.destroy();
 
         fireEvent(this, 'afterDestroy');
     }
@@ -921,24 +893,9 @@ class Table {
     ): void {
         this.tbodyElement.scrollTop = meta.scrollTop;
         this.tbodyElement.scrollLeft = meta.scrollLeft;
-        this.rowPinningView?.syncHorizontalScroll(meta.scrollLeft);
 
         if (meta.focusCursor) {
-            const { section, rowId, columnIndex } = meta.focusCursor;
-            if (section === 'scroll') {
-                void this.grid.dataProvider?.getRowIndex(rowId).then((
-                    rowIndex
-                ): void => {
-                    if (rowIndex === void 0) {
-                        return;
-                    }
-                    this.getRenderedRowByIndex(rowIndex)
-                        ?.cells[columnIndex]?.htmlElement.focus();
-                });
-            } else {
-                this.getRenderedPinnedRowById(rowId, section)
-                    ?.cells[columnIndex]?.htmlElement.focus();
-            }
+            this.focusCellFromCursor(meta.focusCursor);
         }
     }
 
@@ -981,7 +938,8 @@ class Table {
      * The ID of the row.
      */
     public getRow(id: RowId): TableRow | undefined {
-        return this.getRenderedRows().find((row): boolean => row.id === id);
+        return this.rows.find((row): boolean => row.id === id) ||
+            this.getRenderedRows().find((row): boolean => row.id === id);
     }
 
     /**
@@ -991,9 +949,13 @@ class Table {
      */
     public getRenderedRows(): TableRow[] {
         return [
-            ...(this.rowPinningView?.getRows('top') || []),
+            ...this.bodySections
+                .filter((section): boolean => section.position === 'before')
+                .flatMap((section): TableRow[] => section.getRows()),
             ...this.rows,
-            ...(this.rowPinningView?.getRows('bottom') || [])
+            ...this.bodySections
+                .filter((section): boolean => section.position === 'after')
+                .flatMap((section): TableRow[] => section.getRows())
         ];
     }
 
@@ -1007,63 +969,6 @@ class Table {
      */
     public getRenderedRowByIndex(index: number): TableRow | undefined {
         return this.rows.find((row): boolean => row.index === index);
-    }
-
-    public getRenderedPinnedRowById(
-        rowId: RowId,
-        section: 'top'|'bottom'
-    ): TableRow | undefined {
-        return this.rowPinningView?.getRenderedPinnedRowById(rowId, section);
-    }
-
-    /**
-     * Ensures a pinned row is visible within its pinned section viewport.
-     *
-     * @param rowId
-     * Row identifier.
-     *
-     * @param section
-     * The pinned section containing the row.
-     *
-     * @internal
-     */
-    public revealPinnedRowInSection(
-        rowId: RowId,
-        section: 'top'|'bottom'
-    ): void {
-        this.rowPinningView?.revealRowInSection(rowId, section);
-    }
-
-    /**
-     * Recomputes and renders pinned rows after a query cycle.
-     *
-     * @param deferLayout
-     * Whether pinned layout application should be deferred to a following
-     * reflow.
-     *
-     * @internal
-     */
-    public async refreshPinnedRowsFromQueryCycle(
-        deferLayout: boolean = false
-    ): Promise<void> {
-        await this.rowPinningView?.refreshFromQueryCycle(deferLayout);
-    }
-
-    /**
-     * Re-renders top and bottom pinned rows from row IDs.
-     *
-     * @param deferLayout
-     * Whether pinned layout application should be deferred to a following
-     * reflow.
-     *
-     * @internal
-     */
-    public async renderPinnedRows(
-        deferLayout: boolean = false
-    ): Promise<{ missingPinnedRowIds: RowId[] }> {
-        return await this.rowPinningView?.render(deferLayout) || {
-            missingPinnedRowIds: []
-        };
     }
 
     public async syncAriaRowIndexes(): Promise<void> {
@@ -1084,19 +989,71 @@ class Table {
                 'aria-rowcount',
                 (
                     baseRowCount +
-                    (this.rowPinningView?.getPinnedRowsCount() || 0) +
+                    this.bodySections.reduce(
+                        (count, section): number =>
+                            count + section.getRows().length,
+                        0
+                    ) +
                     headerRowsCount
                 ) + ''
             );
         }
     }
 
+    private focusCellFromCursor(
+        cursor: FocusCursor,
+        defer: boolean = false
+    ): void {
+        const focus = (): void => {
+            if (cursor.bodySectionId) {
+                this.bodySections.find(
+                    (section): boolean => section.id === cursor.bodySectionId
+                )?.getRowById(cursor.rowId)
+                    ?.cells[cursor.columnIndex]
+                    ?.htmlElement.focus();
+                return;
+            }
+
+            void this.grid.dataProvider?.getRowIndex(cursor.rowId).then((
+                rowIndex
+            ): void => {
+                if (rowIndex === void 0) {
+                    return;
+                }
+
+                if (defer) {
+                    this.scrollToRow(rowIndex);
+                }
+
+                this.getRenderedRowByIndex(rowIndex)
+                    ?.cells[cursor.columnIndex]
+                    ?.htmlElement.focus();
+            });
+        };
+
+        if (defer) {
+            setTimeout(focus);
+        } else {
+            focus();
+        }
+    }
+
 }
 
-export type FocusCursor =
-    { section: 'scroll'; rowId: RowId; columnIndex: number } |
-    { section: 'top'; rowId: RowId; columnIndex: number } |
-    { section: 'bottom'; rowId: RowId; columnIndex: number };
+export interface FocusCursor {
+    rowId: RowId;
+    columnIndex: number;
+    bodySectionId?: string;
+}
+
+export interface TableBodySection {
+    id: string;
+    position: 'before'|'after';
+    tbodyElement: HTMLElement;
+    getRows: () => TableRow[];
+    getRowByElement: (rowElement: HTMLElement) => TableRow | undefined;
+    getRowById: (rowId: RowId) => TableRow | undefined;
+}
 
 /**
  * Represents the metadata of the viewport state. It is used to save the

@@ -79,12 +79,6 @@ export interface A11yAnnouncementsOptions {
      */
     filtering?: boolean;
 
-    /**
-     * Enable accessibility announcements for Grid Pro row pinning.
-     *
-     * @default true
-     */
-    rowPinning?: boolean;
 }
 
 /**
@@ -105,12 +99,6 @@ export interface LangAccessibilityOptions {
      * Language options for the accessibility descriptions in filtering.
      */
     filtering?: FilteringLangA11yOptions;
-
-    /**
-     * Language options for the accessibility descriptions in Grid Pro row
-     * pinning.
-     */
-    rowPinning?: RowPinningLangA11yOptions;
 
     /**
      * Accessible label for the minimized column header menu button. Use
@@ -228,68 +216,6 @@ export interface FilteringLangA11yOptions {
          */
         filterCleared?: string;
     }
-}
-
-/**
- * Accessibility options for Grid Pro row pinning announcements.
- */
-export interface RowPinningLangA11yOptions {
-    /**
-     * Language options for the accessibility descriptions in Grid Pro row
-     * pinning.
-     */
-    announcements?: {
-        /**
-         * The message when a row was pinned. Use `{rowId}` and `{position}`
-         * as template variables.
-         *
-         * @default 'Row {rowId} pinned to {position}.'
-         */
-        pinned?: string;
-
-        /**
-         * The message when a row was unpinned. Use `{rowId}` as a template
-         * variable.
-         *
-         * @default 'Row {rowId} unpinned.'
-         */
-        unpinned?: string;
-    };
-
-    /**
-     * Row description messages for pinned and duplicated scroll rows.
-     */
-    descriptions?: {
-        /**
-         * Description for rows rendered in the top pinned section.
-         *
-         * @default 'Pinned row in top section.'
-         */
-        pinnedTop?: string;
-
-        /**
-         * Description for rows rendered in the bottom pinned section.
-         *
-         * @default 'Pinned row in bottom section.'
-         */
-        pinnedBottom?: string;
-
-        /**
-         * Description for scrollable rows that are also pinned to the top
-         * section.
-         *
-         * @default 'This row is also pinned to top section.'
-         */
-        alsoPinnedTop?: string;
-
-        /**
-         * Description for scrollable rows that are also pinned to the bottom
-         * section.
-         *
-         * @default 'This row is also pinned to bottom section.'
-         */
-        alsoPinnedBottom?: string;
-    };
 }
 
 /**

@@ -24,6 +24,8 @@
 import type Grid from '../../Core/Grid';
 import type Table from '../../Core/Table/Table';
 import type Column from '../../Core/Table/Column';
+import type TableRow from '../../Core/Table/Body/TableRow';
+import type TableCell from '../../Core/Table/Body/TableCell';
 import type { DeepPartial } from '../../../Shared/Types';
 import type Options from '../../Core/Options';
 
@@ -41,7 +43,8 @@ import RowPinningController, {
     type RowPinningSectionOptions
 } from './RowPinningController.js';
 import RowPinningView, { classNames } from './RowPinningView.js';
-import { registerBuiltInAction } from '../Table/Body/CellContextMenuBuiltInActions.js';
+import PinnedTableCell from './PinnedTableCell.js';
+import { registerBuiltInAction } from '../../Core/Table/Body/CellContextMenuBuiltInActions.js';
 import {
     addEvent,
     merge,
@@ -109,11 +112,19 @@ const defaultPinnedRowsState = {
  *
  * @param ColumnClass
  * Column class to compose into.
+ *
+ * @param TableRowClass
+ * TableRow class to compose into.
+ *
+ * @param TableCellClass
+ * TableCell class to compose into.
  */
 export function compose(
     GridClass: typeof Grid,
     TableClass: typeof Table,
-    ColumnClass: typeof Column
+    ColumnClass: typeof Column,
+    TableRowClass: typeof TableRow,
+    TableCellClass: typeof TableCell
 ): void {
     void ColumnClass;
 
@@ -127,6 +138,12 @@ export function compose(
     addEvent(GridClass, 'beforeLoad', initRowPinning);
     addEvent(GridClass, 'beforeUpdate', onBeforeGridUpdate);
     addEvent(TableClass, 'beforeInit', initRowPinningView);
+    addEvent(TableClass, 'afterReflow', onAfterTableReflow);
+    addEvent(TableClass, 'bodyScroll', onTableBodyScroll);
+    addEvent(TableClass, 'afterDestroy', destroyRowPinningView);
+    addEvent(TableRowClass, 'afterLoadData', rememberMaterializedRowData);
+    addEvent(TableRowClass, 'afterUpdateAttributes', syncRenderedRowAttrs);
+    addEvent(TableCellClass, 'afterEditValue', syncEditedCellMirrors);
 }
 
 /**
@@ -201,14 +218,112 @@ function initRowPinning(this: Grid): void {
  */
 function initRowPinningView(this: Table): void {
     this.rowPinningView = new RowPinningView(this);
+    const previousGetEffectiveRowCount = this.rowsVirtualizer
+        .getEffectiveRowCount;
     this.rowsVirtualizer.getEffectiveRowCount = async (
         providerRowCount: number
     ): Promise<number> => await this.rowPinningView?.getScrollableRowCount(
-        providerRowCount
+        await previousGetEffectiveRowCount?.(providerRowCount) ??
+            providerRowCount
     ) ?? providerRowCount;
+    this.rowsVirtualizer.beforeInitialRenderRows = async (): Promise<void> => {
+        await this.rowPinningView?.refreshFromQueryCycle(true);
+    };
+    const previousAfterRenderRows = this.rowsVirtualizer.afterRenderRows;
     this.rowsVirtualizer.afterRenderRows = async (): Promise<void> => {
+        await previousAfterRenderRows?.();
         await this.rowPinningView?.syncPinnedRowsFromMaterializedRows();
     };
+    this.afterUpdateRowsHooks.push(async (): Promise<void> => {
+        await this.rowPinningView?.refreshFromQueryCycle(true);
+    });
+}
+
+/**
+ * Triggers a reflow of the pinned rows view after the table reflowed.
+ */
+function onAfterTableReflow(this: Table): void {
+    this.rowPinningView?.reflow();
+}
+
+/**
+ * Syncs horizontal scroll position of pinned rows with the table body.
+ *
+ * @param e
+ * Scroll event payload.
+ *
+ * @param e.scrollLeft
+ * Horizontal scroll offset.
+ *
+ * @param e.scrollTop
+ * Vertical scroll offset (unused).
+ */
+function onTableBodyScroll(
+    this: Table,
+    e: { scrollLeft?: number; scrollTop?: number }
+): void {
+    void e.scrollTop;
+    this.rowPinningView?.syncHorizontalScroll(e.scrollLeft || 0);
+}
+
+/**
+ * Destroys the row pinning view and cleans up its reference on the table.
+ */
+function destroyRowPinningView(this: Table): void {
+    this.rowPinningView?.destroy();
+    delete this.rowPinningView;
+}
+
+/**
+ * Caches the materialized row data in the row pinning controller.
+ */
+function rememberMaterializedRowData(this: TableRow): void {
+    this.viewport.grid.rowPinning?.rememberMaterializedRow(this.id, this.data);
+}
+
+/**
+ * Syncs HTML attributes of a rendered row into its pinned mirror rows.
+ */
+function syncRenderedRowAttrs(this: TableRow): void {
+    this.viewport.rowPinningView?.updateRowAttributes(this);
+}
+
+/**
+ * Propagates an edited cell value to pinned mirror rows of the same data row.
+ */
+function syncEditedCellMirrors(this: TableCell): void {
+    if (this instanceof PinnedTableCell) {
+        return;
+    }
+
+    const rowId = this.row.id;
+    if (rowId === void 0) {
+        return;
+    }
+
+    const sourceColumnId = this.column.viewport.grid.columnPolicy
+        .getColumnSourceId(this.column.id);
+    if (!sourceColumnId) {
+        return;
+    }
+
+    this.row.viewport.grid.rowPinning?.updatePinnedRowValue(
+        rowId,
+        this.column.id,
+        this.value
+    );
+
+    if (!this.row.viewport.grid.querying.willNotModify()) {
+        return;
+    }
+
+    void this.row.viewport.rowPinningView?.syncRenderedMirrors(
+        rowId,
+        this.column.id,
+        this.value,
+        this.row,
+        sourceColumnId
+    );
 }
 
 /**

@@ -18,14 +18,6 @@
         --ig-column-border-color: var(--hcg-column-border-color, var(--ig-border-color));
         --ig-column-border: var(--ig-column-border-width) var(--ig-column-border-style) var(--ig-column-border-color);
 
-        /* Row pinning */
-        --ig-pinned-border-width: var(--hcg-pinned-border-width, var(--ig-row-border-width));
-        --ig-pinned-border-style: var(--hcg-pinned-border-style, var(--ig-row-border-style));
-        --ig-pinned-border-color: var(--hcg-pinned-border-color, var(--ig-row-border-color));
-        --ig-pinned-border: var(--ig-pinned-border-width) var(--ig-pinned-border-style) var(--ig-pinned-border-color);
-        --ig-pinned-top-shadow: var(--hcg-pinned-top-shadow);
-        --ig-pinned-bottom-shadow: var(--hcg-pinned-bottom-shadow);
-
         /* Header column borders */
         --ig-header-column-border-width: var(--hcg-header-column-border-width, var(--ig-column-border-width));
         --ig-header-column-border-style: var(--hcg-header-column-border-style, var(--ig-column-border-style));

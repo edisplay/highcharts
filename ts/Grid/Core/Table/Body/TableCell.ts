@@ -238,23 +238,17 @@ class TableCell extends Cell {
      * viewport rows to be updated, or `false` if the only change was the cell's
      * content.
      */
-    private async updateDataset(): Promise<boolean> {
+    protected async updateDataset(): Promise<boolean> {
         const sourceColumnId = this.column.viewport.grid.columnPolicy
             .getColumnSourceId(this.column.id);
         if (!sourceColumnId) {
             return false;
         }
 
-        const oldValue = this.row.pinnedSection ?
-            (
-                sourceColumnId in this.row.data ?
-                    this.row.data[sourceColumnId] :
-                    this.row.data[this.column.id]
-            ) as DataTableCellType :
-            await this.column.viewport.grid.dataProvider?.getValue(
-                sourceColumnId,
-                this.row.index
-            );
+        const oldValue = await this.column.viewport.grid.dataProvider?.getValue(
+            sourceColumnId,
+            this.row.index
+        );
 
         if (oldValue === this.value) {
             // Abort if the value is the same as in the data table.
@@ -277,22 +271,10 @@ class TableCell extends Cell {
             sourceColumnId,
             rowId
         );
-        vp.grid.rowPinning?.updatePinnedRowValue(
-            rowId,
-            this.column.id,
-            this.value
-        );
 
         if (vp.grid.querying.willNotModify()) {
-            await vp.rowPinningView?.syncRenderedMirrors(
-                rowId,
-                this.column.id,
-                this.value,
-                this.row
-            );
             return false;
         }
-
         await vp.updateRows();
         return true;
     }
@@ -326,7 +308,6 @@ class TableCell extends Cell {
         }
 
         vp.focusCursor = {
-            section: this.row.pinnedSection || 'scroll',
             rowId,
             columnIndex: this.column.index
         };
@@ -352,20 +333,12 @@ class TableCell extends Cell {
     }
 
     public override onMouseOver(): void {
-        if (this.row.pinnedSection) {
-            this.row.setHoveredState(true);
-        } else {
-            this.row.viewport.grid.hoverRow(this.row.index);
-        }
+        this.row.viewport.grid.hoverRow(this.row.index);
         super.onMouseOver();
     }
 
     public override onMouseOut(): void {
-        if (this.row.pinnedSection) {
-            this.row.setHoveredState(false);
-        } else {
-            this.row.viewport.grid.hoverRow();
-        }
+        this.row.viewport.grid.hoverRow();
         super.onMouseOut();
     }
 
