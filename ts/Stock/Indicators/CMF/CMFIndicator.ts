@@ -347,6 +347,7 @@ SeriesRegistry.registerSeriesType('cmf', CMFIndicator);
  *
  * */
 
+/** @internal */
 export default CMFIndicator;
 
 /* *

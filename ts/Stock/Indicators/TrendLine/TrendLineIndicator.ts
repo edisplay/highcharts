@@ -199,6 +199,7 @@ SeriesRegistry.registerSeriesType('trendline', TrendLineIndicator);
  *
  * */
 
+/** @internal */
 export default TrendLineIndicator;
 
 /* *

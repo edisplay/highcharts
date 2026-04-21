@@ -298,6 +298,7 @@ SeriesRegistry.registerSeriesType('stochastic', StochasticIndicator);
  *
  * */
 
+/** @internal */
 export default StochasticIndicator;
 
 /* *

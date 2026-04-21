@@ -256,6 +256,7 @@ SeriesRegistry.registerSeriesType('aroon', AroonIndicator);
  *
  * */
 
+/** @internal */
 export default AroonIndicator;
 
 /* *

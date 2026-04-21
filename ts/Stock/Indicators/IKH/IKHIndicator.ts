@@ -964,6 +964,7 @@ SeriesRegistry.registerSeriesType('ikh', IKHIndicator);
  *
  * */
 
+/** @internal */
 export default IKHIndicator;
 
 /* *

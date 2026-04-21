@@ -237,6 +237,7 @@ SeriesRegistry.registerSeriesType('dema', DEMAIndicator);
  *
  * */
 
+/** @internal */
 export default DEMAIndicator;
 
 /* *

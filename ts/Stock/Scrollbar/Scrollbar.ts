@@ -54,6 +54,7 @@ import {
  *
  * */
 
+/** @internal */
 declare module '../../Core/Chart/ChartBase'{
     interface ChartBase {
         scrollbarsOffsets?: [number, number];

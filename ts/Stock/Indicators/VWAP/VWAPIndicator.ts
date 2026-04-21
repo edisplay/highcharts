@@ -270,6 +270,7 @@ SeriesRegistry.registerSeriesType('vwap', VWAPIndicator);
  *
  * */
 
+/** @internal */
 export default VWAPIndicator;
 
 /* *

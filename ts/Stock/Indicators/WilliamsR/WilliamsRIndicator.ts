@@ -194,6 +194,7 @@ SeriesRegistry.registerSeriesType('williamsr', WilliamsRIndicator);
  *
  * */
 
+/** @internal */
 export default WilliamsRIndicator;
 
 /* *

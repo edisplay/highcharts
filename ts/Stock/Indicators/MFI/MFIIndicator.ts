@@ -293,6 +293,7 @@ SeriesRegistry.registerSeriesType('mfi', MFIIndicator);
  *
  * */
 
+/** @internal */
 export default MFIIndicator;
 
 /* *

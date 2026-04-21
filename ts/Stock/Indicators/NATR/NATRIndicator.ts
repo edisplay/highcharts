@@ -154,6 +154,7 @@ SeriesRegistry.registerSeriesType('natr', NATRIndicator);
  *
  * */
 
+/** @internal */
 export default NATRIndicator;
 
 /* *

@@ -210,6 +210,7 @@ SeriesRegistry.registerSeriesType('cci', CCIIndicator);
  *
  * */
 
+/** @internal */
 export default CCIIndicator;
 
 /* *

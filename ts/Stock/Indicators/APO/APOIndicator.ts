@@ -204,6 +204,7 @@ SeriesRegistry.registerSeriesType('apo', APOIndicator);
  *
  * */
 
+/** @internal */
 export default APOIndicator;
 
 /* *

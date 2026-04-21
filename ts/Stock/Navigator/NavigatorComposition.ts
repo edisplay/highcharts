@@ -48,6 +48,7 @@ declare module '../../Core/Renderer/SVG/SymbolType' {
     }
 }
 
+/** @internal */
 declare module '../../Core/Series/SeriesBase' {
     interface SeriesBase {
         baseSeries?: Series;
@@ -105,8 +106,10 @@ function onSeriesAfterUpdate(
  *
  * */
 
+/** @internal */
 const NavigatorComposition = {
     compose
 };
 
+/** @internal */
 export default NavigatorComposition;

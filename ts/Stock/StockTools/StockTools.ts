@@ -390,8 +390,10 @@ function navigationResizeYAxes(
  *
  * */
 
+/** @internal */
 const StockTools = {
     compose
 };
 
+/** @internal */
 export default StockTools;

@@ -225,6 +225,7 @@ SeriesRegistry.registerSeriesType('ad', ADIndicator);
  *
  * */
 
+/** @internal */
 export default ADIndicator;
 
 /* *

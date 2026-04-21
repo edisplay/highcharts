@@ -283,6 +283,7 @@ SeriesRegistry.registerSeriesType('keltnerchannels', KeltnerChannelsIndicator);
  *
  * */
 
+/** @internal */
 export default KeltnerChannelsIndicator;
 
 /* *

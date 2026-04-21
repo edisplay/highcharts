@@ -904,4 +904,5 @@ Toolbar.prototype.classMapping = {
  *
  * */
 
+/** @internal */
 export default Toolbar;

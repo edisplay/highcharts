@@ -183,6 +183,7 @@ SeriesRegistry.registerSeriesType('momentum', MomentumIndicator);
  *
  * */
 
+/** @internal */
 export default MomentumIndicator;
 
 /* *

@@ -234,6 +234,7 @@ SeriesRegistry.registerSeriesType('ema', EMAIndicator);
  *
  * */
 
+/** @internal */
 export default EMAIndicator;
 
 /* *

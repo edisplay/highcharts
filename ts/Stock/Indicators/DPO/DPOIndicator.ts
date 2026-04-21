@@ -231,6 +231,7 @@ SeriesRegistry.registerSeriesType('dpo', DPOIndicator);
  *
  * */
 
+/** @internal */
 export default DPOIndicator;
 
 /* *

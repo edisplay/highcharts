@@ -222,6 +222,7 @@ SeriesRegistry.registerSeriesType('chaikin', ChaikinIndicator);
  *  Default Export
  *
  * */
+/** @internal */
 export default ChaikinIndicator;
 
 /* *

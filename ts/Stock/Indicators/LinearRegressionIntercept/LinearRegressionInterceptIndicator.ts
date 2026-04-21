@@ -140,6 +140,7 @@ SeriesRegistry.registerSeriesType(
  *
  * */
 
+/** @internal */
 export default LinearRegressionInterceptIndicator;
 
 /* *

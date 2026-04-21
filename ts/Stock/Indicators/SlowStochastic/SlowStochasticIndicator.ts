@@ -192,6 +192,7 @@ SeriesRegistry.registerSeriesType('slowstochastic', SlowStochasticIndicator);
  *
  * */
 
+/** @internal */
 export default SlowStochasticIndicator;
 
 /* *

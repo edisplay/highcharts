@@ -292,6 +292,7 @@ SeriesRegistry.registerSeriesType('priceenvelopes', PriceEnvelopesIndicator);
  *
  * */
 
+/** @internal */
 export default PriceEnvelopesIndicator;
 
 /* *

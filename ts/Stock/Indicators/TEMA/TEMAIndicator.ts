@@ -313,6 +313,7 @@ SeriesRegistry.registerSeriesType('tema', TEMAIndicator);
  *
  * */
 
+/** @internal */
 export default TEMAIndicator;
 
 /* *
