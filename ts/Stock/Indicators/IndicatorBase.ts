@@ -19,10 +19,12 @@ import type Series from '../../Core/Series/Series';
  *
  * */
 
+/** @internal */
 export interface IndicatorBase extends Series {
     useCommonDataGrouping?: boolean;
 }
 
+/** @internal */
 export interface IndicatorLinkedSeriesBase {
     processedYData?: (
         Array<(number|null)>|
