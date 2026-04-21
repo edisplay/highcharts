@@ -49,10 +49,6 @@ QUnit.test('visibility', assert => {
 
 QUnit.test('Halo with boost module', assert => {
     const chart = Highcharts.chart('container', {
-            xAxis: {
-                min: -5,
-                max: 5
-            },
             plotOptions: {
                 series: {
                     boostThreshold: 2,
