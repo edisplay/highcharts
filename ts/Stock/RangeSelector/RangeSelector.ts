@@ -2306,12 +2306,6 @@ export default RangeSelector;
  * */
 
 /**
- * Define the time span for the button
- *
- * @typedef {"all"|"day"|"hour"|"millisecond"|"minute"|"month"|"second"|"week"|"year"|"ytd"} Highcharts.RangeSelectorButtonTypeValue
- */
-
-/**
  * Callback function to react on button clicks.
  *
  * @callback Highcharts.RangeSelectorClickCallbackFunction
