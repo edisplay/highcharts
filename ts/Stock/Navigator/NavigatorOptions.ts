@@ -30,7 +30,7 @@ import type { SeriesTypeOptions } from '../../Core/Series/SeriesType';
  * */
 
 declare module '../../Core/Axis/AxisOptions' {
-    interface AxisOptions {
+    interface XAxisOptions {
         /**
          * Maximum range which can be set using the navigator's handles.
          * Opposite of [xAxis.minRange](#xAxis.minRange).
