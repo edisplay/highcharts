@@ -7,9 +7,9 @@ import LicenseValidation, {
 
 const REF = new Date(Date.UTC(2026, 3, 13));
 
-const KEY_ANNUAL_VALID = 'V9HR-6DCZ-TB80-A21V-06UJ-0000';
-const KEY_ANNUAL_EXPIRED = 'AJU0-DG0S-1ZX1-A1HL-0726-0000';
-const KEY_PERPETUAL_SUPPORT_ENDED = 'LC4W-4MDA-95VZ-P1MO-07FY-0000';
+const KEY_ANNUAL_VALID = 'NMD7-4JNR-GU9L-A223-06PP-0000';
+const KEY_ANNUAL_EXPIRED = 'C2TR-Z9ZC-OL4D-A1HT-07CF-0000';
+const KEY_PERPETUAL_SUPPORT_ENDED = '5DR9-W35I-TMXI-P1MW-07PU-0000';
 
 describe('Grid Pro license validation', () => {
     it('Valid key', () => {
