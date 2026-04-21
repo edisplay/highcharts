@@ -73,10 +73,6 @@ class NATRIndicator extends ATRIndicator {
         }
     } as NATROptions);
 
-    /**
-     * @lends Highcharts.Series#
-     */
-
     /* *
      *
      *  Properties
@@ -177,4 +173,4 @@ export default NATRIndicator;
  * @apioption series.natr
  */
 
-''; // To include the above in the js output'
+''; // To include the above in the js output

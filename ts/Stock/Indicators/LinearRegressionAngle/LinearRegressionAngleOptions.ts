@@ -26,13 +26,13 @@ import type LinearRegressionOptions from
  * option to be set.
  *
  * @sample {highstock} stock/indicators/linear-regression-angle
- *         Linear intercept angle indicator
+ *         Linear regression angle indicator
  *
  * @extends      plotOptions.linearregression
  * @since        7.0.0
  * @product      highstock
  * @requires     stock/indicators/indicators
- * @requires  stock/indicators/regressions
+ * @requires     stock/indicators/regressions
  * @optionparent plotOptions.linearregressionangle
  * @interface Highcharts.LinearRegressionAngleOptions
  */
