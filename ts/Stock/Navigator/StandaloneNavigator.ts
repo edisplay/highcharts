@@ -27,6 +27,7 @@ import Axis from '../../Core/Axis/Axis.js';
 import standaloneNavigatorDefaults from './StandaloneNavigatorDefaults.js';
 import { addEvent, fireEvent, merge, pick } from '../../Shared/Utilities.js';
 
+/** @internal */
 declare module '../../Core/GlobalsBase' {
     interface GlobalsBase {
         navigators: Array<StandaloneNavigator>;
@@ -44,6 +45,7 @@ declare module '../../Core/GlobalsBase' {
  * creating a standalone navigator component that synchronizes the extremes
  * across multiple bound charts.
  *
+ * @internal
  * @class
  * @name Highcharts.StandaloneNavigator
  *
@@ -449,6 +451,7 @@ class StandaloneNavigator {
     }
 }
 
+/** @internal */
 export default StandaloneNavigator;
 
 /* *

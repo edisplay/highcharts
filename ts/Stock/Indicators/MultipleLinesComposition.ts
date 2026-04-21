@@ -39,6 +39,7 @@ import { error } from '../../Core/Utilities.js';
  *
  * */
 
+/** @internal */
 namespace MultipleLinesComposition {
 
     /* *
@@ -423,4 +424,5 @@ namespace MultipleLinesComposition {
  *
  * */
 
+/** @internal */
 export default MultipleLinesComposition;

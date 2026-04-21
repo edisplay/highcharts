@@ -949,6 +949,7 @@ class Scrollbar {
  *
  * */
 
+/** @internal */
 namespace Scrollbar {
     export interface ChangedEvent {
         from: number;
@@ -968,4 +969,5 @@ namespace Scrollbar {
  *
  * */
 
+/** @internal */
 export default Scrollbar;

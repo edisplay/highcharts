@@ -82,6 +82,7 @@ function numExt(
     }
 }
 
+/** @internal */
 export interface SetRangeEvent {
     min: number;
     max: number;

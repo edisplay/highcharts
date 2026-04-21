@@ -42,6 +42,7 @@ import { addEvent, extend, pushUnique } from '../../Shared/Utilities.js';
  *
  * */
 
+/** @internal */
 declare module '../../Core/Renderer/SVG/SymbolType' {
     interface SymbolTypeRegistry {
         'navigator-handle': SymbolFunction;

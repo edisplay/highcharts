@@ -45,6 +45,7 @@ import {
  *
  * */
 
+/** @internal */
 declare module '../../Extensions/Annotations/NavigationBindingsBase' {
     interface NavigationBindingsBase {
         /** @requires modules/stock-tools */
@@ -74,16 +75,19 @@ declare module '../../Extensions/Annotations/NavigationBindingsBase' {
     }
 }
 
+/** @internal */
 export interface AxisPositions {
     top: string;
     height: string;
 }
 
+/** @internal */
 export interface NavigationBindingsResizerObject {
     controlledAxis?: Record<string, Array<string|number>>;
     enabled: boolean;
 }
 
+/** @internal */
 export interface YAxisPositions {
     positions: Array<Record<string, number>>;
     allAxesHeight: number;
