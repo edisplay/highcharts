@@ -115,6 +115,8 @@ class GaugeSeries extends Series {
     public static defaultOptions: GaugeSeriesOptions = merge(
         Series.defaultOptions,
         {
+            clip: false,
+
             /**
              * When this option is `true`, the dial will wrap around the axes.
              * For instance, in a full-range gauge going from 0 to 360, a value
