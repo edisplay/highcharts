@@ -65,16 +65,12 @@ QUnit.test('Halo with boost module', assert => {
                 data: [2, 3]
             }, {
                 data: [3, 2]
+            }, {
+                data: [2.5]
             }]
         }),
         series = chart.series[0],
         controller = new TestController(chart);
-
-    assert.strictEqual(
-        series.markerGroup,
-        chart.series[1].markerGroup,
-        'Boosted series should share one marker group'
-    );
 
     controller.mouseMove(
         series.points[0].plotX + chart.plotLeft,
@@ -89,6 +85,12 @@ QUnit.test('Halo with boost module', assert => {
     assert.strictEqual(
         series.markerGroup.element.getAttribute('opacity'),
         '1',
-        'Shared boost marker group should not be inactive on hover'
+        'Boosted series sharing markerGroup should not be inactive on hover'
+    );
+
+    assert.notEqual(
+        +chart.series[2].markerGroup.element.getAttribute('opacity'),
+        1,
+        'Series not sharing markerGroup should be inactive on hover'
     );
 });

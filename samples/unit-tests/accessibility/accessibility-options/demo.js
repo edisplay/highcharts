@@ -309,38 +309,32 @@ QUnit.test('pointDescriptionEnabledThreshold', function (assert) {
 QUnit.test('High contrast theme should persist on chart update', function (
     assert
 ) {
-    var options = {
-            accessibility: {
-                highContrastMode: true,
-                highContrastTheme: {
-                    yAxis: {
-                        plotLines: [{
-                            color: '#ff0000',
-                            value: 2,
-                            width: 2
-                        }]
-                    },
-                    plotOptions: {
-                        series: {
-                            color: '#ff0000'
-                        }
-                    }
+    const options = {
+        accessibility: {
+            highContrastMode: true,
+            highContrastTheme: {
+                yAxis: {
+                    plotLines: [{
+                        color: '#ff0000',
+                        value: 2,
+                        width: 2
+                    }]
                 }
-            },
-            series: [{
-                color: '#0000ff',
-                data: [1, 2, 3]
-            }],
-            yAxis: {
-                plotLines: [{
-                    color: '#0000ff',
-                    value: 2,
-                    width: 2
-                }]
             }
         },
-        chart = Highcharts.chart('container', options),
-        plotLine = chart.yAxis[0].plotLinesAndBands[0];
+        yAxis: {
+            plotLines: [{
+                color: '#0000ff',
+                value: 2,
+                width: 2
+            }]
+        },
+        series: [{
+            data: [1, 2, 3]
+        }]
+    };
+    const chart = Highcharts.chart('container', options);
+    let plotLine = chart.yAxis[0].plotLinesAndBands[0];
 
     assert.strictEqual(
         plotLine.svgElem.element.getAttribute('stroke'),
