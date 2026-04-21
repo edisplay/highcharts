@@ -14,7 +14,7 @@
  */
 'use strict';
 import Highcharts from '../../Core/Globals.js';
-import ArrowSymbols from '../../Extensions/ArrowSymbols.js';
+import { composeArrowSymbols } from '../../Extensions/ArrowSymbols.js';
 import Connection from '../../Gantt/Connection.js';
 import {
     composeCurrentDateIndication
@@ -38,7 +38,7 @@ G.Scrollbar = G.Scrollbar || Scrollbar;
 // Functions
 G.ganttChart = G.GanttChart.ganttChart;
 // Compositions
-ArrowSymbols.compose(G.SVGRenderer);
+composeArrowSymbols(G.SVGRenderer);
 composeCurrentDateIndication(G.Axis, G.PlotLineOrBand);
 GanttSeries.compose(G.Axis, G.Chart, G.Series, G.Tick);
 G.Navigator.compose(G.Chart, G.Axis, G.Series);

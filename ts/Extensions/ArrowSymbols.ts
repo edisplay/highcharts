@@ -133,7 +133,7 @@ function arrowHalf(
  *
  * @internal
  */
-export function compose(
+export function composeArrowSymbols(
     SVGRendererClass: typeof SVGRenderer
 ): void {
     const symbols = SVGRendererClass.prototype.symbols;
@@ -222,17 +222,3 @@ function triangleLeftHalf(
 ): SVGPath {
     return triangleLeft(x, y, w / 2, h);
 }
-
-/* *
- *
- *  Default Export
- *
- * */
-
-/** @internal */
-const ArrowSymbols = {
-    compose
-};
-
-/** @internal */
-export default ArrowSymbols;

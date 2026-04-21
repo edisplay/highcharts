@@ -45,7 +45,7 @@ import {
     objectEach,
     splat
 } from '../Shared/Utilities.js';
-import { error } from '../Core/Utilities';
+import { error } from '../Core/Utilities.js';
 
 /* *
  *
@@ -1741,6 +1741,11 @@ class Data {
                             poll();
                         }
 
+                        if (!chart.options) {
+                            // If the chart is destroyed, ignore the error as
+                            // a cancelled request.
+                            return;
+                        }
                         return error(
                             `Request failed - ${xhr.status} \n` +
                                 (typeof e === 'string' ? e : e.message),

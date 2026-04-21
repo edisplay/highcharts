@@ -14,7 +14,9 @@
  */
 'use strict';
 import Highcharts from '../../Core/Globals.js';
-import { compose } from '../../Extensions/ArrowSymbols.js';
+import { composeArrowSymbols } from '../../Extensions/ArrowSymbols.js';
+
 const G: AnyRecord = Highcharts;
-compose(G.SVGRenderer);
+composeArrowSymbols(G.SVGRenderer);
+
 export default Highcharts;
