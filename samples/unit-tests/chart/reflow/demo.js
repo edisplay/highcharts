@@ -71,7 +71,7 @@ QUnit.test('Reflow tests (sync, #6968)', function (assert) {
             container.style.width = '300px';
 
             if (navigator.userAgent.indexOf('Edge') === -1) {
-                // triggers page reload on BrowserStack
+                // Triggers page reload on BrowserStack
                 Highcharts.fireEvent(window, 'resize');
             }
         }, 0);
@@ -403,37 +403,11 @@ QUnit.test(
             }]
         });
 
-        // // Proxy position containers live inside `chart.container`. They must
-        // be
-        // // positioned out of flow inline, otherwise they inflate the inner
-        // // container and feed the loop
-        // const proxyContainers = chart.container.querySelectorAll(
-        //     '[class^="highcharts-a11y-proxy-container"]'
-        // );
-        // assert.ok(
-        //     proxyContainers.length > 0,
-        //     'Proxy position containers must be present
-        // inside chart.container.'
-        // );
-        // proxyContainers.forEach(el => {
-        //     assert.strictEqual(
-        //         el.style.position,
-        //         'absolute',
-        //         'Proxy position container must carry `position: absolute`' +
-        //         ' inline.'
-        //     );
-        // });
-
         // Announcer container must be layout-hidden inline
         assert.ok(
             chart.announcerContainer,
             'A11y announcer container should exist.'
         );
-        // assert.strictEqual(
-        //     chart.announcerContainer.style.position,
-        //     'absolute',
-        //     'Announcer container must be positioned out of flow inline.'
-        // );
 
         const initialHeight = chart.chartHeight;
 
