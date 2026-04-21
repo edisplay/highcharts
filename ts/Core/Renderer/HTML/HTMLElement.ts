@@ -323,19 +323,21 @@ class HTMLElement extends SVGElement {
             (styles && 'lineClamp' in styles && !styles.lineClamp) ||
             (styles?.whiteSpace === 'nowrap' && this.styles.lineClamp)
         ) {
-            if (this.element && this.element.style) {
-                this.element.style.removeProperty('-webkit-line-clamp');
-                this.element.style.removeProperty('-webkit-box-orient');
+            const { style } = this.element;
+            if (this.element?.style) {
+                style.removeProperty('-webkit-line-clamp');
+                style.removeProperty('-webkit-box-orient');
                 // Only clear display if it's currently the injected webkit-box
-                if (this.element.style.display === '-webkit-box') {
-                    this.element.style.removeProperty('display');
+                if (style.display === '-webkit-box') {
+                    style.removeProperty('display');
                 }
             }
 
-            if (this.styles) {
-                delete this.styles.lineClamp;
-                if (this.styles.display === '-webkit-box') {
-                    delete this.styles.display;
+            const thisStyles = this.styles;
+            if (thisStyles) {
+                delete thisStyles.lineClamp;
+                if (thisStyles.display === '-webkit-box') {
+                    delete thisStyles.display;
                 }
             }
 
