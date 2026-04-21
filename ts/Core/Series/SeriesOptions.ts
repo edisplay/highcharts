@@ -188,6 +188,8 @@ export interface SeriesEventsOptions {
 /**
  * Function callback when a series has been animated.
  *
+ * @callback Highcharts.SeriesAfterAnimateCallbackFunction
+ *
  * @param {Highcharts.Series} this
  *        The series where the event occurred.
  *
@@ -219,6 +221,8 @@ export interface SeriesAfterAnimateEventObject {
 /**
  * Function callback when a series is clicked. Return false to cancel toggle
  * actions.
+ *
+ * @callback Highcharts.SeriesClickCallbackFunction
  *
  * @param {Highcharts.Series} this
  *        The series where the event occurred.
