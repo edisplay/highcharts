@@ -14,8 +14,7 @@
 
 import type ColorType from '../../../Core/Color/ColorType';
 import type CSSObject from '../../../Core/Renderer/CSSObject';
-import type DataGroupingOptions from '../../../Extensions/DataGrouping/DataGroupingOptions';
-import type { PointMarkerOptions } from '../../../Core/Series/PointOptions';
+
 import type {
     SMAOptions,
     SMAParamsOptions
@@ -73,12 +72,6 @@ export interface KeltnerChannelsOptions extends SMAOptions {
      * @extends plotOptions.keltnerchannels.bottomLine
      */
     topLine?: Record<string, CSSObject>;
-
-    marker?: PointMarkerOptions;
-
-    dataGrouping?: DataGroupingOptions;
-
-    lineWidth?: number;
 }
 
 export interface KeltnerChannelsParamsOptions extends SMAParamsOptions {

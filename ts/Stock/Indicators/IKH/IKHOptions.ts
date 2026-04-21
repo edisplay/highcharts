@@ -13,7 +13,6 @@
  * */
 import type ColorType from '../../../Core/Color/ColorType';
 import type CSSObject from '../../../Core/Renderer/CSSObject';
-import type DataGroupingOptions from '../../../Extensions/DataGrouping/DataGroupingOptions';
 import type IKHIndicator from './IKHIndicator';
 import type IKHPoint from './IKHPoint';
 import type { PointMarkerOptions } from '../../../Core/Series/PointOptions';
@@ -47,41 +46,48 @@ import type SVGElement from '../../../Core/Renderer/SVG/SVGElement';
  */
 export interface IKHOptions extends SMAOptions {
     /**
+     * The styles for Chikou line
+     */
+    chikouLine?: Record<string, CSSObject>;
+
+    gapSize?: number;
+
+    /**
+     * The styles for Kijun line
+     */
+    kijunLine?: Record<string, CSSObject>;
+
+    marker?: PointMarkerOptions;
+
+    /**
      * @excluding index
      */
     params?: IKHParamsOptions;
 
     /**
-     * The styles for Chikou line
-     */
-    chikouLine?: Record<string, CSSObject>;
-    gapSize?: number;
-    /**
-     * The styles for Kijun line
-     */
-    kijunLine?: Record<string, CSSObject>;
-    marker?: PointMarkerOptions;
-    /**
      * The styles for area between Senkou Span A and B.
      */
     senkouSpan?: IKHSenkouSpanOptions;
+
     /**
      * The styles for Senkou Span A line
      */
     senkouSpanA?: Record<string, CSSObject>;
+
     /**
      * The styles for Senkou Span B line
      */
     senkouSpanB?: Record<string, CSSObject>;
+
     /**
      * The styles for Tenkan line
      */
     tenkanLine?: Record<string, CSSObject>;
-
-    dataGrouping?: DataGroupingOptions;
 }
 
 export interface IKHParamsOptions extends SMAParamsOptions {
+    index?: undefined;
+
     /**
      * The base period for Tenkan calculations.
      */
@@ -149,11 +155,3 @@ export interface IKHGapExtensionObject {
 export interface IKHGapSizeOptions {
     gapSize?: IKHOptions['gapSize'];
 }
-
-/* *
- *
- *  Default Export
- *
- * */
-
-export default IKHOptions;
