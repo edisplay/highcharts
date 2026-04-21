@@ -48,8 +48,10 @@ function setFixedRange(this: Chart, range: number | undefined): void {
     }
 }
 
+/** @internal */
 const StockUtilities = {
     setFixedRange
 };
 
+/** @internal */
 export default StockUtilities;

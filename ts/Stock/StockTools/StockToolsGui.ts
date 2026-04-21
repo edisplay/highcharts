@@ -87,9 +87,7 @@ function chartSetStockTools(
     }
 }
 
-/**
- * @internal
- */
+/** @internal */
 function compose(
     ChartClass: typeof Chart,
     NavigationBindingsClass: typeof NavigationBindings
@@ -185,9 +183,7 @@ function setOffset(chart: Chart): void {
     }
 }
 
-/**
- * @internal
- */
+/** @internal */
 function onChartDestroy(
     this: Chart
 ): void {
@@ -196,9 +192,7 @@ function onChartDestroy(
     }
 }
 
-/**
- * @internal
- */
+/** @internal */
 function onChartGetMargins(
     this: Chart
 ): void {
@@ -245,9 +239,7 @@ function onChartRender(
     }
 }
 
-/**
- * @internal
- */
+/** @internal */
 function onNavigationBindingsDeselectButton(
     this: NavigationBindings,
     event: Record<string, HTMLDOMElement>
