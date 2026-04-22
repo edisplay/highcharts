@@ -14,6 +14,7 @@ const STATIC_DAY = new Date(Date.UTC(2026, 3, 13));
 
 const KEY_ANNUAL_VALID = 'NMD7-4JNR-GU9L-A223-06PP-0000';
 const KEY_ANNUAL_EXPIRED = 'C2TR-Z9ZC-OL4D-A1HT-07CF-0000';
+/** Perpetual expiry date: 2025-10-21 */
 const KEY_PERPETUAL_SUPPORT_ENDED = '5DR9-W35I-TMXI-P1MW-07PU-0000';
 
 function setBuildDateForTest(yyyyMmDd: string): void {
