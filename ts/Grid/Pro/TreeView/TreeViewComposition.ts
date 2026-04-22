@@ -25,6 +25,7 @@ import type Grid from '../../Core/Grid';
 import type { RowId } from '../../Core/Data/DataProvider';
 import type Table from '../../Core/Table/Table';
 import type { RestoreCellFocusEvent } from '../../Core/Table/Table';
+import type TableRow from '../../Core/Table/Body/TableRow';
 import type TableCell from '../../Core/Table/Body/TableCell';
 import type { TreeViewOptions } from './TreeViewTypes';
 import type {
@@ -78,6 +79,78 @@ const treeToggleSelector = '[' + treeToggleAttribute + ']';
 const treeToggleListeners = new WeakMap<Table, TreeToggleListeners>();
 
 /**
+ * Composes Grid Pro with TreeView projection infrastructure.
+ *
+ * @param GridClass
+ * Grid class to extend.
+ *
+ * @param TableClass
+ * Table class to extend.
+ *
+ * @param TableCellClass
+ * TableCell class to extend.
+ */
+export function compose(
+    GridClass: typeof Grid,
+    TableClass: typeof Table,
+    TableCellClass: typeof TableCell
+): void {
+    if (!pushUnique(Globals.composed, 'TreeView')) {
+        return;
+    }
+
+    addEvent(GridClass, 'beforeLoad', onBeforeLoad);
+    addEvent(GridClass, 'afterLoad', onAfterLoad);
+    addEvent(GridClass, 'beforeDestroy', onBeforeDestroy);
+    addEvent(GridClass, 'afterRedraw', onAfterRedraw);
+    addEvent(GridClass, 'beforeTreeRowToggle', onBeforeTreeRowToggle);
+    addEvent(GridClass, 'afterTreeRowToggle', onAfterTreeRowToggle);
+    addEvent(TableClass, 'beforeInit', onTableBeforeInit);
+    addEvent(TableClass, 'afterInit', onTableAfterInit);
+    addEvent(TableClass, 'afterReflow', onTableAfterReflow);
+    addEvent(
+        TableClass,
+        'beforeRestoreCellFocus',
+        onTableBeforeRestoreCellFocus
+    );
+    addEvent(TableClass, 'getViewportTopInset', onTableGetViewportTopInset);
+    addEvent(TableClass, 'afterDestroy', onTableAfterDestroy);
+    addEvent(TableCellClass, 'afterRender', onAfterCellRender);
+}
+
+/**
+ * Focuses a rendered row in a way that preserves viewport scroll behavior.
+ *
+ * @param table
+ * Table viewport handling the event.
+ *
+ * @param row
+ * Target row.
+ *
+ * @param columnIndex
+ * Target column index.
+ */
+function focusRenderedRow(
+    table: Table,
+    row: TableRow | undefined,
+    columnIndex: number
+): boolean {
+    if (!row) {
+        return false;
+    }
+
+    if (row.htmlElement.parentElement === table.tbodyElement) {
+        table.focusCellByRowIndex(row.index, columnIndex);
+    } else {
+        row.cells[columnIndex]?.htmlElement.focus({
+            preventScroll: true
+        });
+    }
+
+    return true;
+}
+
+/**
  * Handles tree-aware keyboard navigation for body and sticky rows.
  *
  * @param table
@@ -120,7 +193,24 @@ function handleTreeBodyNavigation(
         return true;
     }
 
+    const renderedRows = table.getRenderedRows();
+    const renderedRowIndex = renderedRows.indexOf(row);
+    const nextRenderedRow = renderedRows[renderedRowIndex + dir[0]];
+    const isViewportBodyRow = row.htmlElement.parentElement ===
+        table.tbodyElement;
     const nextRowIndex = row.index + dir[0];
+
+    if (renderedRowIndex > -1) {
+        if (
+            !isViewportBodyRow ||
+            nextRowIndex < 0 ||
+            nextRowIndex >= table.rowsVirtualizer.rowCount
+        ) {
+            if (focusRenderedRow(table, nextRenderedRow, nextColumnIndex)) {
+                return true;
+            }
+        }
+    }
 
     if (nextRowIndex < 0 && header) {
         const extraRowIdx = header.rows.length + nextRowIndex;
@@ -164,46 +254,6 @@ function onTableBeforeRestoreCellFocus(
     if (stickyCell?.htmlElement === document.activeElement) {
         event.preventDefault?.();
     }
-}
-
-/**
- * Composes Grid Pro with TreeView projection infrastructure.
- *
- * @param GridClass
- * Grid class to extend.
- *
- * @param TableClass
- * Table class to extend.
- *
- * @param TableCellClass
- * TableCell class to extend.
- */
-export function compose(
-    GridClass: typeof Grid,
-    TableClass: typeof Table,
-    TableCellClass: typeof TableCell
-): void {
-    if (!pushUnique(Globals.composed, 'TreeView')) {
-        return;
-    }
-
-    addEvent(GridClass, 'beforeLoad', onBeforeLoad);
-    addEvent(GridClass, 'afterLoad', onAfterLoad);
-    addEvent(GridClass, 'beforeDestroy', onBeforeDestroy);
-    addEvent(GridClass, 'afterRedraw', onAfterRedraw);
-    addEvent(GridClass, 'beforeTreeRowToggle', onBeforeTreeRowToggle);
-    addEvent(GridClass, 'afterTreeRowToggle', onAfterTreeRowToggle);
-    addEvent(TableClass, 'beforeInit', onTableBeforeInit);
-    addEvent(TableClass, 'afterInit', onTableAfterInit);
-    addEvent(TableClass, 'afterReflow', onTableAfterReflow);
-    addEvent(
-        TableClass,
-        'beforeRestoreCellFocus',
-        onTableBeforeRestoreCellFocus
-    );
-    addEvent(TableClass, 'getViewportTopInset', onTableGetViewportTopInset);
-    addEvent(TableClass, 'afterDestroy', onTableAfterDestroy);
-    addEvent(TableCellClass, 'afterRender', onAfterCellRender);
 }
 
 /**

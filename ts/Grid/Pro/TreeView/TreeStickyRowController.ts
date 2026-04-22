@@ -49,6 +49,7 @@ type VisibleRowReference = {
 type StickyFocusState = {
     columnIndex: number;
     inStickyBody: boolean;
+    rowId: RowId;
     rowIndex: number;
     sourceElement: HTMLTableCellElement;
 };
@@ -415,6 +416,7 @@ class TreeStickyRowController {
 
         if (
             !focusCursor ||
+            focusCursor.bodySectionId ||
             !(activeElement instanceof HTMLTableCellElement)
         ) {
             return;
@@ -431,10 +433,16 @@ class TreeStickyRowController {
             return;
         }
 
+        const activeCellCoordinates = this.getActiveFocusedCellCoordinates();
+        if (!activeCellCoordinates) {
+            return;
+        }
+
         return {
-            columnIndex: focusCursor[1],
+            columnIndex: activeCellCoordinates.columnIndex,
             inStickyBody,
-            rowIndex: focusCursor[0],
+            rowId: focusCursor.rowId,
+            rowIndex: activeCellCoordinates.rowIndex,
             sourceElement: activeElement
         };
     }
@@ -1057,7 +1065,11 @@ class TreeStickyRowController {
      * or sticky overlay.
      */
     private getActiveFocusedCellCoordinates():
-    { columnIndex: number; rowIndex: number; } | undefined {
+    {
+        columnIndex: number;
+        rowId?: RowId;
+        rowIndex: number;
+    } | undefined {
         const activeElement = document.activeElement;
 
         if (!(activeElement instanceof HTMLTableCellElement)) {
@@ -1087,6 +1099,7 @@ class TreeStickyRowController {
 
             return {
                 columnIndex,
+                rowId: stickyRow.id,
                 rowIndex: stickyRow.index
             };
         }
@@ -1105,6 +1118,7 @@ class TreeStickyRowController {
 
         return {
             columnIndex,
+            rowId: (cell?.row as TableRow | undefined)?.id,
             rowIndex
         };
     }
@@ -1124,7 +1138,7 @@ class TreeStickyRowController {
         }
 
         const stickyCell = this.stickyRows.find(
-            (row): boolean => row.index === focusState.rowIndex
+            (row): boolean => row.id === focusState.rowId
         )?.cells[focusState.columnIndex];
 
         if (stickyCell) {
@@ -1142,7 +1156,7 @@ class TreeStickyRowController {
         }
 
         const viewportCell = this.viewport.rows.find(
-            (row): boolean => row.index === focusState.rowIndex
+            (row): boolean => row.id === focusState.rowId
         )?.cells[focusState.columnIndex];
 
         if (
@@ -1282,7 +1296,10 @@ class TreeStickyRowController {
         if (activeCellCoordinates) {
             return (
                 activeCellCoordinates.columnIndex === focusState.columnIndex &&
-                activeCellCoordinates.rowIndex === focusState.rowIndex
+                (
+                    activeCellCoordinates.rowId === focusState.rowId ||
+                    activeCellCoordinates.rowIndex === focusState.rowIndex
+                )
             );
         }
 

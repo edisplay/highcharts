@@ -344,6 +344,107 @@ test.describe('Grid Pro - tree view', () => {
         await expect(targetCell).toBeFocused();
     });
 
+    test('keyboard navigation scrolls when focus moves past visible body edge', async ({ page }) => {
+        await loadGridPro(page);
+
+        await page.evaluate(async (): Promise<void> => {
+            const container = document.getElementById('container');
+            const rowCount = 100;
+            const ids = Array.from(
+                { length: rowCount },
+                (_, i): number => i + 1
+            );
+
+            if (!container) {
+                return;
+            }
+
+            container.style.width = '420px';
+
+            (window as any).grid = await (window as any).Grid.grid('container', {
+                data: {
+                    columns: {
+                        id: ids,
+                        parentId: ids.map(
+                            (id): (number|null) => id === 1 ? null : 1
+                        ),
+                        name: ids.map(
+                            (id): string => id === 1 ? 'Root' : `Child ${id - 1}`
+                        )
+                    },
+                    idColumn: 'id',
+                    treeView: {
+                        treeColumn: 'name',
+                        expandedRowIds: 'all'
+                    }
+                },
+                rendering: {
+                    rows: {
+                        virtualization: true
+                    }
+                }
+            }, true);
+        });
+
+        await constrainGridBodyHeight(page, 120);
+
+        const targetIndex = await page.evaluate((): number => {
+            const grid = (window as any).grid;
+            const tbody = grid.viewport.tbodyElement as HTMLElement;
+
+            tbody.scrollTop = 0;
+            tbody.dispatchEvent(new Event('scroll', { bubbles: true }));
+
+            const bodyRect = tbody.getBoundingClientRect();
+            const rows = Array.from(
+                tbody.querySelectorAll<HTMLTableRowElement>(
+                    'tr[data-row-index]'
+                )
+            );
+
+            for (let i = 1, iEnd = rows.length; i < iEnd; ++i) {
+                const previousRow = rows[i - 1];
+                const targetRow = rows[i];
+                const previousIndex = Number(
+                    previousRow.getAttribute('data-row-index')
+                );
+                const currentIndex = Number(
+                    targetRow.getAttribute('data-row-index')
+                );
+
+                if (
+                    currentIndex === previousIndex + 1 &&
+                    targetRow.getBoundingClientRect().top >= bodyRect.bottom
+                ) {
+                    previousRow
+                        .querySelector<HTMLElement>('[data-column-id="name"]')
+                        ?.focus();
+
+                    return currentIndex;
+                }
+            }
+
+            throw new Error('Unable to find a rendered row below the viewport.');
+        });
+
+        const mainBody = page.locator(
+            'table > tbody:not(.hcg-tbody-sticky)'
+        );
+        const scrollTopBefore = await mainBody.evaluate(
+            (tbody): number => (tbody as HTMLElement).scrollTop
+        );
+
+        await page.keyboard.press('ArrowDown');
+
+        await expect.poll(async () => mainBody.evaluate(
+            (tbody): number => (tbody as HTMLElement).scrollTop
+        )).toBeGreaterThan(scrollTopBefore);
+        await expect(page.locator(':focus').locator('..')).toHaveAttribute(
+            'data-row-index',
+            String(targetIndex)
+        );
+    });
+
     test('does not restore detached focus after focusing outside the grid', async ({ page }) => {
         await loadGridPro(page);
 

@@ -22,24 +22,26 @@
  *
  * */
 
-import type TableRow from './Body/TableRow';
 import type DataTable from '../../../Data/DataTable';
+import type DataProvider from '../Data/DataProvider';
+import type TableCell from './Body/TableCell';
 import type { RowId } from '../Data/DataProvider';
 
 import GridUtils from '../GridUtils.js';
 import ColumnResizing from './ColumnResizing/ColumnResizing.js';
 import ColumnResizingMode from './ColumnResizing/ResizingMode.js';
 import Column from './Column.js';
+import TableRow from './Body/TableRow.js';
 import TableHeader from './Header/TableHeader.js';
 import Grid from '../Grid.js';
 import RowsVirtualizer from './Actions/RowsVirtualizer.js';
 import ColumnsResizer from './Actions/ColumnsResizer.js';
 import Globals from '../Globals.js';
-import type TableCell from './Body/TableCell';
 
 import Cell from './Cell.js';
 import { defined, fireEvent, getStyle } from '../../../Shared/Utilities.js';
 import CellContextMenu from './Body/CellContextMenu.js';
+import CellContextMenuBuiltInActions from './Body/CellContextMenuBuiltInActions.js';
 
 const { makeHTMLElement } = GridUtils;
 
@@ -97,6 +99,11 @@ class Table {
     public rows: TableRow[] = [];
 
     /**
+     * Additional rendered body sections composed into the table.
+     */
+    private readonly bodySections: TableBodySection[] = [];
+
+    /**
      * The resize observer for the table container.
      * @internal
      */
@@ -128,10 +135,9 @@ class Table {
     public rowsWidth?: number;
 
     /**
-     * The focus cursor position: [rowIndex, columnIndex] or `undefined` if the
-     * table cell is not focused.
+     * The focus cursor position or `undefined` if no table cell is focused.
      */
-    public focusCursor?: [number, number];
+    public focusCursor?: FocusCursor;
 
     /**
      * Pending focus target used while virtualization scrolls a body row into
@@ -160,6 +166,17 @@ class Table {
      * Cell context menu instance (lazy created).
      */
     private cellContextMenu?: CellContextMenu;
+
+    /**
+     * Async hooks executed after the main row update cycle.
+     * @internal
+     */
+    public readonly afterUpdateRowsHooks: Array<() => Promise<void>> = [];
+
+    /**
+     * Whether the table body min-height was set by the grid.
+     */
+    private tbodyMinHeightManaged = false;
 
     /* *
     *
@@ -199,25 +216,13 @@ class Table {
         this.resizeObserver.observe(tableElement);
 
         this.tbodyElement.addEventListener('scroll', this.onScroll);
-        this.tbodyElement.addEventListener('focus', this.onTBodyFocus);
+        this.addBodyEventListeners(this.tbodyElement);
         document.addEventListener('focusin', this.onDocumentFocusIn, true);
         document.addEventListener(
             'pointerdown',
             this.onDocumentPointerDown,
             true
         );
-
-        // Delegated cell events
-        this.tbodyElement.addEventListener('click', this.onCellClick);
-        this.tbodyElement.addEventListener('dblclick', this.onCellDblClick);
-        this.tbodyElement.addEventListener(
-            'contextmenu',
-            this.onCellContextMenu
-        );
-        this.tbodyElement.addEventListener('mousedown', this.onCellMouseDown);
-        this.tbodyElement.addEventListener('mouseover', this.onCellMouseOver);
-        this.tbodyElement.addEventListener('mouseout', this.onCellMouseOut);
-        this.tbodyElement.addEventListener('keydown', this.onCellKeyDown);
     }
 
     /* *
@@ -233,10 +238,13 @@ class Table {
      * @deprecated Use `grid.dataProvider` instead.
      */
     public get dataTable(): DataTable | undefined {
-        const dp = this.grid.dataProvider;
-        if (dp && 'getDataTable' in dp) {
-            return dp.getDataTable(true);
-        }
+        const dp = this.grid.dataProvider as (
+            DataProvider & {
+                getDataTable?(presentation?: boolean): DataTable | undefined;
+            }
+        ) | undefined;
+
+        return dp?.getDataTable?.(true);
     }
 
     /**
@@ -246,7 +254,6 @@ class Table {
     public async init(): Promise<void> {
         try {
             this.grid.showLoading();
-
             const { tableElement } = this;
             const renderingOptions = this.grid.options?.rendering;
             const customClassName = renderingOptions?.table?.className;
@@ -283,12 +290,73 @@ class Table {
             // this.footer = new TableFooter(this);
             // this.footer.render();
 
+            // Ensure row widths are ready before first row render to prevent
+            // initial pinned-row misalignment.
+            this.columnResizing.reflow();
             await this.rowsVirtualizer.initialRender();
         } finally {
             fireEvent(this, 'afterInit');
             this.reflow();
             this.grid.hideLoading();
         }
+    }
+
+    private addBodyEventListeners(body: HTMLElement): void {
+        body.addEventListener('focus', this.onTBodyFocus);
+        body.addEventListener('click', this.onCellClick);
+        body.addEventListener('dblclick', this.onCellDblClick);
+        body.addEventListener('contextmenu', this.onCellContextMenu);
+        body.addEventListener('mousedown', this.onCellMouseDown);
+        body.addEventListener('mouseover', this.onCellMouseOver);
+        body.addEventListener('mouseout', this.onCellMouseOut);
+        body.addEventListener('keydown', this.onCellKeyDown);
+    }
+
+    private removeBodyEventListeners(body: HTMLElement): void {
+        body.removeEventListener('focus', this.onTBodyFocus);
+        body.removeEventListener('click', this.onCellClick);
+        body.removeEventListener('dblclick', this.onCellDblClick);
+        body.removeEventListener('contextmenu', this.onCellContextMenu);
+        body.removeEventListener('mousedown', this.onCellMouseDown);
+        body.removeEventListener('mouseover', this.onCellMouseOver);
+        body.removeEventListener('mouseout', this.onCellMouseOut);
+        body.removeEventListener('keydown', this.onCellKeyDown);
+    }
+
+    /**
+     * Registers an auxiliary table body section.
+     *
+     * @param section
+     * Body section descriptor.
+     *
+     * @internal
+     */
+    public registerBodySection(section: TableBodySection): void {
+        this.unregisterBodySection(section.id);
+        this.bodySections.push(section);
+        this.addBodyEventListeners(section.tbodyElement);
+    }
+
+    /**
+     * Unregisters an auxiliary table body section.
+     *
+     * @param sectionId
+     * Body section ID.
+     *
+     * @internal
+     */
+    public unregisterBodySection(sectionId: string): void {
+        const sectionIndex = this.bodySections.findIndex(
+            (section): boolean => section.id === sectionId
+        );
+        if (sectionIndex < 0) {
+            return;
+        }
+
+        this.removeBodyEventListeners(
+            this.bodySections[sectionIndex].tbodyElement
+        );
+        this.bodySections.splice(sectionIndex, 1);
     }
 
     /**
@@ -299,14 +367,32 @@ class Table {
         const minVisibleRows = options?.rendering?.rows?.minVisibleRows;
 
         const tbody = this.tbodyElement;
-        if (
-            defined(minVisibleRows) &&
-            !getStyle(tbody, 'min-height', true)
-        ) {
-            tbody.style.minHeight = (
-                minVisibleRows * this.rowsVirtualizer.defaultRowHeight
-            ) + 'px';
+        if (!defined(minVisibleRows)) {
+            if (this.tbodyMinHeightManaged) {
+                tbody.style.minHeight = '';
+                this.tbodyMinHeightManaged = false;
+            }
+            return;
         }
+
+        const hasUserMinHeight = !!getStyle(tbody, 'min-height', true);
+        if (!this.tbodyMinHeightManaged && hasUserMinHeight) {
+            return;
+        }
+
+        const extraRowsCount = this.bodySections.reduce(
+            (count, section): number => count + section.getRows().length,
+            0
+        );
+        const minScrollableRows = Math.max(
+            0,
+            minVisibleRows - extraRowsCount
+        );
+
+        tbody.style.minHeight = (
+            minScrollableRows * this.rowsVirtualizer.defaultRowHeight
+        ) + 'px';
+        this.tbodyMinHeightManaged = true;
     }
 
     /**
@@ -322,8 +408,6 @@ class Table {
             return rows.virtualization;
         }
 
-        // Consider changing this to use the presentation table row count
-        // instead of the original data table row count.
         const rowCount = (await this.grid.dataProvider?.getRowCount()) ?? 0;
         const threshold = rows?.virtualizationThreshold ?? 50;
 
@@ -363,8 +447,7 @@ class Table {
         if (!dp) {
             return;
         }
-
-        vp.grid.querying.pagination.clampPage();
+        const focusCursor = vp.focusCursor;
 
         try {
             this.grid.showLoading();
@@ -374,6 +457,10 @@ class Table {
                 (vp.rows[vp.rows.length - 1]?.index ?? -1) + 1 :
                 0;
             await vp.grid.querying.proceed();
+            vp.grid.querying.pagination.clampPage();
+            if (vp.grid.querying.shouldBeUpdated) {
+                await vp.grid.querying.proceed();
+            }
             for (const column of vp.columns) {
                 column.loadData();
             }
@@ -391,7 +478,6 @@ class Table {
             }
 
             const newRowCount = await dp.getRowCount();
-
             if (shouldRerender) {
                 // Rerender all rows
                 await vp.rowsVirtualizer.rerender();
@@ -407,9 +493,17 @@ class Table {
                 }
             }
 
+            for (const hook of vp.afterUpdateRowsHooks) {
+                await hook();
+            }
+
             // Update the pagination controls
             vp.grid.pagination?.updateControls();
             vp.reflow();
+
+            if (focusCursor) {
+                vp.focusCellFromCursor(focusCursor, true);
+            }
         } finally {
             this.grid.hideLoading();
         }
@@ -428,6 +522,13 @@ class Table {
 
         // Reflow rows content dimensions
         this.rowsVirtualizer.reflowRows();
+        const measuredRowHeight = (
+            this.rowsVirtualizer.measureRenderedRowHeight()
+        );
+        if (defined(measuredRowHeight)) {
+            this.rowsVirtualizer.applyMeasuredRowHeight(measuredRowHeight);
+        }
+        this.setTbodyMinHeight();
 
         // Reflow the pagination
         this.grid.pagination?.reflow();
@@ -449,9 +550,7 @@ class Table {
      */
     private onTBodyFocus = (e: FocusEvent): void => {
         e.preventDefault();
-
-        this.rows[this.rowsVirtualizer.rowCursor - this.rows[0].index]
-            ?.cells[0]?.htmlElement.focus();
+        this.getRenderedRows()[0]?.cells[0]?.htmlElement.focus();
     };
 
     /**
@@ -470,6 +569,10 @@ class Table {
         }
 
         this.header?.scrollHorizontally(this.tbodyElement.scrollLeft);
+        fireEvent(this, 'bodyScroll', {
+            scrollLeft: this.tbodyElement.scrollLeft,
+            scrollTop: this.tbodyElement.scrollTop
+        });
     };
 
     /**
@@ -603,27 +706,24 @@ class Table {
             return;
         }
 
-        // Disabled until meaningful functionality is ready.
+        const isContextMenuKey = (
+            e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)
+        );
 
-
-        // const isContextMenuKey = (
-        //     e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)
-        // );
-
-        // if (isContextMenuKey && 'column' in cell && 'row' in cell) {
-        //     const tableCell = cell as TableCell;
-        //     const rect = tableCell.htmlElement.getBoundingClientRect();
-        //     const opened = this.openCellContextMenu(
-        //         tableCell,
-        //         rect.left + 4,
-        //         rect.bottom - 2
-        //     );
-        //     if (opened) {
-        //         e.preventDefault();
-        //         e.stopPropagation();
-        //         return;
-        //     }
-        // }
+        if (isContextMenuKey && 'column' in cell && 'row' in cell) {
+            const tableCell = cell as TableCell;
+            const rect = tableCell.htmlElement.getBoundingClientRect();
+            const opened = this.openCellContextMenu(
+                tableCell,
+                rect.left + 4,
+                rect.bottom - 2
+            );
+            if (opened) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+        }
 
         (cell as { onKeyDown(e: KeyboardEvent): void }).onKeyDown(e);
     };
@@ -654,7 +754,10 @@ class Table {
             return false;
         }
 
-        const items = options?.items || [];
+        const items =
+            CellContextMenuBuiltInActions.resolveCellContextMenuItems(
+                tableCell
+            );
         if (!items.length) {
             return false; // Keep native browser menu
         }
@@ -692,24 +795,34 @@ class Table {
         const viewportTopInset = this.getViewportTopInset();
 
         if (this.virtualRows) {
-            this.tbodyElement.scrollTop =
-                Math.max(
-                    0,
-                    index * this.rowsVirtualizer.defaultRowHeight -
-                    viewportTopInset
-                );
+            this.tbodyElement.scrollTop = Math.max(
+                0,
+                index * this.rowsVirtualizer.defaultRowHeight -
+                viewportTopInset
+            );
             return;
         }
 
         const rowClass = '.' + Globals.getClassName('rowElement');
-        const rows = Array.from(this.tbodyElement.querySelectorAll(rowClass));
-        const firstRowTop = rows[0].getBoundingClientRect().top;
+        const rows = this.tbodyElement.querySelectorAll(rowClass);
+        const firstRow = rows[0];
+        const safeIndex = Math.min(
+            Math.max(0, index),
+            Math.max(0, rows.length - 1)
+        );
+        const targetRow = rows[safeIndex];
+
+        if (!firstRow || !targetRow) {
+            return;
+        }
+
+        const firstRowTop = firstRow.getBoundingClientRect().top;
 
         this.tbodyElement.scrollTop = Math.max(
             0,
-            (
-                rows[index].getBoundingClientRect().top
-            ) - firstRowTop - viewportTopInset
+            targetRow.getBoundingClientRect().top -
+            firstRowTop -
+            viewportTopInset
         );
     }
 
@@ -819,22 +932,24 @@ class Table {
     /**
      * Returns whether the provided cell currently owns detached logical focus.
      *
-     * @param rowIndex
-     * Target row index in the rendered/projected order.
+     * @param rowId
+     * Target row ID.
      *
      * @param columnIndex
      * Target column index.
      */
     public hasDetachedFocusAt(
-        rowIndex: number,
+        rowId: RowId | undefined,
         columnIndex: number
     ): boolean {
         const focusCursor = this.focusCursor;
 
         return !!(
             this.hasDetachedFocus &&
-            focusCursor?.[0] === rowIndex &&
-            focusCursor[1] === columnIndex
+            rowId !== void 0 &&
+            focusCursor &&
+            focusCursor.rowId === rowId &&
+            focusCursor.columnIndex === columnIndex
         );
     }
 
@@ -946,15 +1061,26 @@ class Table {
         if (!tr) {
             return;
         }
-
-        const rowIndexAttr = tr.getAttribute('data-row-index');
-        if (rowIndexAttr === null) {
+        const tbody = tr.parentElement;
+        if (!tbody) {
             return;
         }
 
-        const rowIndex = parseInt(rowIndexAttr, 10);
-        const firstRowIndex = this.rows[0]?.index ?? 0;
-        const row = this.rows[rowIndex - firstRowIndex];
+        let row: TableRow | undefined;
+        if (tbody === this.tbodyElement) {
+            const rowIndexAttr = tr.getAttribute('data-row-index');
+            if (rowIndexAttr === null) {
+                return;
+            }
+
+            const rowIndex = parseInt(rowIndexAttr, 10);
+            row = this.getRenderedRowByIndex(rowIndex);
+        } else {
+            row = this.bodySections.find(
+                (section): boolean => section.tbodyElement === tbody
+            )?.getRowByElement(tr);
+        }
+
         if (!row) {
             return;
         }
@@ -971,7 +1097,6 @@ class Table {
      * Destroys the grid table.
      */
     public destroy(): void {
-        this.tbodyElement.removeEventListener('focus', this.onTBodyFocus);
         this.tbodyElement.removeEventListener('scroll', this.onScroll);
         document.removeEventListener('focusin', this.onDocumentFocusIn, true);
         document.removeEventListener(
@@ -979,20 +1104,13 @@ class Table {
             this.onDocumentPointerDown,
             true
         );
-        this.tbodyElement.removeEventListener('click', this.onCellClick);
-        this.tbodyElement.removeEventListener('dblclick', this.onCellDblClick);
-        this.tbodyElement.removeEventListener(
-            'contextmenu',
-            this.onCellContextMenu
-        );
-        this.tbodyElement.removeEventListener(
-            'mousedown', this.onCellMouseDown
-        );
-        this.tbodyElement.removeEventListener(
-            'mouseover', this.onCellMouseOver
-        );
-        this.tbodyElement.removeEventListener('mouseout', this.onCellMouseOut);
-        this.tbodyElement.removeEventListener('keydown', this.onCellKeyDown);
+        this.removeBodyEventListeners(this.tbodyElement);
+        for (const section of this.bodySections) {
+            this.removeBodyEventListeners(
+                section.tbodyElement
+            );
+        }
+        this.bodySections.length = 0;
         this.resizeObserver.disconnect();
         this.columnsResizer?.removeEventListeners();
         this.header?.destroy();
@@ -1035,10 +1153,14 @@ class Table {
         this.tbodyElement.scrollTop = meta.scrollTop;
         this.tbodyElement.scrollLeft = meta.scrollLeft;
 
+        this.header?.scrollHorizontally(meta.scrollLeft);
+        fireEvent(this, 'bodyScroll', {
+            scrollLeft: meta.scrollLeft,
+            scrollTop: meta.scrollTop
+        });
+
         if (meta.focusCursor) {
-            const [rowIndex, columnIndex] = meta.focusCursor;
-            const row = this.rows[rowIndex - this.rows[0].index];
-            row?.cells[columnIndex]?.htmlElement.focus();
+            this.focusCellFromCursor(meta.focusCursor);
         }
     }
 
@@ -1081,8 +1203,129 @@ class Table {
      * The ID of the row.
      */
     public getRow(id: RowId): TableRow | undefined {
-        return this.rows.find((row): boolean => row.id === id);
+        return this.rows.find((row): boolean => row.id === id) ||
+            this.getRenderedRows().find((row): boolean => row.id === id);
     }
+
+    /**
+     * Returns all rendered rows in visual order.
+     *
+     * @internal
+     */
+    public getRenderedRows(): TableRow[] {
+        return [
+            ...([] as TableRow[]).concat(
+                ...this.bodySections
+                    .filter((section): boolean => section.position === 'before')
+                    .map((section): TableRow[] => section.getRows())
+            ),
+            ...this.rows,
+            ...([] as TableRow[]).concat(
+                ...this.bodySections
+                    .filter((section): boolean => section.position === 'after')
+                    .map((section): TableRow[] => section.getRows())
+            )
+        ];
+    }
+
+    /**
+     * Returns the rendered row with the provided presentation index.
+     *
+     * @param index
+     * The row index in the presentation table.
+     *
+     * @internal
+     */
+    public getRenderedRowByIndex(index: number): TableRow | undefined {
+        return this.rows.find((row): boolean => row.index === index);
+    }
+
+    public async syncAriaRowIndexes(): Promise<void> {
+        const headerRowsCount = this.header?.rows.length ?? 0;
+        const rows = this.getRenderedRows();
+
+        for (let i = 0, iEnd = rows.length; i < iEnd; ++i) {
+            this.grid.accessibility?.setRowIndex(
+                rows[i].htmlElement,
+                i + headerRowsCount + 1
+            );
+        }
+
+        const baseRowCount = await this.grid.dataProvider?.getRowCount() || 0;
+        const tableElement = this.grid.tableElement;
+        if (tableElement) {
+            tableElement.setAttribute(
+                'aria-rowcount',
+                (
+                    baseRowCount +
+                    this.bodySections.reduce(
+                        (count, section): number =>
+                            count + section.getRows().length,
+                        0
+                    ) +
+                    headerRowsCount
+                ) + ''
+            );
+        }
+    }
+
+    private focusCellFromCursor(
+        cursor: FocusCursor,
+        defer: boolean = false
+    ): void {
+        const focus = (): void => {
+            if (cursor.bodySectionId) {
+                this.bodySections.find(
+                    (section): boolean => section.id === cursor.bodySectionId
+                )?.getRowById(cursor.rowId)
+                    ?.cells[cursor.columnIndex]
+                    ?.htmlElement.focus();
+                return;
+            }
+
+            void this.grid.dataProvider?.getRowIndex(cursor.rowId).then((
+                rowIndex
+            ): void => {
+                if (rowIndex === void 0) {
+                    return;
+                }
+
+                if (defer) {
+                    this.focusCellByRowIndex(rowIndex, cursor.columnIndex);
+                    return;
+                }
+
+                const row = this.getRenderedRowByIndex(rowIndex);
+                this.restoreRenderedCellFocus(
+                    row?.cells[cursor.columnIndex],
+                    rowIndex,
+                    cursor.columnIndex
+                );
+            });
+        };
+
+        if (defer) {
+            setTimeout(focus);
+        } else {
+            focus();
+        }
+    }
+
+}
+
+export interface FocusCursor {
+    rowId: RowId;
+    columnIndex: number;
+    bodySectionId?: string;
+}
+
+export interface TableBodySection {
+    id: string;
+    position: 'before'|'after';
+    tbodyElement: HTMLElement;
+    getRows: () => TableRow[];
+    getRowByElement: (rowElement: HTMLElement) => TableRow | undefined;
+    getRowById: (rowId: RowId) => TableRow | undefined;
 }
 
 
@@ -1100,7 +1343,7 @@ export interface ViewportStateMetadata {
     scrollTop: number;
     scrollLeft: number;
     columnResizing: ColumnResizingMode;
-    focusCursor?: [number, number];
+    focusCursor?: FocusCursor;
 }
 
 /**
