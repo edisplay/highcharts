@@ -50,8 +50,14 @@ export interface VBPOptions extends SMAOptions {
     enableMouseTracking?: boolean;
     params?: VBPParamsOptions;
     pointPadding?: number;
+    /**
+     * The styles for bars when volume is divided into positive/negative.
+     */
     volumeDivision?: VBPIndicator.VBPIndicatorStyleOptions;
     zIndex?: number;
+    /**
+     * The styles for lines which determine price zones.
+     */
     zoneLines?: VBPIndicator.VBPIndicatorStyleOptions;
 }
 

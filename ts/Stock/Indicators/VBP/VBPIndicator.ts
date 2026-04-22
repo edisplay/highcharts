@@ -919,6 +919,7 @@ extend(VBPIndicator.prototype, {
 
 namespace VBPIndicator {
 
+    /** @internal */
     export interface VBPIndicatorPriceZoneObject {
         end: number;
         index: number;
