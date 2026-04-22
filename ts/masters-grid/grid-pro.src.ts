@@ -51,6 +51,7 @@ import CellRenderersComposition from '../Grid/Pro/CellRendering/CellRenderersCom
 import CellRendererRegistry from '../Grid/Pro/CellRendering/CellRendererRegistry.js';
 import PaginationComposition from '../Grid/Pro/Pagination/PaginationComposition.js';
 import RowPinningComposition from '../Grid/Pro/RowPinning/RowPinningComposition.js';
+import TreeViewComposition from '../Grid/Pro/TreeView/TreeViewComposition.js';
 import Pagination from '../Grid/Core/Pagination/Pagination.js';
 import CellContentPro from '../Grid/Pro/CellRendering/CellContentPro.js';
 import CellRenderer from '../Grid/Pro/CellRendering/CellRenderer.js';
@@ -155,6 +156,7 @@ RowPinningComposition.compose(
     G.Grid, G.Table, G.Column,
     G.TableRow, G.TableCell
 );
+TreeViewComposition.compose(G.Grid, G.Table, G.TableCell);
 ResponsiveComposition.compose(G.Grid);
 
 

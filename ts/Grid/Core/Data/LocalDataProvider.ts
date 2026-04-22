@@ -34,7 +34,7 @@ import type DataConnectorType from '../../../Data/Connectors/DataConnectorType';
 import type {
     DataConnectorTypeOptions
 } from '../../../Data/Connectors/DataConnectorType';
-import type { MakeOptional, TypedArray } from '../../../Shared/Types';
+import type { MakeOptional, TypedArray, AnyRecord } from '../../../Shared/Types';
 
 import { DataProvider } from './DataProvider.js';
 import DataTable from '../../../Data/DataTable.js';
@@ -278,13 +278,20 @@ export class LocalDataProvider extends DataProvider {
     public override async getRowId(
         rowIndex: number
     ): Promise<RowId | undefined> {
+        const idColId = this.options.idColumn;
+        if (idColId) {
+            const rawId = this.presentationTable?.getCell(idColId, rowIndex);
+            if (isString(rawId) || isNumber(rawId)) {
+                return Promise.resolve(rawId);
+            }
+        }
+
         const originalRowIndex =
             await this.getOriginalRowIndexFromLocal(rowIndex);
         if (!defined(originalRowIndex) || !this.dataTable) {
             return Promise.resolve(void 0);
         }
 
-        const idColId = this.options.idColumn;
         if (!idColId) {
             return Promise.resolve(originalRowIndex);
         }
@@ -412,6 +419,17 @@ export class LocalDataProvider extends DataProvider {
             interTable = originalDataTable.getModified();
         }
 
+        const grid = this.querying.grid;
+        if ('treeView' in grid && grid.treeView) {
+            try {
+                grid.treeView.sync();
+                interTable = grid.treeView.projectTable(interTable);
+            } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error((error as AnyRecord).message);
+            }
+        }
+
         this.prePaginationRowCount = interTable.rowCount;
 
         // Pagination modifier
@@ -519,6 +537,13 @@ export class LocalDataProvider extends DataProvider {
         return 'getTable' in connector;
     }
 }
+
+
+/* *
+ *
+ *  Declarations
+ *
+ * */
 
 export type GridDataConnectorTypeOptions =
     MakeOptional<DataConnectorTypeOptions, 'id'>;

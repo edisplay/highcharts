@@ -45,6 +45,7 @@ import CellContextMenuBuiltInActions from './Body/CellContextMenuBuiltInActions.
 
 const { makeHTMLElement } = GridUtils;
 
+
 /* *
  *
  *  Class
@@ -424,7 +425,8 @@ class Table {
      */
     public async updateRows(): Promise<void> {
         const vp = this;
-        if (!vp.grid.dataProvider) {
+        const { dataProvider: dp } = vp.grid;
+        if (!dp) {
             return;
         }
         const focusCursor = vp.focusCursor;
@@ -457,7 +459,7 @@ class Table {
                 shouldRerender = true;
             }
 
-            const newRowCount = await vp.grid.dataProvider.getRowCount();
+            const newRowCount = await dp.getRowCount();
             if (shouldRerender) {
                 // Rerender all rows
                 await vp.rowsVirtualizer.rerender();
@@ -1064,6 +1066,13 @@ export interface TableBodySection {
     getRowByElement: (rowElement: HTMLElement) => TableRow | undefined;
     getRowById: (rowId: RowId) => TableRow | undefined;
 }
+
+
+/* *
+ *
+ *  Declarations
+ *
+ * */
 
 /**
  * Represents the metadata of the viewport state. It is used to save the
