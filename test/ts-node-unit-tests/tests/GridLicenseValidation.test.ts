@@ -7,8 +7,8 @@ import LicenseValidation, {
 } from '../../../ts/Grid/Pro/License/LicenseValidation.js';
 
 /**
- * Fixed “today” for annual tests only: `getStatus` uses `new Date()` for
- * non-perpetual keys, overridden with `t.mock.timers`.
+ * Fixed `today` for annual tests only: `getStatus` uses `new Date()` for
+ * non-perpetual keys.
  */
 const STATIC_DAY = new Date(Date.UTC(2026, 3, 13));
 
