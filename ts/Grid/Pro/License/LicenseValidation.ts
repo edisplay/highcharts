@@ -357,13 +357,20 @@ class LicenseValidation {
                 break;
         }
 
+        const message = [
+            `Highcharts Grid Pro is ${statusMsg}`,
+            `Please visit ${GRID_KEY_DOC} for more details.`
+        ];
 
         /* eslint-disable no-console */
-        const log = this.isLocalhostURL() ? console.warn : console.error;
-        log('***************************************************');
-        log('Highcharts Grid Pro is ' + statusMsg);
-        log('Please visit ' + GRID_KEY_DOC + ' for more details.');
-        log('***************************************************');
+        if (this.isLocalhostURL()) {
+            console.warn(message.join(' '));
+        } else {
+            const border = '**************************************************';
+            console.error(border);
+            message.forEach((line): void => console.error(line));
+            console.error(border);
+        }
         /* eslint-enable no-console */
     }
 }
