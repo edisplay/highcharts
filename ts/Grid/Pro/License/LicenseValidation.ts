@@ -367,7 +367,7 @@ class LicenseValidation {
             console.warn(message.join(' '));
         } else {
             console.error('**************************************************');
-            message.forEach((line): void => console.error(line));
+            console.error(message.join('\n'));
             console.error('**************************************************');
         }
         /* eslint-enable no-console */
