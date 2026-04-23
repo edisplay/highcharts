@@ -366,10 +366,9 @@ class LicenseValidation {
         if (this.isLocalhostURL()) {
             console.warn(message.join(' '));
         } else {
-            const border = '**************************************************';
-            console.error(border);
+            console.error('**************************************************');
             message.forEach((line): void => console.error(line));
-            console.error(border);
+            console.error('**************************************************');
         }
         /* eslint-enable no-console */
     }
