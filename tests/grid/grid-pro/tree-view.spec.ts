@@ -190,6 +190,85 @@ test.describe('Grid Pro - tree view', () => {
             .toHaveAttribute('aria-expanded', 'false');
     });
 
+    test('parses path input with a separator callback', async ({ page }) => {
+        await loadGridPro(page);
+
+        await page.evaluate(async (): Promise<void> => {
+            (window as any).grid = await (window as any).Grid.grid('container', {
+                data: {
+                    columns: {
+                        id: [1, 2],
+                        path: ['AaaBbbCcc', 'AaaBbbDdd'],
+                        name: ['Ccc', 'Ddd']
+                    },
+                    idColumn: 'id',
+                    treeView: {
+                        input: {
+                            type: 'path',
+                            separator: (path: string): string[] =>
+                                path.match(
+                                    /[A-Z]+(?![a-z])|[A-Z][a-z]*/g
+                                ) || []
+                        },
+                        treeColumn: 'name',
+                        expandedRowIds: 'all'
+                    }
+                },
+                rendering: {
+                    rows: {
+                        virtualization: false
+                    }
+                }
+            }, true);
+        });
+
+        await expect(page.locator('tbody .hcg-row')).toHaveCount(4);
+        expect(await getVisibleRowIds(page)).toStrictEqual([
+            '__hcg_tree_path__:Aaa',
+            '__hcg_tree_path__:AaaBbb',
+            '1',
+            '2'
+        ]);
+    });
+
+    test('parses path input with a separator regexp', async ({ page }) => {
+        await loadGridPro(page);
+
+        await page.evaluate(async (): Promise<void> => {
+            (window as any).grid = await (window as any).Grid.grid('container', {
+                data: {
+                    columns: {
+                        id: [1, 2],
+                        path: ['AaaBbbCcc', 'AaaBbbDdd'],
+                        name: ['Ccc', 'Ddd']
+                    },
+                    idColumn: 'id',
+                    treeView: {
+                        input: {
+                            type: 'path',
+                            separator: /[A-Z]+(?![a-z])|[A-Z][a-z]*/
+                        },
+                        treeColumn: 'name',
+                        expandedRowIds: 'all'
+                    }
+                },
+                rendering: {
+                    rows: {
+                        virtualization: false
+                    }
+                }
+            }, true);
+        });
+
+        await expect(page.locator('tbody .hcg-row')).toHaveCount(4);
+        expect(await getVisibleRowIds(page)).toStrictEqual([
+            '__hcg_tree_path__:Aaa',
+            '__hcg_tree_path__:AaaBbb',
+            '1',
+            '2'
+        ]);
+    });
+
     test('preserves focus when a focused tree cell becomes sticky', async ({ page }) => {
         await loadGridPro(page);
 

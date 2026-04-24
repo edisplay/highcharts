@@ -82,6 +82,20 @@ export type TreeInputOptions = (
 );
 
 /**
+ * Callback used to split a raw path value into ordered path segments.
+ */
+export type TreeInputPathSeparatorCallback = (path: string) => string[];
+
+/**
+ * Path segment separator definition for path-based tree input.
+ */
+export type TreeInputPathSeparator = (
+    string |
+    RegExp |
+    TreeInputPathSeparatorCallback
+);
+
+/**
  * Parent-child relation input based on a parent ID column.
  */
 export interface TreeInputParentIdOptions {
@@ -113,10 +127,11 @@ export interface TreeInputPathOptions {
     pathColumn?: string;
 
     /**
-     * Path segment separator.
+     * Path segment separator, a RegExp extracting ordered path segments,
+     * or a callback returning ordered path segments.
      * @default '/'
      */
-    separator?: string;
+    separator?: TreeInputPathSeparator;
 }
 
 /**

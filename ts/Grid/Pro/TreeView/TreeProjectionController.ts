@@ -47,10 +47,12 @@ import {
 import {
     buildIndexFromColumns as buildParentIdIndexFromColumns
 } from './InputAdapters/ParentIdTreeInputAdapter.js';
+import { normalizeTreeViewOptions } from './TreeViewOptionsNormalizer.js';
+import { isDeepEqual } from '../../Core/GridUtils.js';
 import {
-    normalizeTreeViewOptions
-} from './TreeViewOptionsNormalizer.js';
-import { defined, fireEvent } from '../../../Shared/Utilities.js';
+    defined,
+    fireEvent
+} from '../../../Shared/Utilities.js';
 
 
 /* *
@@ -87,7 +89,7 @@ class TreeProjectionController {
         table: DataTable;
         versionTag: string;
         idColumn: string;
-        inputCacheKey: string;
+        input: NormalizedTreeInputOptions;
     };
 
 
@@ -144,15 +146,11 @@ class TreeProjectionController {
                 'TreeView: `data.idColumn` is required for tree input.'
             );
         }
-        const inputCacheKey = TreeProjectionController.getInputCacheKey(
-            options.input
-        );
-
         const isCacheValid = (
             this.cacheSource?.table === table &&
             this.cacheSource.versionTag === versionTag &&
             this.cacheSource.idColumn === idColumn &&
-            this.cacheSource.inputCacheKey === inputCacheKey
+            isDeepEqual(this.cacheSource.input, options.input)
         );
 
         if (!isCacheValid) {
@@ -166,7 +164,7 @@ class TreeProjectionController {
                 table,
                 versionTag,
                 idColumn,
-                inputCacheKey
+                input: options.input
             };
         }
 
@@ -1111,30 +1109,6 @@ class TreeProjectionController {
         }
 
         return parts.join('|');
-    }
-
-    /**
-     * Builds deterministic cache key for normalized input configuration.
-     *
-     * @param input
-     * Normalized input configuration.
-     *
-     * @returns
-     * Cache key representing input identity.
-     */
-    private static getInputCacheKey(input: NormalizedTreeInputOptions): string {
-        if (input.type === 'parentId') {
-            return JSON.stringify([
-                'parentId',
-                input.parentIdColumn
-            ]);
-        }
-
-        return JSON.stringify([
-            'path',
-            input.pathColumn,
-            input.separator
-        ]);
     }
 
     /**
