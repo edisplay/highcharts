@@ -18,6 +18,7 @@
  * */
 
 import type AnimationOptions from '../Animation/AnimationOptions';
+import type AreaSeries from '../../Series/Area/AreaSeries';
 import type Axis from '../Axis/Axis';
 import type BBoxObject from '../Renderer/BBoxObject';
 import type BubbleLegendItem from '../../Series/Bubble/BubbleLegendItem';
@@ -508,7 +509,7 @@ class Legend {
         if (!this.chart.styledMode) {
             const { itemHiddenStyle = {} } = this,
                 hiddenColor = itemHiddenStyle.color,
-                { fillColor, fillOpacity, lineColor, marker } =
+                { fillColor, lineColor, marker } =
                     (item as Series).options,
                 colorizeHidden = (attr: SVGAttributes): SVGAttributes => {
                     if (!visible) {
@@ -536,7 +537,9 @@ class Legend {
 
             area?.attr(colorizeHidden({
                 fill: fillColor || item.color,
-                'fill-opacity': fillColor ? 1 : (fillOpacity ?? 0.75)
+                'fill-opacity': fillColor ?
+                    1 :
+                    ((item as AreaSeries).options.fillOpacity ?? 0.75)
             }));
         }
 
