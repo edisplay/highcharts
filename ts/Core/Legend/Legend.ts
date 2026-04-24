@@ -2004,6 +2004,10 @@ export default Legend;
  *
  * @param {Highcharts.LegendItemClickEventObject} event
  * The event that occurred.
+ *
+ * @param {Highcharts.Legend} [ctx]
+ * Since v12.6.0, the legend context passed as an extra argument for arrow
+ * functions.
  */
 
 /**
@@ -2049,6 +2053,10 @@ export default Legend;
  *
  * @param {Highcharts.PointLegendItemClickEventObject} event
  * The event that occurred.
+ *
+ * @param {Highcharts.Point} [ctx]
+ * Since v12.6.0, the point context passed as an extra argument for arrow
+ * functions.
  */
 
 /**
@@ -2104,6 +2112,10 @@ export default Legend;
  *
  * @param {Highcharts.SeriesLegendItemClickEventObject} event
  * The event that occurred.
+ *
+ * @param {Highcharts.Series} [ctx]
+ * Since v12.6.0, the series context passed as an extra argument for arrow
+ * functions.
  */
 
 /**
