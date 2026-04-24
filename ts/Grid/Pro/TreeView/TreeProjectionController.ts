@@ -38,7 +38,7 @@ import type {
 } from './TreeViewTypes';
 import type {
     NormalizedTreeInputOptions,
-    NormalizedTreeViewOptions
+    ResolvedTreeViewOptions
 } from './TreeViewOptionsNormalizer';
 
 import {
@@ -83,6 +83,8 @@ class TreeProjectionController {
 
     private expansionStateSeedKey?: string;
 
+    private resolvedOptions?: ResolvedTreeViewOptions;
+
     private cacheSource?: {
         table: DataTable;
         versionTag: string;
@@ -113,13 +115,12 @@ class TreeProjectionController {
      */
     public sync(): void {
         const dataOptions = this.getDataOptions();
-        const options = normalizeTreeViewOptions(dataOptions?.treeView);
+        const normalizedOptions = normalizeTreeViewOptions(
+            dataOptions?.treeView
+        );
 
-        if (dataOptions) {
-            dataOptions.treeView = options;
-        }
-
-        if (!options) {
+        if (!normalizedOptions) {
+            this.resolvedOptions = void 0;
             this.clearCache();
             return;
         }
@@ -127,12 +128,14 @@ class TreeProjectionController {
         const dataProvider = this.grid.dataProvider;
         if (!TreeProjectionController.hasGetDataTable(dataProvider)) {
             // Remote provider runtime support is intentionally deferred.
+            this.resolvedOptions = void 0;
             this.clearCache();
             return;
         }
 
         const table = dataProvider.getDataTable(false);
         if (!table) {
+            this.resolvedOptions = void 0;
             this.clearCache();
             return;
         }
@@ -144,6 +147,26 @@ class TreeProjectionController {
                 'TreeView: `data.idColumn` is required for tree input.'
             );
         }
+        let resolvedInput: NormalizedTreeInputOptions;
+
+        try {
+            resolvedInput = TreeProjectionController.resolveInputOptions(
+                table.columns,
+                normalizedOptions.input
+            );
+        } catch (error) {
+            this.resolvedOptions = void 0;
+            this.clearCache();
+            throw error;
+        }
+
+        const options: ResolvedTreeViewOptions = {
+            ...normalizedOptions,
+            input: resolvedInput
+        };
+
+        this.resolvedOptions = options;
+
         const inputCacheKey = TreeProjectionController.getInputCacheKey(
             options.input
         );
@@ -174,12 +197,10 @@ class TreeProjectionController {
     }
 
     /**
-     * Returns normalized TreeView options from the Grid options.
+     * Returns resolved TreeView options for the current source table.
      */
-    public get options(): NormalizedTreeViewOptions | undefined {
-        return this.getDataOptions()?.treeView as (
-            NormalizedTreeViewOptions | undefined
-        );
+    public get options(): ResolvedTreeViewOptions | undefined {
+        return this.resolvedOptions;
     }
 
     /**
@@ -1086,13 +1107,13 @@ class TreeProjectionController {
      * Builds a stable key for expansion state seeds from options.
      *
      * @param options
-     * Normalized TreeView options.
+     * Resolved TreeView options.
      *
      * @returns
      * Expansion seed key used to decide whether state should be reinitialized.
      */
     private static getExpansionSeedKey(
-        options: NormalizedTreeViewOptions
+        options: ResolvedTreeViewOptions
     ): string {
         if (options.expandedRowIds === 'all') {
             return 'all';
@@ -1135,6 +1156,63 @@ class TreeProjectionController {
             input.pathColumn,
             input.separator
         ]);
+    }
+
+    /**
+     * Resolves effective tree input configuration for source columns.
+     *
+     * @param columns
+     * Source columns.
+     *
+     * @param input
+     * Normalized input configuration. When omitted, the controller
+     * auto-detects the standard `parentId` or `path` columns.
+     *
+     * @returns
+     * Resolved normalized input configuration.
+     */
+    private static resolveInputOptions(
+        columns: ColumnCollection,
+        input?: NormalizedTreeInputOptions
+    ): NormalizedTreeInputOptions {
+        if (input) {
+            return input;
+        }
+
+        const parentIdColumn = 'parentId';
+        const pathColumn = 'path';
+        const separator = '/';
+        const hasParentIdColumn = !!columns[parentIdColumn];
+        const hasPathColumn = !!columns[pathColumn];
+
+        if (hasParentIdColumn && hasPathColumn) {
+            throw new Error(
+                'TreeView: Could not autodetect input type because both ' +
+                `"${parentIdColumn}" and "${pathColumn}" ` +
+                'columns exist. Set `data.treeView.input.type` explicitly.'
+            );
+        }
+
+        if (hasParentIdColumn) {
+            return {
+                type: 'parentId',
+                parentIdColumn
+            };
+        }
+
+        if (hasPathColumn) {
+            return {
+                type: 'path',
+                pathColumn,
+                separator
+            };
+        }
+
+        throw new Error(
+            'TreeView: Could not autodetect input type. Expected either ' +
+            `"${parentIdColumn}" or "${pathColumn}" column, ` +
+            'or set `data.treeView.input.type` explicitly.'
+        );
     }
 
     /**

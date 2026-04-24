@@ -44,7 +44,9 @@ export interface TreeViewOptions {
     /**
      * Input format definition used to build the tree index.
      *
-     * @default { type: 'parentId' }
+     * When omitted, TreeView auto-detects the standard `parentId` or `path`
+     * columns. For ambiguous or custom input definitions, set
+     * `data.treeView.input.type` explicitly.
      */
     input?: TreeInputOptions;
 
@@ -88,7 +90,7 @@ export interface TreeInputParentIdOptions {
     /**
      * Type of the tree input.
      */
-    type?: 'parentId';
+    type: 'parentId';
 
     /**
      * Column ID containing parent row IDs.
