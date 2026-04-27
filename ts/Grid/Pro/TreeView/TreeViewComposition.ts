@@ -32,7 +32,7 @@ import type {
     TreeViewOptions
 } from './TreeViewTypes';
 import type {
-    NormalizedTreeViewOptions
+    ResolvedTreeViewOptions
 } from './TreeViewOptionsNormalizer';
 import type {
     AfterTreeRowToggleEvent,
@@ -450,7 +450,7 @@ function getLastPathSegment(
 function getPathSegmentDisplayValue(
     value: unknown,
     columnId: string,
-    options: NormalizedTreeViewOptions
+    options: ResolvedTreeViewOptions
 ): string | undefined {
     const input = options.input;
 
