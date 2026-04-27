@@ -154,6 +154,77 @@ test.describe('Grid Pro - tree view', () => {
             .toHaveAttribute('aria-expanded', 'false');
     });
 
+    test('detects path input from dataset when treeView.input is omitted', async ({ page }) => {
+        await loadGridPro(page);
+
+        await page.evaluate(async (): Promise<void> => {
+            (window as any).grid = await (window as any).Grid.grid('container', {
+                data: {
+                    columns: {
+                        id: [1, 2, 3],
+                        path: ['A/a', 'A/b', 'B/c'],
+                        name: ['a', 'b', 'c']
+                    },
+                    idColumn: 'id',
+                    treeView: {
+                        treeColumn: 'name',
+                        expandedRowIds: 'all'
+                    }
+                },
+                rendering: {
+                    rows: {
+                        virtualization: false
+                    }
+                }
+            }, true);
+        });
+
+        await expect(page.locator('tbody .hcg-row')).toHaveCount(5);
+        expect(await getVisibleRowIds(page)).toStrictEqual([
+            '__hcg_tree_path__:A',
+            '1',
+            '2',
+            '__hcg_tree_path__:B',
+            '3'
+        ]);
+    });
+
+    test('prefers path input when both dataset columns exist', async ({ page }) => {
+        await loadGridPro(page);
+
+        await page.evaluate(async (): Promise<void> => {
+            (window as any).grid = await (window as any).Grid.grid('container', {
+                data: {
+                    columns: {
+                        id: [1, 2, 3],
+                        parentId: [null, 1, 1],
+                        path: ['A/a', 'A/b', 'B/c'],
+                        name: ['a', 'b', 'c']
+                    },
+                    idColumn: 'id',
+                    treeView: {
+                        treeColumn: 'name',
+                        expandedRowIds: 'all'
+                    }
+                },
+                rendering: {
+                    rows: {
+                        virtualization: false
+                    }
+                }
+            }, true);
+        });
+
+        await expect(page.locator('tbody .hcg-row')).toHaveCount(5);
+        expect(await getVisibleRowIds(page)).toStrictEqual([
+            '__hcg_tree_path__:A',
+            '1',
+            '2',
+            '__hcg_tree_path__:B',
+            '3'
+        ]);
+    });
+
     test('keeps generated path parents addressable after pagination', async ({ page }) => {
         await loadGridPro(page);
 
