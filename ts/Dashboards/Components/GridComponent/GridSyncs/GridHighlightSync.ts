@@ -27,9 +27,7 @@ import type { GridHighlightSyncOptions } from '../GridComponentOptions';
 import type { TableCellEvent } from '../../../Plugins/GridTypes';
 
 import Component from '../../Component';
-import {
-    hasDataTableProvider
-} from '../../../../Grid/Core/Data/DataProvider.js';
+import { hasDataTableProvider } from '../GridDataProvider.js';
 import { addEvent, removeEvent } from '../../../../Shared/Utilities.js';
 
 /* *

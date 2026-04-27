@@ -31,9 +31,7 @@ import type { EventTypes as ComponentEventTypes } from '../Component';
 import Component from '../Component.js';
 import GridSyncs from './GridSyncs/GridSyncs.js';
 import GridComponentDefaults from './GridComponentDefaults.js';
-import {
-    hasDataTableProvider
-} from '../../../Grid/Core/Data/DataProvider.js';
+import { hasDataTableProvider } from './GridDataProvider.js';
 import DU from '../../Utilities.js';
 import SidebarPopup from '../../EditMode/SidebarPopup';
 import { diffObjects, getStyle, merge } from '../../../Shared/Utilities.js';
@@ -124,7 +122,7 @@ class GridComponent extends Component {
         const grid = this.grid;
 
         if (grid) {
-            await grid.update(
+            grid.update(
                 options.gridOptions,
                 false
             );

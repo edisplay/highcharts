@@ -25,9 +25,7 @@ import type { Event as DataCursorEvent } from '../../../../Data/DataCursor';
 import type GridComponent from '../GridComponent.js';
 
 import Component from '../../Component';
-import {
-    hasDataTableProvider
-} from '../../../../Grid/Core/Data/DataProvider.js';
+import { hasDataTableProvider } from '../GridDataProvider.js';
 
 /* *
  *
