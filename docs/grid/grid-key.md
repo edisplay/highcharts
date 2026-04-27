@@ -3,20 +3,16 @@ tags: ["grid-pro"]
 sidebar_label: "Grid Key"
 ---
 
-# Grid Key
+# What is the Grid Key?
 
-**Highcharts Grid Pro** is a commercial product. In the browser, the library checks for a valid **Grid Key** on hosts where a license applies.
+**Highcharts Grid Pro** requires a valid **Grid Key** in deployed environments. Grid Lite does not use a Grid Key.
 
-Grid Lite does not use a Grid Key. If you only use [Grid Lite](https://www.highcharts.com/docs/grid/general), you can skip this page.
+When Grid Pro loads or updates, it validates the `gridKey` API property. If the key is missing, invalid, or expired, Grid Pro writes a browser console warning.
 
-## When you need a Grid Key
-
-The **Grid Key** is required whenever **Grid Pro** loads: staging and production, all need `gridKey` so the deployment matches your license.
-On **`localhost`** that check is skipped, so you can run Grid Pro locally without configuring a key.
 
 ## How to set the Grid Key
 
-You can define the key once for the whole page, or pass it only for specific grid instances.
+You can set the key once for the whole page, or pass it to specific Grid Pro instances. The Grid Key can be obtained in your License Statement.
 
 **Globally**:
 
@@ -40,12 +36,19 @@ Grid.grid('container', {
 });
 ```
 
-Use the same pattern after following the [Installation](https://www.highcharts.com/docs/grid/installation) guide for your bundler or CDN setup.
+## Getting and renewing a key
 
-## Obtaining and renewing a key
+Purchase or manage Grid Pro licensing through the [Highsoft shop](https://shop.highcharts.com). The Grid Key is located in the provided License Statement. A new Grid Key is issued on each renewal, and the key in your application must be updated.
 
-Purchase or manage Grid Pro licensing through the [Highsoft shop](https://shop.highcharts.com). There you will find editions, pricing, and license terms. Your Grid Key is tied to the license term; if the key expires, replace it in your configuration with a current one from your license details.
+Customers who purchased a Grid Pro or Dashboards license before **May 6, 2026** can find their Grid Key in the updated license statement.
 
-## If the key is missing or invalid
+From **May 6, 2026**, Grid Pro is no longer included with new Dashboards licenses, but if you
+purchased Dashboards prior to this date you are still entitled to use Grid Pro.
 
-When Grid Pro cannot validate the key (missing, invalid, or expired) on a host where the check runs, it logs a **warning in the browser console** and points to this article. The message is emitted once per page load when validation runs.
+## Expiry and license types
+
+The Grid Key contains an expiry date. Grid Pro treats keys as expired after that date, for both annual and perpetual licenses.
+
+For annual licenses, the key follows the subscription period. When the subscription ends, you must stop using Grid Pro, including all releases.
+
+For perpetual licenses, the license allows use of the covered software in perpetuity. Highcharts Advantage is included for the first year and renewed yearly until cancellation. After the Advantage period ends, you may continue using covered releases, but not new releases published after that period.
