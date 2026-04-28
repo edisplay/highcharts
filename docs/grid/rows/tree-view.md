@@ -111,7 +111,7 @@ Grid.grid('container', {
 
 With `path` input, intermediate nodes do not need to exist as source rows. If
 your dataset contains `Root/Sales/EMEA` but does not contain separate source
-rows for `Root` or `Root/Sales`, TreeView can generate those ancestors
+rows for `Root` or `Root/Sales`, Tree view can generate those ancestors
 automatically so the visible hierarchy stays complete.
 
 Generated rows are structural rows. Their path value is available, but other
