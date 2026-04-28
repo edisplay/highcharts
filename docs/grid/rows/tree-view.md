@@ -238,7 +238,7 @@ treeView: {
 }
 ```
 
-This is useful for camel-cased hierarchy keys such as
+This is useful for e.g. PascalCase hierarchy keys such as
 `CompanySalesEMEA`, where the intended path is `Company / Sales / EMEA`.
 
 Use a callback when path segmentation depends on custom parsing logic that is
