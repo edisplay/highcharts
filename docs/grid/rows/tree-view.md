@@ -213,7 +213,7 @@ Both events include:
 
 ## Sorting, filtering, and pagination
 
-TreeView is applied after sorting and filtering, and before pagination. In
+Tree view is applied after sorting and filtering, and before pagination. In
 practice this means:
 
 - sorting changes the visible sibling order inside the tree
