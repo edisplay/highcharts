@@ -317,15 +317,14 @@ class HTMLElement extends SVGElement {
             styles.whiteSpace = 'nowrap';
         }
 
-        // Clean up sticky side-effects when lineClamp is explicitly removed
-        // (set to 0) or contradicted by a forced nowrap (#22961)
+        // Apply line clamp
         if (styles?.lineClamp) {
             styles.display = '-webkit-box';
             styles.WebkitLineClamp = styles.lineClamp;
             styles.WebkitBoxOrient = 'vertical';
             styles.overflow = 'hidden';
         } else if (styles?.lineClamp === 0) {
-            // Disable the clamp by breaking the -webkit-box context
+            // Disable the clamp by breaking the -webkit-box context (#22961)
             styles.display = 'inline-block';
         }
 
