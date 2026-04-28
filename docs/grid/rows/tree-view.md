@@ -169,7 +169,7 @@ hierarchies and [row virtualization](https://www.highcharts.com/docs/grid/rows/v
 
 ## Runtime API
 
-The TreeView controller is available on `grid.treeView`.
+The Tree view controller is available on `grid.treeView`.
 
 ```js
 await grid.treeView?.expandAll();
