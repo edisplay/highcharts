@@ -178,7 +178,7 @@ await grid.treeView?.toggleRow(2);
 ```
 
 Use this API for toolbar actions, external buttons, or synchronized UI outside
-the Grid.
+the grid.
 
 ## Events
 
