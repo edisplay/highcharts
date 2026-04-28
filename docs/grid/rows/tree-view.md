@@ -221,7 +221,7 @@ practice this means:
   the visible result still forms a valid hierarchy
 - pagination counts projected visible tree rows, not only raw source rows
 
-This behavior makes TreeView work naturally with Grid querying without breaking
+This behavior makes Tree view work naturally with Grid querying without breaking
 parent-child context.
 
 ## Custom separators
