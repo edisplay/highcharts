@@ -5,7 +5,7 @@ tags: ["grid-pro"]
 # Tree view
 
 Tree view is a Highcharts Grid Pro feature that turns flat row data into an
-expandable hierarchy inside the Grid. Use it when your data represents
+expandable hierarchy inside the grid. Use it when your data represents
 parent-child relationships such as organization structures, folders, product
 categories, account trees, or multi-level budgets.
 
