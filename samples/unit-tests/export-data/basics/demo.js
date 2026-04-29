@@ -1508,6 +1508,55 @@ QUnit.test('Sortable table (#16972)', function (assert) {
         '100',
         'After sorting, values should correspond to the one on the chart.'
     );
+    chart.update({
+        xAxis: {
+            categories: void 0
+        },
+        series: [{
+            data: [300, 2000, 9, 999, 111]
+        }, {
+            data: []
+        }]
+    });
+
+    chart.exporting.ascendingOrderInTable = false;
+
+    chart
+        .exporting
+        .dataTableDiv
+        .children[0]
+        .children[1]
+        .children[0]
+        .children[1]
+        .click();
+
+    assert.strictEqual(
+        chart
+            .exporting
+            .dataTableDiv
+            .children[0]
+            .children[2]
+            .children[0]
+            .children[1]
+            .innerText,
+        '9',
+        `Table sorting should correctly handle formatted numbers with thousands
+        separators.`
+    );
+
+    assert.strictEqual(
+        chart
+            .exporting
+            .dataTableDiv
+            .children[0]
+            .children[2]
+            .children[4]
+            .children[1]
+            .innerText,
+        '2,000',
+        `Formatted numbers should be sorted by their numeric value, not as
+        strings.`
+    );
 });
 
 QUnit.test('Exporting duplicated points (#17639)', function (assert) {

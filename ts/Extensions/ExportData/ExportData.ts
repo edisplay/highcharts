@@ -1633,7 +1633,7 @@ namespace ExportData {
                 normalized = normalized.replace(decimalPoint, '.');
 
                 const number = Number(normalized);
-                return isNaN(number) ? null : number;
+                return isNumber(number) ? null : number;
             },
 
             comparer = (index: number, ascending: boolean) =>
