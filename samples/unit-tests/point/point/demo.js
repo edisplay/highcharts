@@ -55,6 +55,26 @@ QUnit.test('Center the halo on the point(#4689)', function (assert) {
             'Point ' + i + ' and halo has the same center'
         );
     }
+
+    // #24459, do not throw when point has been detached from its series.
+    const point = chart.series[0].points[0],
+        series = point.series;
+    let error;
+
+    point.series = void 0;
+
+    try {
+        point.onMouseOut();
+    } catch (e) {
+        error = e;
+    }
+
+    point.series = series;
+
+    assert.ok(
+        !error,
+        'Point.onMouseOut should not throw when point.series is undefined.'
+    );
 });
 
 QUnit.test('Point inactive state - basics', function (assert) {
