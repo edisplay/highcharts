@@ -74,7 +74,7 @@ Grid.grid('container', {
             expandedRowIds: [1, 2, 3, 13] // Values from defined idColum above
         }
     },
-    columns: [
+    columns: [{
         id: 'recordId',
         enabled: false
     }, {
