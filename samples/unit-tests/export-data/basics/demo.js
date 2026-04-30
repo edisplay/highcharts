@@ -1508,7 +1508,7 @@ QUnit.test('Sortable table (#16972)', function (assert) {
         '100',
         'After sorting, values should correspond to the one on the chart.'
     );
-  
+
     const headers = chart
         .exporting
         .dataTableDiv
@@ -1532,7 +1532,7 @@ QUnit.test('Sortable table (#16972)', function (assert) {
         null,
         'Unsorted columns should not have aria-sort.'
     );
-  
+
     chart.series[0].setData([300, 2000, 9, 999, 111], true);
 
     chart.exporting.ascendingOrderInTable = false;
@@ -1561,8 +1561,8 @@ QUnit.test('Sortable table (#16972)', function (assert) {
         'Formatted numbers should be sorted numerically,' +
         'not lexicographically, (#24476).'
     );
-  
-  
+
+
 });
 
 QUnit.test('Exporting duplicated points (#17639)', function (assert) {
