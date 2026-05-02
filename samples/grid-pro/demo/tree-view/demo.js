@@ -74,12 +74,15 @@ Grid.grid('container', {
             expandedRowIds: [1, 2, 3, 13] // Values from defined idColum above
         }
     },
+    columnDefaults: {
+        width: 150
+    },
     columns: [{
         id: 'recordId',
         enabled: false
     }, {
         id: 'Regions',
-        width: 300
+        width: 'auto'
     }, {
         id: 'Status',
         className: 'hcg-center',
@@ -91,5 +94,18 @@ Grid.grid('container', {
                 }
             }
         }
-    }]
+    }],
+    responsive: {
+        rules: [{
+            condition: {
+                maxWidth: 700
+            },
+            gridOptions: {
+                header: ['Regions', 'Budget', 'Actual'],
+                columnDefaults: {
+                    width: 100
+                }
+            }
+        }]
+    }
 });
