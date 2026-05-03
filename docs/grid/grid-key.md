@@ -9,10 +9,15 @@ sidebar_label: "Grid Key"
 
 When Grid Pro loads or updates, it validates the `gridKey` API property. If the key is missing, invalid, or expired, Grid Pro writes a browser console warning.
 
+## Grid Key vs License Key
+
+The Grid Key is only used by Grid Pro through the `gridKey` configuration option. It is not the same as the License Key.
+
+The License Key identifies your actual Highcharts license. Use the License Key when you need to identify your license, for example when contacting Highsoft support.
 
 ## How to set the Grid Key
 
-You can set the key once for the whole page, or pass it to specific Grid Pro instances. The Grid Key can be obtained in your License Statement.
+You can set the Grid Key once for the whole page, or pass the Grid Key to specific Grid Pro instances. Only the Grid Key should be passed to `gridKey`; do not use the License Key there. The Grid Key can be obtained in your License Statement.
 
 **Globally**:
 
