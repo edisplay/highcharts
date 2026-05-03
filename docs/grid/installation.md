@@ -84,6 +84,13 @@ Best for quick prototypes, CodePen, JSFiddle, or projects without build tools.
 </html>
 ```
 
+For Grid Pro, swap the filenames:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@highcharts/grid-pro/grid-pro.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highcharts/grid-pro/css/grid-pro.css" />
+```
+
 > **TIP:** Want to lock to a specific version? Use: `https://cdn.jsdelivr.net/npm/@highcharts/grid-lite@2.0.0/grid-lite.js`
 
 ---
