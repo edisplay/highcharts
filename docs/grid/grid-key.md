@@ -13,7 +13,7 @@ When Grid Pro loads or updates, it validates the `gridKey` API property. If the 
 
 The Grid Key is only used by Grid Pro through the `gridKey` configuration option. It is not the same as the License Key.
 
-The License Key identifies your actual Highcharts license. Use the License Key when you need to identify your license, for example when contacting Highsoft support.
+The License Key identifies your actual Highcharts license. Use the License Key when you need to identify your license, for example when contacting Highsoft support. The License Key is private and should not be shared publicly.
 
 ## How to set the Grid Key
 
