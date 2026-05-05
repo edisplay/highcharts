@@ -8,7 +8,7 @@ The release has been tested with:
 - [Vite](https://vite.dev/) with [plugin-react](https://www.npmjs.com/package/@vitejs/plugin-react) version 4.3.3 and newer
 - React and react-dom version 18.3.1 and newer
 
-## 1. Install Highcharts React:
+## 1. Install Highcharts React
 
 Install [Highcharts React](https://www.npmjs.com/package/@highcharts/react) by running:
 
@@ -46,17 +46,22 @@ The result should look like this:
 
 <iframe src="https://www.highcharts.com/samples/embed/highcharts/react/basic" title="Basic Highcharts React chart example"></iframe>
 
-## 4. Customize your chart (optional)
+## 4. Customize your chart
 
-You can customize your chart using props and dedicated chart element components:
+Highcharts React provides dedicated React components for chart elements and modules to customize your chart.
+
+### Chart elements
+
+You can use element components to shape your chart structure:
 
 ```tsx
-import { Chart, Legend } from "@highcharts/react";
+import { Chart, Title, Legend } from "@highcharts/react";
 import { ColumnSeries } from "@highcharts/react/series/Column";
 
 export default function ColumnChart() {
   return (
     <Chart options={{ chart: { className: "column-chart" } }}>
+      <Title>Column chart</Title>
       <Legend>{"{index}: {name}"}</Legend>
       <ColumnSeries data={[3, 4, 1, 5, 2]} name="Column series" color="red" />
     </Chart>
@@ -70,9 +75,9 @@ Learn more about the concepts used:
 - See the [Series types](https://www.highcharts.com/docs/react/components/series-types) documentation to work with different series types.
 - See the [Legend](https://www.highcharts.com/docs/react/components/chart-elements/legend) documentation as an example of working with chart elements.
 
-## 5. Load modules (optional)
+### Modules (optional)
 
-You can load additional Highcharts modules using dedicated React components:
+You can use module components to load additional Highcharts modules:
 
 ```tsx
 import { Chart } from "@highcharts/react";
@@ -93,7 +98,7 @@ export default function ModulesChart() {
 
 > **Note:** Each component automatically includes the corresponding Highcharts module.
 
-To explore modules with dedicated components, see the [Modules components](https://www.highcharts.com/docs/react/components/modules/accessibility) documentation. If a module doesn't have a dedicated component, it's recommended to import it directly from Highcharts using its ESM version:
+To explore modules with dedicated components, see the [Module components](https://www.highcharts.com/docs/react/components/modules/accessibility) documentation. If a module doesn't have a dedicated component, we recommend importing it directly from Highcharts using its ESM version:
 
 ```tsx
 import { Chart, YAxis } from "@highcharts/react";
