@@ -446,7 +446,6 @@ Example configuration should look like:
 
   function App() {
     const options = useMemo(() => ({
-      navigator: { enabled: false },
       yAxis: [{
         height: '60%'
       }, {
