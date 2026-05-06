@@ -1543,8 +1543,13 @@ class Point {
      * @emits Highcharts.Point#event:mouseOut
      */
     public onMouseOut(): void {
-        const point = this,
-            chart = point.series.chart;
+        const point = this;
+
+        if (!point.series) {
+            return;
+        }
+
+        const chart = point.series.chart;
 
         point.firePointEvent('mouseOut');
 
